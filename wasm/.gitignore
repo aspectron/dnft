@@ -2,5 +2,6 @@ target
 Cargo.lock
 web/dnft
 web/package.json
+nodejs/dnft
 nodejs/node_modules
-nodejs/package.json
+nodejs/package-lock.json
