@@ -1,0 +1,24 @@
+[package]
+name = "dynamic-nft"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+borsh-derive.workspace = true
+borsh.workspace = true
+cfg-if.workspace = true
+kaizen.workspace = true
+solana-program.workspace = true
+wasm-bindgen.workspace = true
+workflow-core.workspace = true
+workflow-log.workspace = true
+
+[target.'cfg(not(target_os = "solana"))'.dependencies]
+inventory.workspace = true
+rand.workspace = true
+js-sys.workspace = true
+thiserror.workspace = true
+wasm-bindgen-futures.workspace = true

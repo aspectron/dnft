@@ -1,0 +1,17 @@
+[package]
+name = "dynamic-nft-simulator"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+async-trait.workspace = true
+cfg-if.workspace = true
+clap.workspace = true
+dynamic-nft.workspace = true
+inventory.workspace = true
+kaizen.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+workflow-core.workspace = true
+workflow-log.workspace = true
+workflow-rpc.workspace = true

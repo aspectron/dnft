@@ -1,0 +1,21 @@
+<html>
+    <head>
+        <script type="module">
+            import * as dnft from './dnft/dnft.js';
+            (async () => {
+                const wasm = await dnft.default('./dnft/dnft_bg.wasm');
+                
+                dnft.init_console_panic_hook();
+                console.log("init kaizen");
+                dnft.init_kaizen(dnft,{},{});
+                let program_id = dnft.program_id();
+                let authority = new dnft.Pubkey("42bML5qB3WkMwfa2cosypjUrN7F2PLQm4qhxBdRDyW7f");
+                console.log("program_id: ",program_id, "authority: ",authority);
+                let transport = await dnft.Transport.InProcUnitTests(program_id,authority);
+                console.log("init kaizen done");
+                dnft.run_test();
+            })();
+        </script>
+    </head>
+    <body></body>
+</html>

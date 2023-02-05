@@ -1,0 +1,36 @@
+[workspace]
+members = [
+    "lib",
+    "simulator",
+    "wasm",
+    "program",
+]
+
+[workspace.package]
+version = "0.1.0"
+authors = ["Anton Yemelyanov <anton.yemelyanov@gmail.com>", "Surinder Singh Matoo Mattaur <surinder83singh@gmail.com>"]
+license = "MIT OR Apache-2.0"
+edition = "2021"
+repository = "https://github.com/aspectron/dynamic-nft"
+
+
+[workspace.dependencies]
+async-trait = "0.1.64"
+borsh = "0.9.1"
+borsh-derive = "0.9.1"
+cfg-if = "1.0.0"
+clap = { version = "4.1.4", features = ["derive"] }
+dynamic-nft = { path = "lib" }
+inventory = "0.3.3"
+js-sys = "0.3.61"
+kaizen = { path = "../kaizen" }
+rand = "0.8.5"
+solana-program = "1.15.0"
+thiserror = "1.0.38"
+tokio = { version = "1.25.0", features = ['io-util','time'] }
+wasm-bindgen = "0.2.84"
+wasm-bindgen-futures = "0.4.34"
+workflow-core = { path = "../workflow-rs/core" }
+workflow-log = { path = "../workflow-rs/log" }
+workflow-rpc = { path = "../workflow-rs/rpc" }
+workflow-panic-hook = { path = "../workflow-rs/panic-hook" }

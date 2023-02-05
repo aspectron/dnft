@@ -1,0 +1,5 @@
+cargo build-sbf
+
+if [ $? -eq 0 ]; then
+ls -lh ../target/sbf-solana-solana/release/*.so
+fi
