@@ -222,6 +222,11 @@ pub mod client {
         .await?;
         Ok(())
     }
+
+    #[wasm_bindgen]
+    pub fn dnft_program_id() -> Pubkey {
+        program_id()
+    }
 }
 
 #[cfg(test)]
