@@ -11,7 +11,9 @@ dynamic-nft.workspace = true
 inventory.workspace = true
 kaizen.workspace = true
 thiserror.workspace = true
-tokio.workspace = true
 workflow-core.workspace = true
 workflow-log.workspace = true
 workflow-rpc.workspace = true
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+tokio.workspace = true

@@ -15,6 +15,7 @@ solana-program.workspace = true
 wasm-bindgen.workspace = true
 workflow-core.workspace = true
 workflow-log.workspace = true
+workflow-wasm.workspace = true
 
 [target.'cfg(not(target_os = "solana"))'.dependencies]
 inventory.workspace = true
@@ -22,3 +23,5 @@ rand.workspace = true
 js-sys.workspace = true
 thiserror.workspace = true
 wasm-bindgen-futures.workspace = true
+# wasm-bindgen-derive.workspace = true
+num.workspace = true

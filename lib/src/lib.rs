@@ -1,11 +1,17 @@
+extern crate alloc;
+
 pub mod category;
 pub mod exchange;
 pub mod prelude;
-pub mod schema;
+
+#[cfg(not(target_os = "solana"))]
+pub mod client;
+pub mod error;
+pub mod program;
 
 use crate::prelude::*;
 
-pub mod program {
+pub mod dnft_program {
     use kaizen::container::Utf8String;
 
     use super::*;
@@ -103,17 +109,17 @@ pub mod program {
 }
 
 #[cfg(not(target_os = "solana"))]
-pub mod client {
+pub mod dnft_client {
     use super::*;
     use kaizen::{result::Result, utils};
     use std::str::FromStr;
     pub struct DnftHandlerClient;
     use rand;
-    declare_client!(program::DnftHandler, DnftHandlerClient);
+    declare_client!(dnft_program::DnftHandler, DnftHandlerClient);
 
     impl DnftHandlerClient {
         pub async fn run_test(authority: &Pubkey) -> Result<TransactionList> {
-            let builder = DnftHandlerClient::execution_context_for(program::DnftHandler::test)
+            let builder = DnftHandlerClient::execution_context_for(dnft_program::DnftHandler::test)
                 .with_authority(authority)
                 .seal()?;
 
@@ -127,15 +133,15 @@ pub mod client {
     }
 
     pub struct DnftContainerClient;
-    declare_client!(program::DnftContainer, DnftContainerClient);
+    declare_client!(dnft_program::DnftContainer, DnftContainerClient);
 
     impl DnftContainerClient {
         pub async fn create(
             authority: &Pubkey,
-            data: &program::CreationData,
+            data: &dnft_program::CreationData,
         ) -> Result<TransactionList> {
             let random_seed = rand::random::<[u8; 8]>();
-            let builder = Self::execution_context_for(program::DnftContainer::create)
+            let builder = Self::execution_context_for(dnft_program::DnftContainer::create)
                 .with_authority(authority)
                 .with_account_templates_with_custom_suffixes(&[&random_seed])
                 // .with_account_templates(1)
@@ -170,25 +176,25 @@ pub mod client {
 
         let authority = transport.get_authority_pubkey()?;
 
-        let tx = client::DnftHandlerClient::run_test(&authority).await?;
+        let tx = dnft_client::DnftHandlerClient::run_test(&authority).await?;
         tx.execute().await?;
 
         let pubkey = Pubkey::from_str("9ZNTfG4NyQgxy2SWjSiQoUyBPEvXT2xo7fKc5hPYYJ7b")?;
-        let data = program::CreationData {
+        let data = dnft_program::CreationData {
             msg: "hello container".to_string(),
-            data: program::RecordArgs {
+            data: dnft_program::RecordArgs {
                 int8: 1,
                 int32: 2,
                 int64: 3,
                 pubkey,
             },
         };
-        let tx = client::DnftContainerClient::create(&authority, &data).await?;
+        let tx = dnft_client::DnftContainerClient::create(&authority, &data).await?;
         let target_account_pubkey = tx.target_account()?;
 
         tx.execute().await?;
 
-        let container = load_container::<program::DnftContainer>(&target_account_pubkey)
+        let container = load_container::<dnft_program::DnftContainer>(&target_account_pubkey)
             .await?
             .expect("¯\\_(ツ)_/¯");
 
@@ -250,7 +256,7 @@ pub mod tests {
         .await?;
         println!("run test...");
 
-        client::run_test().await?;
+        dnft_client::run_test().await?;
 
         Ok(())
     }
@@ -259,6 +265,5 @@ pub mod tests {
 declare_program!(
     "dnft",
     "5UAQGzYRWKEgdbpZCqoUjKDKiWpNbHeataWknRpvswEH",
-    [program::DnftHandler, program::DnftContainer,]
+    [dnft_program::DnftHandler, dnft_program::DnftContainer,]
 );
-
