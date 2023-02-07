@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[allow(non_camel_case_types)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, BorshSerialize, BorshDeserialize)]
 pub enum Data {
     Bool(bool),
     u8(u8),
@@ -24,13 +24,13 @@ pub enum Data {
     Time(u32), // <-- TODO
     Geo(Geo),
     Pubkey(Pubkey),
-    Array(Vec<Data>),
-    Table(Vec<(Data, Data)>),
+    // Array(Vec<Data>),
+    // Table(Vec<(Data, Data)>),
 }
 
 u16_try_from! {
     #[allow(non_camel_case_types)]
-    #[derive(Debug, Clone, Copy)]
+    #[derive(Debug, Clone, Copy, BorshSerialize, BorshDeserialize)]
     #[wasm_bindgen]
     #[repr(u16)]
     pub enum DataType {
@@ -52,24 +52,8 @@ u16_try_from! {
         Pubkey,
         Array,
         Table,
-    }
-}
-
-#[derive(Debug, Clone, TryFromJsValue)]
-#[wasm_bindgen]
-pub struct Geo {
-    pub latitude: f64,
-    pub longitude: f64,
-}
-
-#[wasm_bindgen]
-impl Geo {
-    #[wasm_bindgen(constructor)]
-    pub fn new(latitude: f64, longitude: f64) -> Self {
-        Self {
-            latitude,
-            longitude,
-        }
+        // TODO
+        // Hash
     }
 }
 
@@ -123,13 +107,61 @@ impl fmt::Display for super::Data {
             Data::Geo(v) => {
                 write!(f, "{},{}", v.latitude, v.longitude)
             }
-            Data::Array(v) => {
-                for item in v {
-                    writeln!(f, "\t{item}").unwrap();
-                }
-                Ok(())
-            }
+            // Data::Array(v) => {
+            //     for item in v {
+            //         writeln!(f, "\t{item}").unwrap();
+            //     }
+            //     Ok(())
+            // }
             _ => write!(f, "{self:?}"),
         }
+    }
+}
+
+#[derive(Debug, Clone, TryFromJsValue, BorshSerialize, BorshDeserialize)]
+#[wasm_bindgen]
+pub struct Geo {
+    pub latitude: f64,
+    pub longitude: f64,
+}
+
+#[wasm_bindgen]
+impl Geo {
+    #[wasm_bindgen(constructor)]
+    pub fn new(latitude: f64, longitude: f64) -> Self {
+        Self {
+            latitude,
+            longitude,
+        }
+    }
+}
+
+// TODO
+#[derive(Debug, Clone, BorshSerialize, BorshDeserialize)]
+pub enum Url {
+    Page(String),
+    Image(String),
+}
+
+#[derive(Debug, Clone, TryFromJsValue, BorshSerialize, BorshDeserialize)]
+#[wasm_bindgen]
+pub struct Hash {
+    hash: [u8; 32],
+}
+
+#[cfg(not(target_os = "solana"))]
+#[wasm_bindgen]
+impl Hash {
+    #[wasm_bindgen(constructor)]
+    pub fn new(text: String) -> Self {
+        use sha2::{Digest, Sha256};
+        let mut hasher = Sha256::new();
+        hasher.update(text);
+        let hash = hasher.finalize();
+        Self { hash: hash.into() }
+    }
+
+    pub fn check(&self) -> bool {
+        true
     }
 }

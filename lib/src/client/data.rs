@@ -155,36 +155,21 @@ impl TryFrom<(DataType, Vec<JsValue>)> for program::Data {
                 ensure_args(&args, 1)?;
                 program::Data::Pubkey(ref_from_abi!(Pubkey, args.get(0).unwrap())?)
             }
-            DataType::Array => {
-                // todo!();
-                ensure_args(&args, 1)?;
-                let vec = js_sys::Array::from(args.get(0).unwrap()).to_vec();
-                if vec.is_empty() {
-                    return Err("Supplied argument must be an array".into());
-                }
+            // DataType::Array => {
+            //     // todo!();
+            //     ensure_args(&args, 1)?;
+            //     let vec = js_sys::Array::from(args.get(0).unwrap()).to_vec();
+            //     if vec.is_empty() {
+            //         return Err("Supplied argument must be an array".into());
+            //     }
 
-                let mut list: Vec<program::Data> = Vec::new();
-                for item in vec.iter() {
-                    // let data = load_data(item)?;
-                    // let mut vec = js_sys::Array::from(item).to_vec();
-
-                    // if vec.is_empty() {
-                    //     return Err("Supplied argument must be an array with elements".into());
-                    // }
-                    // let data_type = get_data_type(&vec.remove(0))?;
-                    // // list.push((&item).try_into()?);
-                    // let data : Data = (data_type, vec).try_into()?;
-                    let data: Data = item.try_into()?;
-                    list.push(data.data);
-                }
-
-                program::Data::Array(list)
-
-                // let array: Array = args.get(0).unwrap().try_into()?;
-                // let arr = args.get(0).unwrap().as_array().ok_or_else(|| "")?;
-                // let pubkey : Pubkey = ref_from_abi(args.get(0).unwrap())?;
-                // Data::Pubkey(pubkey)
-            }
+            //     let mut list: Vec<program::Data> = Vec::new();
+            //     for item in vec.iter() {
+            //         let data: Data = item.try_into()?;
+            //         list.push(data.data);
+            //     }
+            //     program::Data::Array(list)
+            // }
             _ => {
                 todo!()
             }
