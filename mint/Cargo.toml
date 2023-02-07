@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 clap.workspace = true
 thiserror.workspace = true
-dynamic-nft.workspace = true
+dnft.workspace = true
 cfg-if.workspace = true
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]

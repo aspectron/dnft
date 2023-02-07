@@ -1,5 +1,5 @@
 [package]
-name = "dynamic-nft-wasm"
+name = "dnft-wasm"
 version = "0.1.0"
 description = "Dynamic NFT - WASM Bindings"
 license = "MIT/Apache-2.0"
@@ -10,5 +10,5 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 kaizen.workspace = true
-dynamic-nft.workspace = true
+dnft.workspace = true
 workflow-panic-hook.workspace = true

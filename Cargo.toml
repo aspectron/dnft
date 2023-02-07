@@ -22,7 +22,7 @@ borsh = "0.9.1"
 borsh-derive = "0.9.1"
 cfg-if = "1.0.0"
 clap = { version = "4.1.4", features = ["derive"] }
-dynamic-nft = { path = "lib" }
+dnft = { path = "lib" }
 inventory = "0.3.3"
 js-sys = "0.3.61"
 kaizen = { path = "../kaizen" }

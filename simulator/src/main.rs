@@ -66,7 +66,7 @@ cfg_if! {
                     }
 
                     println!();
-                    dynamic_nft::init();
+                    dnft::init();
                     // ~~~~~~~~~~~~~~~~~~~~~~~~~
                     kaizen::init()?;
                     kaizen::program::registry::list_entrypoints()?;
@@ -97,7 +97,7 @@ cfg_if! {
                     std::fs::remove_dir_all(FileStore::default_data_folder())?;
                 },
                 Action::List => {
-                    dynamic_nft::init();
+                    dnft::init();
                     kaizen::init()?;
                     let store = FileStore::try_new()?;
                     store.list().await?.to_log();

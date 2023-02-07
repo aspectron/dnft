@@ -1,5 +1,5 @@
 #[allow(unused_imports)]
-use dynamic_nft::client;
+use dnft::client;
 
 #[allow(unused_imports)]
 use workflow_panic_hook::*;

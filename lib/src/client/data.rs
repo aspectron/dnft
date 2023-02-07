@@ -123,14 +123,23 @@ impl TryFrom<(DataType, Vec<JsValue>)> for program::Data {
                     .ok_or_else(|| JsError::new("Supplied argument must be a string"))?;
                 program::Data::String(v)
             }
-            DataType::Url => {
+            DataType::PageUrl => {
                 ensure_args(&args, 1)?;
                 let v = args
                     .get(0)
                     .unwrap()
                     .as_string()
                     .ok_or_else(|| JsError::new("Supplied argument must be a string"))?;
-                program::Data::Url(v)
+                program::Data::PageUrl(v)
+            }
+            DataType::ImageUrl => {
+                ensure_args(&args, 1)?;
+                let v = args
+                    .get(0)
+                    .unwrap()
+                    .as_string()
+                    .ok_or_else(|| JsError::new("Supplied argument must be a string"))?;
+                program::Data::ImageUrl(v)
             }
             DataType::Geo => {
                 ensure_args(&args, 1)?;

@@ -13,4 +13,4 @@ default = []
 
 [dependencies]
 solana-program.workspace = true
-dynamic-nft.workspace = true
+dnft.workspace = true

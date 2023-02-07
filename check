@@ -1,0 +1,16 @@
+cargo fmt --all
+cargo clippy
+
+declare -a crates=(
+    "dnft"
+    "dnft-wasm"
+)
+
+for crate in "${crates[@]}"
+do
+    cargo clippy -p $crate --target wasm32-unknown-unknown
+    if [ $? -ne 0 ]; then
+        echo "\n--> $crate\n"
+        exit $code
+    fi
+done
