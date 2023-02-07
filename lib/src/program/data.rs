@@ -145,13 +145,13 @@ pub enum Url {
 
 #[derive(Debug, Clone, TryFromJsValue, BorshSerialize, BorshDeserialize)]
 #[wasm_bindgen]
-pub struct Hash {
+pub struct Hash256 {
     hash: [u8; 32],
 }
 
 #[cfg(not(target_os = "solana"))]
 #[wasm_bindgen]
-impl Hash {
+impl Hash256 {
     #[wasm_bindgen(constructor)]
     pub fn new(text: String) -> Self {
         use sha2::{Digest, Sha256};
