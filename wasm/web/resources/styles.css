@@ -49,6 +49,85 @@ h1, h2, h3, h4 {
 .mdl-dnft form{
   margin:10px auto;
 }
+
+#add-field-dialog{
+  width:600px;
+  max-width:90%;
+}
+#add-field-dialog .mdl-dialog__content{
+  overflow: auto;
+  max-height: 50vh;
+  margin-top: 10px;
+}
+#add-field-dialog .mdl-dialog__actions{
+  padding:15px 24px 8px 24px
+}
+td[contenteditable]{
+  position:relative;
+}
+td[contenteditable]:focus-visible,
+td[contenteditable]:hover{
+  outline:none;
+  background-color: #FFF;
+  border-bottom-color: #512da9;
+}
+td[contenteditable]:focus-visible:after,
+td[contenteditable]:hover:after{
+  position:absolute;
+  bottom:0px;
+  right:0px;
+  left:0px;
+  content:"";
+  border-bottom: 1px solid #512da9;
+}
+
+.action-bar{
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 15px 0px;
+}
+.add-field-msg{
+  text-align: center;
+  padding:50px;
+}
+.main-container:not(.no-fields) .add-field-msg,
+.main-container.no-fields .fields-info{
+  display:none;
+}
+
+#field-type-list tr{
+  cursor: pointer;
+}
+
+.edit-box{
+  position:relative;
+}
+.edit-box__input{
+  position:absolute;
+  left:0px;
+  right:0px;
+  top:0px;
+  bottom:-2px;
+  padding:0px 18px;
+  border:0px;
+  border-bottom: 2px solid #512da9;
+  outline: none;
+  font-size: inherit;
+  font-family: inherit;
+  font-weight: inherit;
+  font-style: inherit;
+  z-index:1;
+}
+.mdl-data-table td:first-of-type .edit-box__input,
+.mdl-data-table th:first-of-type .edit-box__input{
+  padding-left:24px;
+}
+.mdl-data-table td:last-of-type .edit-box__input,
+.mdl-data-table th:last-of-type .edit-box__input{
+  padding-right:24px;
+}
+
 .mdl-dnft form>.mdl-card__actions{
   padding:10px 40px;
   text-align: right;
@@ -57,7 +136,7 @@ h1, h2, h3, h4 {
 .main-container{
   max-width:700px;
   width:90%;
-  margin: auto;
+  margin: 0px auto 100px;
 }
 .mdl-textfield.block{
   display:block;
