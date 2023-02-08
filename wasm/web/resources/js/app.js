@@ -12,7 +12,25 @@ function escapeHtml(text){
          .replace(/>/g, "&gt;")
          .replace(/"/g, "&quot;")
          .replace(/'/g, "&#039;");
- }
+}
+
+function createIconBtn(icon, title="", attributes={}){
+    let iconEl = document.createElement("i");
+    iconEl.setAttribute("class", "material-icons");
+    iconEl.innerHTML = icon;
+
+    let btn = document.createElement("button");
+    Object.keys(attributes).forEach(key=>{
+        btn.setAttribute(key, attributes[key]);
+    });
+    btn.classList.add("mdl-button", "mdl-button--icon");
+    btn.appendChild(iconEl);
+    if(title){
+        btn.setAttribute("title", title)
+    }
+
+    return btn;
+}
 
 class App{
 
@@ -35,7 +53,7 @@ class App{
         let fields = [];
         let dataTypes = Object.keys(DataType).filter(k => !isFinite(+k));
         for (let dataType of dataTypes) {
-            let name = ("field-"+dataType).toLowerCase();
+            //let name = ("field-"+dataType).toLowerCase();
             let descr = `Descr for ${dataType}`;
 
             fields.push(new Field(DataType[dataType], dataType, descr));
@@ -140,6 +158,25 @@ class App{
             }
         });
 
+        this.fieldListEl.addEventListener("click", event=>{
+            let tr = event.target.closest("tr");
+            let actionEl = event.target.closest("[data-action]");
+            if(!actionEl || !tr)
+                return
+            let action = actionEl.dataset.action;
+            switch(action){
+                case "delete":
+                    tr.remove();
+                break;
+                case "move-up":
+                    tr.parentElement.insertBefore(tr, tr.previousElementSibling)
+                break;
+                case "move-down":
+                    tr.parentElement.insertBefore(tr, tr.nextElementSibling.nextElementSibling)
+                break;
+            }
+        });
+
         this.createDnftMintBtn.addEventListener("click", ()=>{
             let trList = this.fieldListEl.querySelectorAll("tr");
             let fields = [];
@@ -147,7 +184,8 @@ class App{
                 let dataType = tr.children[0].innerText;
                 let name = escapeHtml(tr.children[1].innerText).replace(/\n/g, " ")
                 let discription = escapeHtml(tr.children[2].innerText).replace(/\n/g, " ");
-
+                //let a = DataType[dataType];
+                //console.log("dataType:", dataType, a);
                 fields.push(new Field(DataType[dataType], name, discription))
             })
 
@@ -203,10 +241,22 @@ class App{
             td_descr.setAttribute("class", "mdl-data-table__cell--non-numeric");
             td_descr.setAttribute("contentEditable", "true");
 
+
+            let btn_move_down = createIconBtn("expand_more", "Move down", {"data-action":"move-down"});
+            let btn_move_up = createIconBtn("expand_less", "Move up", {"data-action":"move-up"});
+            let btn_delete = createIconBtn("delete", "Delete", {"data-action":"delete"});
+
+            let td_action = document.createElement("td");
+            td_action.appendChild(btn_move_down);
+            td_action.appendChild(btn_move_up);
+            td_action.appendChild(btn_delete);
+            td_action.setAttribute("class", "actions");
+
             let tr = document.createElement("tr");
             tr.appendChild(td_type);
             tr.appendChild(td_name);
             tr.appendChild(td_descr);
+            tr.appendChild(td_action);
             this.fieldListEl.appendChild(tr);
         }
     }

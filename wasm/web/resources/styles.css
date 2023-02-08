@@ -80,6 +80,18 @@ td[contenteditable]:hover:after{
   content:"";
   border-bottom: 1px solid #512da9;
 }
+.sortable-list>tr:first-child [data-action="move-up"],
+.sortable-list>tr:last-child [data-action="move-down"]{
+  visibility: hidden;
+}
+/*
+td.actions .material-icons{
+  font-size:24px;
+  padding:2px 5px;
+  margin:0px 4px;
+  cursor: pointer;
+}
+*/
 
 .action-bar{
   display: flex;

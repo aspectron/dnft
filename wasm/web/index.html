@@ -54,17 +54,6 @@
     <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.deep_purple-pink.min.css">
     <link rel="stylesheet" href="resources/fonts/blender-pro/stylesheet.css">
     <link rel="stylesheet" href="resources/styles.css">
-    <!--style>
-      #view-source {
-        position: fixed;
-        display: block;
-        right: 0;
-        bottom: 0;
-        margin-right: 40px;
-        margin-bottom: 40px;
-        z-index: 900;
-      }
-    </style-->
     <script src="resources/js/app.js"></script>
     <script type="module">
       import * as dnft from './dnft/dnft.js';
@@ -88,22 +77,13 @@
   <body class="mdl-dnft mdl-color--grey-100 mdl-color-text--grey-700 mdl-base">
     <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
       <header class="mdl-layout__header mdl-layout__header--fixed mdl-color--primary">
-        <!--div class="mdl-layout--large-screen-only mdl-layout__header-row">
-        </div-->
         <div class="mdl-layout--large-screen-only mdl-layout__header-row">
           <h3>Dynamic NFT</h3>
         </div>
-        <!--div class="mdl-layout--large-screen-only mdl-layout__header-row">
-        </div-->
         <div class="mdl-layout__tab-bar mdl-js-ripple-effect mdl-color--primary-dark">
             <a href="#browse" class="mdl-layout__tab">Browse Mints</a>
             <a href="#create-dnft" class="mdl-layout__tab is-active">Create DNFT Mint</a>
             <a href="#mint-dnft" class="mdl-layout__tab">Mint DNFT</a>
-
-            <button class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored mdl-shadow--4dp mdl-color--accent" id="add">
-                <i class="material-icons" role="presentation">add</i>
-                <span class="visuallyhidden">Add</span>
-            </button>
         </div>
       </header>
       <main class="mdl-layout__content">
@@ -132,23 +112,69 @@
                     <th class="mdl-data-table__cell--non-numeric">Data Type</th>
                     <th class="mdl-data-table__cell--non-numeric" width="20%">Field Name</th>
                     <th class="mdl-data-table__cell--non-numeric" width="60%">Description</th>
+                    <th></th>
                   </tr>
                 </thead>
-                <tbody id="field-list">
+                <tbody id="field-list" class="sortable-list">
                   <!--tr>
                     <td class="mdl-data-table__cell--non-numeric">String</td>
                     <td class="mdl-data-table__cell--non-numeric" contentEditable="true">Name</td>
                     <td class="mdl-data-table__cell--non-numeric" contentEditable="true">Item Name</td>
+                    <td class="actions">
+                      <button class="mdl-button mdl-button--icon" data-action="move-down">
+                        <i class="material-icons">
+                          expand_more
+                        </i>
+                      </button>
+                      <button class="mdl-button mdl-button--icon" data-action="move-up">
+                        <i class="material-icons">
+                          expand_less
+                        </i>
+                      </button>
+                      <button class="mdl-button mdl-button--icon" data-action="delete">
+                        <i class="material-icons">delete</i>
+                      </button>
+                    </td>
                   </tr>
                   <tr>
-                    <td class="mdl-data-table__cell--non-numeric">U8</td>
+                    <td class="mdl-data-table__cell--non-numeric">u8</td>
                     <td class="mdl-data-table__cell--non-numeric" contentEditable="true">Color</td>
                     <td class="mdl-data-table__cell--non-numeric" contentEditable="true">Item Color</td>
+                    <td class="actions">
+                      <button class="mdl-button mdl-button--icon" data-action="move-down">
+                        <i class="material-icons">
+                          expand_more
+                        </i>
+                      </button>
+                      <button class="mdl-button mdl-button--icon" data-action="move-up">
+                        <i class="material-icons">
+                          expand_less
+                        </i>
+                      </button>
+                      <button class="mdl-button mdl-button--icon" data-action="delete">
+                        <i class="material-icons">delete</i>
+                      </button>
+                    </td>
                   </tr>
                   <tr>
-                    <td class="mdl-data-table__cell--non-numeric">U16</td>
+                    <td class="mdl-data-table__cell--non-numeric">u16</td>
                     <td class="mdl-data-table__cell--non-numeric" contentEditable="true">Speed</td>
                     <td class="mdl-data-table__cell--non-numeric" contentEditable="true">Item Speed</td>
+                    <td class="actions">
+                      <button class="mdl-button mdl-button--icon" data-action="move-down">
+                        <i class="material-icons">
+                          expand_more
+                        </i>
+                      </button>
+                      <button class="mdl-button mdl-button--icon" data-action="move-up">
+                        <i class="material-icons">
+                          expand_less
+                        </i>
+                      </button>
+                      <button class="mdl-button mdl-button--icon" data-action="delete">
+                        <i class="material-icons">delete</i>
+                      </button>
+                    </td>
                   </tr-->
                 </tbody>
               </table>
