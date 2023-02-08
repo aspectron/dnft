@@ -24,13 +24,36 @@ impl Field {
             description,
         }
     }
+
+    #[wasm_bindgen]
+    pub fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    #[wasm_bindgen(js_name="dataType")]
+    pub fn data_type(&self) -> DataType {
+        self.data_type.clone()
+    }
+
+    #[wasm_bindgen]
+    pub fn description(&self) -> String {
+        self.description.clone()
+    }
 }
 
 impl fmt::Display for Field {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        /*
+        f.debug_struct("Field")
+            .field("type", &format!("{:?}", self.data_type))
+            .field("name", &format!("{}", self.name))
+            .field("description", &format!("{}", self.description));
+        Ok(())
+        */
+        
         write!(
             f,
-            "type: {:?} name:'{}' descr:'{}'",
+            "Field {{ type: {:?},  name:'{}', descr:'{}' }}",
             self.data_type, self.name, self.description
         )
     }
