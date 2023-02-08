@@ -84,6 +84,18 @@ td[contenteditable]:hover:after{
 .sortable-list>tr:last-child [data-action="move-down"]{
   visibility: hidden;
 }
+
+.mdl-button--big{
+  height:50px;
+  line-height:50px;
+}
+.mdl-data-table{
+  font-size: 1rem;
+}
+.mdl-data-table th{
+  font-size: .9rem;
+}
+
 /*
 td.actions .material-icons{
   font-size:24px;

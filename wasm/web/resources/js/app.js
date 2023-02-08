@@ -46,7 +46,7 @@ class App{
     init_create_dnft_form(){
         this.fieldListEl = $("#field-list");
         this.fieldTypeListEl = $("#field-type-list");
-        this.createDnftMintBtn = $("#create-dnft-min-btn");
+        this.createDnftMintBtn = $("#create-dnft-mint-btn");
 
         const { Field, DataType, Data } = this.dnft;
 
