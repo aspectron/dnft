@@ -5,7 +5,6 @@ pub mod tests {
     use kaizen::result::Result;
     use program::MintCreationArgs;
     use std::str::FromStr;
-    use workflow_log::style;
 
     const AUTHORITY: &str = "42bML5qB3WkMwfa2cosypjUrN7F2PLQm4qhxBdRDyW7f";
 
