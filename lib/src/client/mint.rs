@@ -38,14 +38,13 @@ impl Mint {
         args: &MintCreationArgs,
         mint_pubkey: &Pubkey,
     ) -> Result<TransactionList> {
-
         let builder = client::Root::execution_context_for(program::Root::create_mint)
             .with_authority(authority_pubkey)
             .with_handler_accounts(&[AccountMeta::new(*mint_pubkey, false)])
             .with_instruction_data(&args.try_to_vec()?)
             .seal()?;
 
-        let accounts = builder.gather_accounts(None, Some(&mint_pubkey))?;
+        let accounts = builder.gather_accounts(None, Some(mint_pubkey))?;
         let transaction = Transaction::new_with_accounts(
             format!("Creating mint {mint_pubkey}").as_str(),
             accounts,
@@ -54,5 +53,4 @@ impl Mint {
 
         Ok(TransactionList::new(vec![transaction]))
     }
-    
 }

@@ -97,11 +97,11 @@ class App{
     }
 
     init(){
-        this.init_create_dnft_form();
-        this.init_mint_dnft_page();
+        this.initCreateDnftForm();
+        this.initMintDnftPage();
     }
 
-    init_create_dnft_form(){
+    initCreateDnftForm(){
         this.fieldListEl = $("#field-list");
         this.fieldTypeListEl = $("#field-type-list");
         this.createDnftMintBtn = $("#create-dnft-mint-btn");
@@ -228,7 +228,7 @@ class App{
             }
         });
 
-        this.createDnftMintBtn.addEventListener("click", ()=>{
+        this.createDnftMintBtn.addEventListener("click", async ()=>{
             let trList = this.fieldListEl.querySelectorAll("tr");
             let fields = [];
             trList.forEach(tr=>{
@@ -241,6 +241,11 @@ class App{
             })
 
             console.log("fields[0]", fields[0].dataType(), fields[0].name(), fields[0].description())
+            let schema = new this.dnft.Schema(fields)
+            let pubkey = await this.dnft.createDnftMint(schema);
+            console.log("create_dnft_mint: result", pubkey);
+
+            this.loadSchema(pubkey);
         })
         
 
@@ -275,7 +280,16 @@ class App{
         */
     }
 
-    init_mint_dnft_page(){
+    async loadSchema(pubkey){
+        let schema = await this.dnft.loadSchema(pubkey);
+        fields = schema.fields();
+        console.log("schema: result", fields);
+
+        this.buildMintForm(fields);
+        this.activateMintForm();
+    }
+
+    initMintDnftPage(){
         let schemaListEl = $("#schema-list");
         this.schemaListPanel = $("#schema-list-panel");
         this.mintFormPanel = $("#mint-form-panel");
@@ -303,6 +317,10 @@ class App{
             this.activateMintForm();
             
         })
+    }
+
+    activateTab(tab){
+        
     }
 
     activateMintForm(){
@@ -384,13 +402,13 @@ class App{
         let info = document.createElement("div");
         info.setAttribute("class", "form-field__info-text");
         info.innerHTML = field.description();
-        let infoIcon = document.createElement("i");
-        infoIcon.setAttribute("class", "material-icons");
-        infoIcon.innerHTML = "info";
+        //let infoIcon = document.createElement("i");
+        //infoIcon.setAttribute("class", "material-icons");
+        //infoIcon.innerHTML = "info";
 
         let infoBox = document.createElement("div");
         infoBox.setAttribute("class", "form-field__info");
-        infoBox.appendChild(infoIcon)
+        //infoBox.appendChild(infoIcon)
         infoBox.appendChild(info)
 
         let formField = document.createElement("div");

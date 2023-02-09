@@ -68,10 +68,11 @@
           console.log("program_id: ",program_id, "authority: ",authority);
           let transport = await dnft.Transport.InProcUnitTests(program_id,authority);
           console.log("init kaizen done");
-          let a = dnft.check_f64_number("-1.7976931348623158e+308");
-          console.log("check_f64_number:" , a)
-          dnft.run_test();
+          //let a = dnft.check_f64_number("-1.7976931348623158e+308");
+          //console.log("check_f64_number:" , a)
+          
           let app = new App(dnft);
+          //dnft.run_test();
           //window.app = app
       })();
   </script>
@@ -266,16 +267,7 @@
               </div>
               <div class="mdl-tabs__panel" id="mint-form-panel">
                 <h2 id="mint-form-title">Mint DNFT</h2>
-                <div id="mint-form-fields">
-                  <div class="mdl-textfield block mdl-textfield--floating-label mdl-js-textfield has-placeholder">
-                      <input class="mdl-textfield__input" type="text" id="field1">
-                      <label class="mdl-textfield__label" for="field1">Name</label>
-                  </div>
-                  <div class="mdl-textfield block mdl-textfield--floating-label mdl-js-textfield has-placeholder">
-                    <input class="mdl-textfield__input" type="text" id="field2">
-                    <label class="mdl-textfield__label" for="field2">Description</label>
-                  </div>
-                </div>
+                <div id="mint-form-fields"></div>
                 <div class="action-bar">
                   <button id="mint-dnft-btn" class="mdl-button mdl-js-button mdl-button--big mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
                     Mint DNFT

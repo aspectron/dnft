@@ -27,4 +27,3 @@ declare_program!(
 pub fn dnft_program_id() -> Pubkey {
     program_id()
 }
-

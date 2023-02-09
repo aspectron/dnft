@@ -89,4 +89,38 @@ impl Schema {
             log_info!("{}", field);
         }
     }
+
+    pub fn fields(&self) -> js_sys::Array{
+        let result = js_sys::Array::new();//self.fields.len() as u32);
+        for field in self.fields.clone(){
+            result.push(&field.into());
+        }
+        result
+    }
+}
+
+impl Schema {
+    pub fn new(fields: Vec<Field>) -> Self {
+        Self { fields }
+    }
+}
+
+impl From<Schema> for MintCreationArgs {
+    fn from(value: Schema) -> Self {
+        let mut schema = program::Schema::default();
+        let mut names = vec![];
+        let mut descriptions = vec![];
+
+        for field in value.fields {
+            schema.push(field.data_type());
+            names.push(field.name());
+            descriptions.push(field.description());
+        }
+
+        Self {
+            schema: Some(schema),
+            names: Some(names),
+            descriptions: Some(descriptions),
+        }
+    }
 }

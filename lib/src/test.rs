@@ -1,8 +1,11 @@
-#[cfg(test)]
+//#[cfg(test)]
 pub mod tests {
+    use crate::client::Field;
     use crate::prelude::*;
     // use super::*;
+    use crate::client::schema::Schema;
     use kaizen::result::Result;
+    use program::MintCreationArgs;
     use std::str::FromStr;
 
     const AUTHORITY: &str = "42bML5qB3WkMwfa2cosypjUrN7F2PLQm4qhxBdRDyW7f";
@@ -69,15 +72,15 @@ pub mod tests {
         use program::MintCreationArgs;
 
         log_info!("creating mint");
-        let mut schema = program::Schema::default();
-        
-        schema.push(program::DataType::u32);
-        schema.push(program::DataType::u8);
-        schema.push(program::DataType::String);
-        schema.push(program::DataType::u64);
+        let schema = vec![
+            program::DataType::u32,
+            program::DataType::u8,
+            program::DataType::String,
+            program::DataType::u64,
+        ];
 
         let args = MintCreationArgs {
-            schema : Some(schema),
+            schema: Some(schema),
             ..MintCreationArgs::default()
         };
 
@@ -122,5 +125,73 @@ pub mod tests {
         log_info!("\n\nmint container schema: {:#?}\n", schema);
 
         Ok(())
+    }
+
+    #[wasm_bindgen(js_name = "createDnftMint")]
+    pub async fn create_dnft_mint(schema: Schema) -> Result<Pubkey> {
+        let transport = Transport::global()?;
+        if let Some(emulator) = transport.emulator() {
+            let authority = Pubkey::from_str(AUTHORITY)?;
+            transport.set_custom_authority(Some(authority))?;
+            emulator
+                .fund(
+                    &authority,
+                    &Pubkey::default(),
+                    utils::sol_to_lamports(500.0),
+                )
+                .await?;
+        }
+
+        let authority = transport.get_authority_pubkey()?;
+
+        // ----------------------------------------------------------------------------
+
+        log_info!("creating root ----------------------------------------------------------------------------");
+        let args = program::RootCreationArgs {};
+        let tx = client::Root::create(&authority, &args).await?;
+        let target_account_pubkey = tx.target_account()?;
+        tx.execute().await?;
+        let root_container = load_container::<program::Root>(&target_account_pubkey)
+            .await?
+            .expect("¯\\_(ツ)_/¯");
+        log_info!("root creation ok {}", root_container.pubkey());
+
+        // ----------------------------------------------------------------------------
+
+        log_info!("creating mint ----------------------------------------------------------------------------");
+        let args: MintCreationArgs = schema.into();
+
+        let tx = client::Mint::create(&authority, &args).await?;
+        let mint_account_pubkey = tx.target_account()?;
+        tx.execute().await?;
+        let mint_container = load_container::<program::Mint>(&mint_account_pubkey)
+            .await?
+            .expect("¯\\_(ツ)_/¯");
+        let key = mint_container.pubkey();
+        log_info!("mint creation ok {}", key);
+
+        Ok(*key)
+    }
+
+    #[wasm_bindgen(js_name = "loadSchema")]
+    pub async fn load_schema(mint_account_pubkey: Pubkey) -> Result<Schema> {
+        let mint_container = load_container::<program::Mint>(&mint_account_pubkey)
+            .await?
+            .expect("¯\\_(ツ)_/¯");
+        let key = mint_container.pubkey();
+        log_info!("mint creation ok {}", key);
+
+        let data_types = mint_container.schema.load()?;
+        let names = mint_container.names.load()?;
+        let descriptions = mint_container.descriptions.load()?;
+        let mut fields = vec![];
+
+        for (index, data_type) in data_types.into_iter().enumerate() {
+            let name = names.get(index).unwrap_or(&"".to_string()).clone();
+            let description = descriptions.get(index).unwrap_or(&"".to_string()).clone();
+            fields.push(Field::new(data_type, name, description));
+        }
+
+        Ok(Schema::new(fields))
     }
 }
