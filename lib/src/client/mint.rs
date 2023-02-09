@@ -95,7 +95,7 @@ impl Mint {
     pub async fn get_token_pubkeys(pubkey: Pubkey, from: u64, to: u64) -> Result<Vec<Pubkey>> {
         let mint = load_container::<program::Mint>(&pubkey)
             .await?
-            .ok_or_else(|| "Unable to load root container".to_string())?;
+            .ok_or_else(|| format!("Unable to load mint container {pubkey}"))?;
 
         let len = mint.tokens.len() as u64;
 

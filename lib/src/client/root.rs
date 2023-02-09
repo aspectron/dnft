@@ -58,4 +58,37 @@ impl Root {
 
         Ok(TransactionList::new(vec![transaction]))
     }
+
+    pub async fn get_mint_pubkeys(from: u64, to: u64) -> Result<Vec<Pubkey>> {
+        let root = load_container::<program::Root>(&Root::pubkey())
+            .await?
+            .ok_or_else(|| "Unable to load root container".to_string())?;
+
+        let len = root.mints.len() as u64;
+
+        if from > len {
+            return Err(kaizen::error!(
+                "invalid token sequence range from: {from} but length is: {len}"
+            ));
+        }
+
+        let to = std::cmp::min(to, len);
+
+        let list = (from..to)
+            .map(|idx| root.mints.get_pubkey_at(&crate::program_id(), idx))
+            .collect::<std::result::Result<Vec<Pubkey>, _>>()?;
+
+        Ok(list)
+    }
+}
+
+mod wasm {
+    use super::Root;
+    use crate::prelude::*;
+
+    /// Returns a range of token pubkeys for a specific mint
+    #[wasm_bindgen(js_name = "getTokenPubkeys")]
+    pub async fn get_token_pubkeys(from: u64, to: u64) -> Result<JsValue, JsValue> {
+        Ok(to_value(&Root::get_mint_pubkeys(from, to).await?).unwrap())
+    }
 }
