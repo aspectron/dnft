@@ -14,3 +14,7 @@ do
         exit $code
     fi
 done
+
+cd program
+cargo build-sbf
+cd ..
