@@ -22,3 +22,9 @@ declare_program!(
         // program::Token,
     ]
 );
+
+#[wasm_bindgen]
+pub fn dnft_program_id() -> Pubkey {
+    program_id()
+}
+
