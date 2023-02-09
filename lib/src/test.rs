@@ -4,8 +4,8 @@ pub mod tests {
     use crate::prelude::*;
     use kaizen::result::Result;
     use program::MintCreationArgs;
-    use workflow_log::style;
     use std::str::FromStr;
+    use workflow_log::style;
 
     const AUTHORITY: &str = "42bML5qB3WkMwfa2cosypjUrN7F2PLQm4qhxBdRDyW7f";
 
@@ -106,7 +106,7 @@ pub mod tests {
                 log_info!("creating token {mint_seq}:{token_seq}");
 
                 let mint_account_pubkey = mint_pubkeys.get(mint_seq).unwrap();
-                let mint_container = reload_container::<program::Mint>(&mint_account_pubkey)
+                let mint_container = reload_container::<program::Mint>(mint_account_pubkey)
                     .await?
                     .expect("¯\\_(ツ)_/¯");
 
@@ -126,7 +126,7 @@ pub mod tests {
         }
         // ----------------------------------------------------------------------------
 
-        for (idx,pk) in mint_pubkeys.iter().enumerate() {
+        for (idx, pk) in mint_pubkeys.iter().enumerate() {
             log_info!("mint pubkey {idx} : {pk}");
         }
 
@@ -139,8 +139,14 @@ pub mod tests {
             let mint_account_pubkey = root
                 .mints
                 .get_pubkey_at(&crate::program_id(), mint_seq as u64)?;
-            log_info!("domain: {:?}",root.mints);
-            log_info!("{}",style(format!("reloading mint pubkey {mint_seq} : {mint_account_pubkey}")).red());
+            log_info!("domain: {:?}", root.mints);
+            log_info!(
+                "{}",
+                style(format!(
+                    "reloading mint pubkey {mint_seq} : {mint_account_pubkey}"
+                ))
+                .red()
+            );
             // let mint_account_pubkey = mint_pubkeys.get(mint_seq).unwrap();
             let mint_container = reload_container::<program::Mint>(&mint_account_pubkey)
                 .await?

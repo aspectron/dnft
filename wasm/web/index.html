@@ -68,6 +68,7 @@
           console.log("program_id: ",program_id, "authority: ",authority);
           let transport = await dnft.Transport.InProcUnitTests(program_id,authority);
           console.log("init kaizen done");
+          await dnft.createRoot();
           //let a = dnft.check_f64_number("-1.7976931348623158e+308");
           //console.log("check_f64_number:" , a)
           
@@ -83,7 +84,7 @@
         <div class="mdl-layout--large-screen-only mdl-layout__header-row">
           <h3>Dynamic NFT</h3>
         </div>
-        <div class="mdl-layout__tab-bar mdl-js-ripple-effect mdl-color--primary-dark">
+        <div id="top-tabs" class="mdl-layout__tab-bar mdl-js-ripple-effect mdl-color--primary-dark">
             <a href="#browse" class="mdl-layout__tab">Browse Mints</a>
             <a href="#create-dnft" class="mdl-layout__tab is-active">Create DNFT Mint</a>
             <a href="#mint-dnft" class="mdl-layout__tab">Mint DNFT</a>
