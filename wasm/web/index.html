@@ -68,6 +68,8 @@
           console.log("program_id: ",program_id, "authority: ",authority);
           let transport = await dnft.Transport.InProcUnitTests(program_id,authority);
           console.log("init kaizen done");
+          let a = dnft.check_f64_number("-1.7976931348623158e+308");
+          console.log("check_f64_number:" , a)
           dnft.run_test();
           let app = new App(dnft);
           //window.app = app
@@ -210,7 +212,78 @@
           </div>
         </div>
         <div class="mdl-layout__tab-panel" id="mint-dnft">
-          mint-dnft
+          <div class="main-container" id="mint-dnft-main-container">
+            <div class="mdl-tabs mdl-js-tabs">
+              <div class="mdl-tabs__tab-bar">
+                <a href="#schema-list-panel" class="mdl-tabs__tab is-active">Select DNFT MINT (Schema)</a>
+                <a href="#mint-form-panel" class="mdl-tabs__tab">Mint DNFT</a>
+              </div>
+              <div class="mdl-tabs__panel is-active" id="schema-list-panel">
+                <h2>Select DNFT MINT (Schema)</h2>
+                <table width="100%" class="mdl-data-table">
+                  <thead>
+                    <tr>
+                      <th class="mdl-data-table__cell--non-numeric" width="30%">Name</th>
+                      <th class="mdl-data-table__cell--non-numeric" width="65%">Description</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="schema-list">
+                    <tr class="schema-item">
+                      <td class="mdl-data-table__cell--non-numeric">DNFT 1</td>
+                      <td class="mdl-data-table__cell--wrap-text">
+                        <p>
+                          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                          Cras eu tincidunt magna. Donec molestie placerat augue.
+                          Aliquam lobortis nulla nibh, ultricies tincidunt felis
+                          pharetra nec. Sed vehicula at lectus sed gravida.
+                        </p>
+                      </td>
+                      <td>
+                        <button class="mdl-button mint-dnft">
+                          Mint it
+                        </button>
+                      </td>
+                    </tr>
+                    <tr class="schema-item">
+                      <td class="mdl-data-table__cell--non-numeric">DNFT 2</td>
+                      <td class="mdl-data-table__cell--wrap-text">
+                        <p>
+                          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                          Cras eu tincidunt magna. Donec molestie placerat augue.
+                          Aliquam lobortis nulla nibh, ultricies tincidunt felis
+                          pharetra nec. Sed vehicula at lectus sed gravida.
+                        </p>
+                      </td>
+                      <td>
+                        <button class="mdl-button mint-dnft">
+                          Mint it
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="mdl-tabs__panel" id="mint-form-panel">
+                <h2 id="mint-form-title">Mint DNFT</h2>
+                <div id="mint-form-fields">
+                  <div class="mdl-textfield block mdl-textfield--floating-label mdl-js-textfield has-placeholder">
+                      <input class="mdl-textfield__input" type="text" id="field1">
+                      <label class="mdl-textfield__label" for="field1">Name</label>
+                  </div>
+                  <div class="mdl-textfield block mdl-textfield--floating-label mdl-js-textfield has-placeholder">
+                    <input class="mdl-textfield__input" type="text" id="field2">
+                    <label class="mdl-textfield__label" for="field2">Description</label>
+                  </div>
+                </div>
+                <div class="action-bar">
+                  <button id="mint-dnft-btn" class="mdl-button mdl-js-button mdl-button--big mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                    Mint DNFT
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <footer class="mdl-mega-footer">
             <div class="mdl-mega-footer--middle-section">

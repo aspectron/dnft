@@ -32,6 +32,63 @@ function createIconBtn(icon, title="", attributes={}){
     return btn;
 }
 
+function createCheckbox(value, label="", id="", cls=""){
+    let input = document.createElement('input');
+    input.type = "checkbox";
+    if(id)
+        input.id = id;
+    input.setAttribute("class", "mdl-checkbox__input "+cls);
+    input.setAttribute("value", value);
+    let checkbox = document.createElement('label');
+    checkbox.setAttribute("class", "mdl-checkbox mdl-js-checkbox");
+    checkbox.appendChild(input);
+    if (label){
+        let span = document.createElement('span');
+        span.setAttribute("class", "mdl-checkbox__label");
+        span.innerHTML = label;
+        checkbox.appendChild(span);
+    }
+    componentHandler.upgradeElement(checkbox, "MaterialCheckbox");
+
+    return checkbox;
+}
+
+const field_info = {
+    min:{
+        u8: 0,
+        u16: 0,
+        u32: 0,
+        u64: 0,
+        u128: 0,
+        i8: -(2**7),
+        i16: -(2**15),
+        i32: -(2**31),
+        i64: BigInt(-(2**63)),
+        i128: BigInt(-(2**127)),
+        f32: -3.40282347E+38,
+        f32_positive: 1.17549435e-38,
+        f64: -1.7976931348623157e+308,
+        f64_positive: 2.2250738585072014e-308
+    },
+    max:{
+        u8: (2**8)-1,
+        u16: (2**16)-1,
+        u32: (2**32)-1,
+        u64: BigInt((2**64)-1),
+        u128: BigInt((2**128)-1),
+        i8: (2**7)-1,
+        i16: (2**15)-1,
+        i32: (2**31)-1,
+        i64: BigInt((2**63)-1),
+        i128: BigInt((2**127)-1),
+        f32: 3.40282347e+38,
+        f64: 1.7976931348623157e+308
+    }
+};
+
+console.log("field_info", field_info)
+
+
 class App{
 
     constructor(dnft){
@@ -41,6 +98,7 @@ class App{
 
     init(){
         this.init_create_dnft_form();
+        this.init_mint_dnft_page();
     }
 
     init_create_dnft_form(){
@@ -60,18 +118,11 @@ class App{
         }
 
         for(let field of fields){
-            let input = document.createElement('input');
-            input.type = "checkbox";
-            input.id = "checkbox-field-type-"+field.dataType();
-            input.setAttribute("class", "mdl-checkbox__input field-type");
-            input.setAttribute("value", field.dataType());
-            let label = document.createElement('label');
-            label.setAttribute("class", "mdl-checkbox mdl-js-checkbox");
-            label.appendChild(input);
-            componentHandler.upgradeElement(label);
+            let type = field.dataType()
+            let checkbox = createCheckbox(type, "", "checkbox-field-type-"+type, "field-type");
             
             let td_checkbox = document.createElement("td");
-            td_checkbox.appendChild(label);
+            td_checkbox.appendChild(checkbox);
 
             let td_type = document.createElement("td");
             td_type.innerHTML = field.name();
@@ -222,6 +273,132 @@ class App{
             this.floatingInputBox.focus();
         })
         */
+    }
+
+    init_mint_dnft_page(){
+        let schemaListEl = $("#schema-list");
+        this.schemaListPanel = $("#schema-list-panel");
+        this.mintFormPanel = $("#mint-form-panel");
+        this.mintFormFieldsEl = $("#mint-form-fields");
+
+        schemaListEl.addEventListener("click", event=>{
+            let el = event.target.closest(".schema-item");
+            let btn = event.target.closest("button.mint-dnft");
+            if(!btn || !el)
+                return
+            
+            //TODO get schema/fields
+            const { Field, DataType, Data } = this.dnft;
+
+            let fields = [];
+            let dataTypes = Object.keys(DataType).filter(k => !isFinite(+k));
+            for (let dataType of dataTypes) {
+                let name = "Field "+dataType;
+                let descr = `Descr for ${dataType}`;
+
+                fields.push(new Field(DataType[dataType], name, descr));
+            }
+
+            this.buildMintForm(fields);
+            this.activateMintForm();
+            
+        })
+    }
+
+    activateMintForm(){
+        this.mintFormPanel.classList.add("is-active");
+        this.schemaListPanel.classList.remove("is-active");
+    }
+
+    buildMintForm(fields){
+        while(this.mintFormFieldsEl.childNodes.length){
+            this.mintFormFieldsEl.childNodes[0].remove();
+        }
+        for(let field of fields){
+            let el = this.createFormField(field);
+            this.mintFormFieldsEl.appendChild(el);
+        }
+    }
+
+    createFormField(field, attributes={}){
+        let type = this.dnft.DataType[field.dataType()];
+
+        console.log("createFormField: type", type )
+        let createField = ()=>{
+            if (type == "Bool"){
+                let checkbox = createCheckbox("ON", field.name());
+                return checkbox
+            }
+        
+            let input = document.createElement("input");
+            input.setAttribute("class", "mdl-textfield__input");
+            input.type = "text";
+            
+           if(["u8", "u16", "u32", "u64", "u128", "i8", "i16", "i32", "i64", "i128", "f32", "f64"].includes(type)){
+                input.type = "number";
+                input.min = field_info.min[type];
+                input.max = field_info.max[type];
+            }else if(type == "ImageUrl" || type == "PageUrl"){
+                input.type = "url";
+            }
+            
+            let label = document.createElement("label");
+            label.setAttribute("class", "mdl-textfield__label");
+            label.innerHTML = field.name();
+
+            let error = document.createElement("span");
+            error.setAttribute("class", "mdl-textfield__error");
+            error.innerHTML = "Invalid value";
+        
+            let fieldEl = document.createElement("div");
+            Object.keys(attributes).forEach(key=>{
+                fieldEl.setAttribute(key, attributes[key]);
+            });
+        
+            fieldEl.classList.add("mdl-textfield", "mdl-textfield--floating-label", "mdl-js-textfield", "has-placeholder");
+            fieldEl.appendChild(input);
+            fieldEl.appendChild(label);
+            fieldEl.appendChild(error);
+            
+            componentHandler.upgradeElement(fieldEl, "MaterialTextfield");
+
+            if(["u64", "u128", "i64", "i128"/*, "f32", "f64"*/].includes(type)){
+                fieldEl.MaterialTextfield.checkValidity = () =>{
+                    let isValid = BigInt(input.value) >= BigInt(field_info.min[type]) &&
+                    BigInt(input.value) <= BigInt(field_info.max[type])
+
+                    //console.log("isValid:", type, input.value, isValid)
+
+                    if (isValid) {
+                        fieldEl.classList.remove(fieldEl.MaterialTextfield.CssClasses_.IS_INVALID);
+                    } else {
+                        fieldEl.classList.add(fieldEl.MaterialTextfield.CssClasses_.IS_INVALID);
+                    }
+                }
+            }
+
+            return fieldEl;
+        }
+
+        let fieldEl = createField();
+        let info = document.createElement("div");
+        info.setAttribute("class", "form-field__info-text");
+        info.innerHTML = field.description();
+        let infoIcon = document.createElement("i");
+        infoIcon.setAttribute("class", "material-icons");
+        infoIcon.innerHTML = "info";
+
+        let infoBox = document.createElement("div");
+        infoBox.setAttribute("class", "form-field__info");
+        infoBox.appendChild(infoIcon)
+        infoBox.appendChild(info)
+
+        let formField = document.createElement("div");
+        formField.setAttribute("class", "form-field--with-info");
+        formField.appendChild(fieldEl);
+        formField.appendChild(infoBox);
+        
+        return formField;
     }
 
     appendToFieldList(fields){

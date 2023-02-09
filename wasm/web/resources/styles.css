@@ -85,6 +85,21 @@ td[contenteditable]:hover:after{
   visibility: hidden;
 }
 
+#mint-dnft-main-container>.mdl-tabs>.mdl-tabs__tab-bar{
+  display:none;
+}
+
+.form-field--with-info{
+  display:flex;
+}
+.form-field__info{
+  flex: 1;
+  padding: 5px 10px;
+}
+.form-field--with-info .mdl-checkbox{
+  width:300px;
+}
+
 .mdl-button--big{
   height:50px;
   line-height:50px;
@@ -94,6 +109,11 @@ td[contenteditable]:hover:after{
 }
 .mdl-data-table th{
   font-size: .9rem;
+}
+
+.mdl-data-table .mdl-data-table__cell--wrap-text{
+  white-space:normal;
+  text-align: left;
 }
 
 /*

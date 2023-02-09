@@ -160,6 +160,15 @@ pub mod dnft_client {
     }
 
     #[wasm_bindgen]
+    pub fn check_f64_number(num: String) -> Result<f64> {
+        if let Ok(v) = num.parse::<f64>(){
+            log_trace!("check_f64_number: {num}, {}, {}", v, v.to_string());
+            return Ok(v)
+        }
+        Err("f64-number-error".into())
+    }
+
+    #[wasm_bindgen]
     pub async fn run_test() -> Result<()> {
         let transport = Transport::global()?;
         if let Some(emulator) = transport.emulator() {
