@@ -1,5 +1,3 @@
-
-
 #[cfg(test)]
 pub mod tests {
     use crate::prelude::*;
@@ -32,12 +30,11 @@ pub mod tests {
             .await?
             .to_log();
         log_info!("");
-    
-        log_trace!("all looks good ... 😎");    
+
+        log_trace!("all looks good ... 😎");
 
         Ok(())
     }
-
 
     #[wasm_bindgen]
     pub async fn run_test() -> Result<()> {
@@ -59,7 +56,7 @@ pub mod tests {
         // ----------------------------------------------------------------------------
 
         log_info!("creating root");
-        let args = program::RootCreationArgs { };
+        let args = program::RootCreationArgs {};
         let tx = client::Root::create(&authority, &args).await?;
         let target_account_pubkey = tx.target_account()?;
         tx.execute().await?;
@@ -69,15 +66,15 @@ pub mod tests {
         log_info!("root creation ok {}", root_container.pubkey());
 
         // ----------------------------------------------------------------------------
-        
+
         log_info!("creating mint");
-        let args = program::MintCreationArgs { };
+        let args = program::MintCreationArgs {};
         let tx = client::Mint::create(&authority, &args).await?;
         let mint_account_pubkey = tx.target_account()?;
         tx.execute().await?;
         let mint_container = load_container::<program::Mint>(&mint_account_pubkey)
-        .await?
-        .expect("¯\\_(ツ)_/¯");
+            .await?
+            .expect("¯\\_(ツ)_/¯");
         log_info!("mint creation ok {}", mint_container.pubkey());
 
         // ----------------------------------------------------------------------------
@@ -88,8 +85,8 @@ pub mod tests {
             let mint_container = reload_container::<program::Mint>(&mint_account_pubkey)
                 .await?
                 .expect("¯\\_(ツ)_/¯");
-    
-            let args = program::TokenCreationArgs { };
+
+            let args = program::TokenCreationArgs {};
             let tx = client::Token::create(&authority, mint_container.pubkey(), &args).await?;
             let target_account_pubkey = tx.target_account()?;
             tx.execute().await?;
@@ -106,11 +103,9 @@ pub mod tests {
             .await?
             .expect("¯\\_(ツ)_/¯");
 
-
         let token_len = mint_container.tokens.len();
         log_info!("... tokens created: {token_len}");
 
         Ok(())
     }
-
 }

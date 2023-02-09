@@ -1,12 +1,12 @@
 //!
 //! Token Mint - managing all token chains
-//! 
+//!
 
 use crate::prelude::*;
 use program::Token;
 
 #[derive(Clone, Debug, BorshSerialize, BorshDeserialize)]
-pub struct MintCreationArgs { }
+pub struct MintCreationArgs {}
 
 // ~
 
@@ -14,20 +14,19 @@ pub struct MintCreationArgs { }
 #[repr(packed)]
 pub struct MintMeta {
     version: u32,
-    root : Pubkey,
+    root: Pubkey,
 }
 
 #[container(Containers::Mint)]
-pub struct Mint<'info,'refs> {
+pub struct Mint<'info, 'refs> {
     pub meta: RefCell<&'info mut MintMeta>,
-    pub store: SegmentStore<'info,'refs>,
+    pub store: SegmentStore<'info, 'refs>,
     // ---
     #[collection(seed(b"token"), container(program::Token))]
     pub tokens: PdaCollection<'info, 'refs>,
 
-    pub schema : Serialized<'info,'refs,program::Schema>,
+    pub schema: Serialized<'info, 'refs, program::Schema>,
 }
-
 
 impl<'info, 'refs> Mint<'info, 'refs> {
     pub fn test(ctx: &ContextReference) -> ProgramResult {
@@ -52,13 +51,12 @@ impl<'info, 'refs> Mint<'info, 'refs> {
 
         let mut mint = Mint::try_load(&ctx.handler_accounts[0])?;
 
-        let mut token = mint.tokens
-            .try_create_container::<Token>(
-                ctx,
-                tpl_data.seed,
-                tpl_account_info,
-                None,
-            )?;
+        let mut token = mint.tokens.try_create_container::<Token>(
+            ctx,
+            tpl_data.seed,
+            tpl_account_info,
+            None,
+        )?;
 
         token.init(ctx)?;
 
@@ -68,10 +66,4 @@ impl<'info, 'refs> Mint<'info, 'refs> {
     }
 }
 
-declare_handlers!(
-    Mint::<'info, 'refs>,
-    [
-        Mint::test,
-        Mint::create_token,
-    ]
-);
+declare_handlers!(Mint::<'info, 'refs>, [Mint::test, Mint::create_token,]);

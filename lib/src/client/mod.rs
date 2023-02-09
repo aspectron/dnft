@@ -12,4 +12,3 @@ pub use token::*;
 
 pub mod schema;
 pub use schema::*;
-

@@ -28,7 +28,6 @@ cfg_if! {
 }
 
 impl Root {
-
     pub fn find_root_pubkey() -> Pubkey {
         let program_id = crate::program_id();
         let bytes = "root".as_bytes();
@@ -42,12 +41,9 @@ impl Root {
         authority_pubkey: &Pubkey,
         args: &program::RootCreationArgs,
     ) -> Result<TransactionList> {
-
         let builder = Root::execution_context_for(program::Root::create_root)
             .with_authority(authority_pubkey)
-            .with_generic_account_templates_with_seeds(
-                &[(AddressDomain::None, b"root")],
-            )
+            .with_generic_account_templates_with_seeds(&[(AddressDomain::None, b"root")])
             .with_instruction_data(&args.try_to_vec()?)
             .seal()?;
 
@@ -62,5 +58,4 @@ impl Root {
 
         Ok(TransactionList::new(vec![transaction]))
     }
-
 }

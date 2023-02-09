@@ -5,12 +5,10 @@ pub struct Token;
 // declare_client!(program::Token, Token);
 
 impl Token {
-
-
     pub async fn create<'channel>(
         authority_pubkey: &Pubkey,
         mint_pubkey: &Pubkey,
-        args : &TokenCreationArgs
+        args: &TokenCreationArgs,
     ) -> Result<TransactionList> {
         let mint = reload_container::<program::Mint>(&mint_pubkey)
             .await?
@@ -36,4 +34,3 @@ impl Token {
         Ok(TransactionList::new(vec![transaction]))
     }
 }
-

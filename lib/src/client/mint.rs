@@ -5,7 +5,6 @@ pub struct Mint;
 declare_client!(program::Mint, Mint);
 
 impl Mint {
-
     pub async fn create(
         authority_pubkey: &Pubkey,
         args: &MintCreationArgs,

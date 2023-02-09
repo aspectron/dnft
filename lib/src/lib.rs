@@ -7,9 +7,9 @@ pub mod test;
 
 #[cfg(not(target_os = "solana"))]
 pub mod client;
-pub mod program;
-pub mod error;
 pub mod containers;
+pub mod error;
+pub mod program;
 
 use crate::prelude::*;
 

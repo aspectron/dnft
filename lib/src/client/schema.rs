@@ -32,7 +32,7 @@ impl Field {
         self.name.clone()
     }
 
-    #[wasm_bindgen(js_name="dataType")]
+    #[wasm_bindgen(js_name = "dataType")]
     pub fn data_type(&self) -> DataType {
         self.data_type
     }
@@ -52,7 +52,7 @@ impl fmt::Display for Field {
             .field("description", &format!("{}", self.description));
         Ok(())
         */
-        
+
         write!(
             f,
             "Field {{ type: {:?},  name:'{}', descr:'{}' }}",

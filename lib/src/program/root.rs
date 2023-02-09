@@ -1,12 +1,12 @@
 //!
 //! Program root, managing all mint chains.
-//! 
+//!
 
 use crate::prelude::*;
 use program::Mint;
 
 #[derive(Clone, Debug, BorshSerialize, BorshDeserialize)]
-pub struct RootCreationArgs { }
+pub struct RootCreationArgs {}
 
 // ~
 
@@ -17,14 +17,13 @@ pub struct RootMeta {
 }
 
 #[container(Containers::Root)]
-pub struct Root<'info,'refs> {
+pub struct Root<'info, 'refs> {
     pub meta: RefCell<&'info mut RootMeta>,
-    pub store: SegmentStore<'info,'refs>,
+    pub store: SegmentStore<'info, 'refs>,
     // ---
     #[collection(seed(b"mint"), container(program::Mint))]
     pub mints: PdaCollection<'info, 'refs>,
 }
-
 
 impl<'info, 'refs> Root<'info, 'refs> {
     pub fn test(ctx: &ContextReference) -> ProgramResult {
@@ -34,13 +33,8 @@ impl<'info, 'refs> Root<'info, 'refs> {
     }
 
     pub fn create_root(ctx: &ContextReference) -> ProgramResult {
-
         let allocation_args = AccountAllocationArgs::new(AddressDomain::None);
-        let mut root = Root::try_allocate(
-            ctx,
-            &allocation_args,
-            0,
-        )?;
+        let mut root = Root::try_allocate(ctx, &allocation_args, 0)?;
 
         let mut meta = root.meta.borrow_mut();
         meta.set_version(1);
@@ -58,13 +52,9 @@ impl<'info, 'refs> Root<'info, 'refs> {
 
         let mut root = Root::try_load(&ctx.handler_accounts[0])?;
 
-        let mut mint = root.mints
-            .try_create_container::<Mint>(
-                ctx,
-                tpl_data.seed,
-                tpl_account_info,
-                None,
-            )?;
+        let mut mint =
+            root.mints
+                .try_create_container::<Mint>(ctx, tpl_data.seed, tpl_account_info, None)?;
 
         mint.init(ctx)?;
 
@@ -76,17 +66,11 @@ impl<'info, 'refs> Root<'info, 'refs> {
 
 declare_handlers!(
     Root::<'info, 'refs>,
-    [
-        Root::test,
-        Root::create_root,
-        Root::create_mint,
-    ]
+    [Root::test, Root::create_root, Root::create_mint,]
 );
 
 // #[cfg(not(target_os = "solana"))]
 // pub mod client {
 //     use super::*;
-
-
 
 // }
