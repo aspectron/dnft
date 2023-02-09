@@ -139,6 +139,7 @@ pub mod tests {
             let mint_account_pubkey = root
                 .mints
                 .get_pubkey_at(&crate::program_id(), mint_seq as u64)?;
+            log_info!("domain: {:?}",root.mints);
             log_info!("{}",style(format!("reloading mint pubkey {mint_seq} : {mint_account_pubkey}")).red());
             // let mint_account_pubkey = mint_pubkeys.get(mint_seq).unwrap();
             let mint_container = reload_container::<program::Mint>(&mint_account_pubkey)
