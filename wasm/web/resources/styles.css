@@ -100,15 +100,19 @@ td[contenteditable]:hover:after{
   width:300px;
 }
 
+.mdl-layout__tab{
+  font-size:1.2rem;
+}
+
 .mdl-button--big{
   height:50px;
   line-height:50px;
 }
 .mdl-data-table{
-  font-size: 1rem;
+  font-size: 1.4rem;
 }
 .mdl-data-table th{
-  font-size: .9rem;
+  font-size: 1.4rem;
 }
 
 .mdl-data-table .mdl-data-table__cell--wrap-text{
@@ -393,7 +397,7 @@ td.actions .material-icons{
           flex-direction: column;
 }
 .mdl-dnft .toc h4 {
-  font-size: 0.9rem;
+  font-size: 1.3rem;
   margin-top: 0;
 }
 .mdl-dnft .toc a {
