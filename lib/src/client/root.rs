@@ -86,8 +86,8 @@ mod wasm {
     use super::Root;
     use crate::prelude::*;
 
-    /// Returns a range of token pubkeys for a specific mint
-    #[wasm_bindgen(js_name = "getTokenPubkeys")]
+    /// Returns a range of mint pubkeys for a specific mint
+    #[wasm_bindgen(js_name = "getMintPubkeys")]
     pub async fn get_token_pubkeys(from: u64, to: u64) -> Result<JsValue, JsValue> {
         Ok(to_value(&Root::get_mint_pubkeys(from, to).await?).unwrap())
     }

@@ -69,7 +69,6 @@ pub mod tests {
         log_info!("root creation ok {}", root_container.pubkey());
 
         // ----------------------------------------------------------------------------
-        use program::{DataType, MintCreationArgs};
 
         log_info!("creating mint");
         let data_types = vec![
@@ -171,27 +170,5 @@ pub mod tests {
         log_info!("mint creation ok {}", key);
 
         Ok(*key)
-    }
-
-    #[wasm_bindgen(js_name = "loadSchema")]
-    pub async fn load_schema(mint_account_pubkey: Pubkey) -> Result<Schema> {
-        let mint_container = load_container::<program::Mint>(&mint_account_pubkey)
-            .await?
-            .expect("¯\\_(ツ)_/¯");
-        let key = mint_container.pubkey();
-        log_info!("mint creation ok {}", key);
-
-        let data_types = mint_container.data_types.load()?;
-        let names = mint_container.names.load()?;
-        let descriptions = mint_container.descriptions.load()?;
-        let mut fields = vec![];
-
-        for (index, data_type) in data_types.into_iter().enumerate() {
-            let name = names.get(index).unwrap_or(&"".to_string()).clone();
-            let description = descriptions.get(index).unwrap_or(&"".to_string()).clone();
-            fields.push(Field::new(data_type, name, description));
-        }
-
-        Ok(Schema::new(fields))
     }
 }

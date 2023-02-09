@@ -281,12 +281,12 @@ class App{
     }
 
     async loadSchema(pubkey){
-        let schema = await this.dnft.loadSchema(pubkey);
-        fields = schema.fields();
-        console.log("schema: result", fields);
+        let mintData = await this.dnft.getMintData(pubkey);
+        //fields = schema.fields();
+        console.log("mintData: result", mintData);
 
-        this.buildMintForm(fields);
-        this.activateMintForm();
+        //this.buildMintForm(fields);
+        //this.activateMintForm();
     }
 
     initMintDnftPage(){
@@ -320,7 +320,7 @@ class App{
     }
 
     activateTab(tab){
-        
+
     }
 
     activateMintForm(){
