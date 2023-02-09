@@ -119,10 +119,10 @@ class App{
 
         for(let field of fields){
             let type = field.dataType()
-            let checkbox = createCheckbox(type, "", "checkbox-field-type-"+type, "field-type");
+            //let checkbox = createCheckbox(type, "", "checkbox-field-type-"+type, "field-type");
             
-            let td_checkbox = document.createElement("td");
-            td_checkbox.appendChild(checkbox);
+            //let td_checkbox = document.createElement("td");
+            //td_checkbox.appendChild(checkbox);
 
             let td_type = document.createElement("td");
             td_type.innerHTML = field.name();
@@ -133,7 +133,8 @@ class App{
             td_descr.setAttribute("class", "mdl-data-table__cell--non-numeric");
 
             let tr = document.createElement("tr");
-            tr.appendChild(td_checkbox);
+            tr.setAttribute("data-type", type);
+            //tr.appendChild(td_checkbox);
             tr.appendChild(td_type);
             tr.appendChild(td_descr);
             this.fieldTypeListEl.appendChild(tr);
@@ -144,10 +145,23 @@ class App{
             if (label)
                 return
 
-            let tr = event.target.closest("tr")
+            let tr = event.target.closest("tr[data-type]")
             if(!tr)
                 return
+            let type = tr.dataset.type;
 
+            dialog.close();
+            let fields = [type].map(dataType=>{
+                return new Field(+dataType, "", "")
+            });
+
+            if (fields.length){
+                $("#create-dnft-main-container").classList.remove("no-fields");
+            }
+
+            this.appendToFieldList(fields);
+
+            /*
             let checkbox = tr.querySelector("input.field-type");
             if (!checkbox)
                 return
@@ -156,6 +170,7 @@ class App{
             }else{
                 checkbox.parentElement.MaterialCheckbox.check()
             }
+            */
         });
 
 
@@ -166,7 +181,7 @@ class App{
         }
 
         addFieldButtons.forEach(btn=>btn.addEventListener('click', ()=>{
-            clearSelected();
+            //clearSelected();
             dialog.showModal();
         }));
 
@@ -174,6 +189,7 @@ class App{
             dialog.close();
         });
 
+        /*
         let getSelected = ()=>{
             let list = [];
             this.fieldTypeListEl.querySelectorAll("input.field-type:checked").forEach(checkbox=>{
@@ -192,6 +208,7 @@ class App{
                 checkbox.parentElement.MaterialCheckbox.uncheck()
             });
         }
+        
 
         dialog.querySelector('.add-fields').addEventListener('click', ()=>{
             let list = getSelected();
@@ -208,6 +225,7 @@ class App{
                 this.appendToFieldList(fields);
             }
         });
+        */
 
         this.fieldListEl.addEventListener("click", event=>{
             let tr = event.target.closest("tr");
@@ -430,15 +448,25 @@ class App{
             td_type.innerHTML = DataType[field.dataType()];
             td_type.setAttribute("class", "mdl-data-table__cell--non-numeric");
 
+
+            let input_name = document.createElement("div");
+            input_name.innerHTML = field.name();
+            input_name.setAttribute("class", "editable");
+            input_name.setAttribute("contentEditable", "true");
+
             let td_name = document.createElement("td");
-            td_name.innerHTML = field.name();
-            td_name.setAttribute("class", "mdl-data-table__cell--non-numeric");
-            td_name.setAttribute("contentEditable", "true");
+            td_name.appendChild(input_name);
+            td_name.setAttribute("class", "mdl-data-table__cell--non-numeric edit-container");
+
+
+            let input_descr = document.createElement("div");
+            input_descr.innerHTML = field.description();
+            input_descr.setAttribute("class", "editable");
+            input_descr.setAttribute("contentEditable", "true");
 
             let td_descr = document.createElement("td");
-            td_descr.innerHTML = field.description();
-            td_descr.setAttribute("class", "mdl-data-table__cell--non-numeric");
-            td_descr.setAttribute("contentEditable", "true");
+            td_descr.appendChild(input_descr);
+            td_descr.setAttribute("class", "mdl-data-table__cell--non-numeric edit-container");
 
 
             let btn_move_down = createIconBtn("expand_more", "Move down", {"data-action":"move-down"});
