@@ -24,7 +24,7 @@ impl Token {
 
         let token_pubkey = builder.collection_template_pubkey_at(0);
         let accounts = builder.gather_accounts(None, Some(&token_pubkey))?;
-
+        // log_info!("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ {:?}", accounts);
         let transaction = Transaction::new_with_accounts(
             format!("Creating token {token_pubkey}").as_str(),
             accounts,

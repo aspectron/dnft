@@ -126,10 +126,6 @@ pub mod tests {
         }
         // ----------------------------------------------------------------------------
 
-        for (idx,pk) in mint_pubkeys.iter().enumerate() {
-            log_info!("mint pubkey {idx} : {pk}");
-        }
-
         let root = reload_container::<program::Root>(&client::Root::pubkey())
             .await?
             .expect("¯\\_(ツ)_/¯");
@@ -139,15 +135,12 @@ pub mod tests {
             let mint_account_pubkey = root
                 .mints
                 .get_pubkey_at(&crate::program_id(), mint_seq as u64)?;
-            log_info!("domain: {:?}",root.mints);
-            log_info!("{}",style(format!("reloading mint pubkey {mint_seq} : {mint_account_pubkey}")).red());
-            // let mint_account_pubkey = mint_pubkeys.get(mint_seq).unwrap();
             let mint_container = reload_container::<program::Mint>(&mint_account_pubkey)
                 .await?
                 .expect("¯\\_(ツ)_/¯");
 
             let token_len = mint_container.tokens.len();
-            log_info!("mint {mint_account_pubkey} ... tokens: {token_len}");
+            log_info!("mint {mint_seq} {mint_account_pubkey} [{token_len}]");
 
             for token_seq in 0..token_len {
                 let token_account_pubkey = mint_container
