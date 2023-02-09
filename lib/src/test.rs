@@ -1,9 +1,7 @@
-//#[cfg(test)]
+#[cfg(not(target_os = "solana"))]
 pub mod tests {
-    use crate::client::Field;
-    use crate::prelude::*;
-    // use super::*;
     use crate::client::schema::Schema;
+    use crate::prelude::*;
     use kaizen::result::Result;
     use program::MintCreationArgs;
     use std::str::FromStr;

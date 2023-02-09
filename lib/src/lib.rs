@@ -16,11 +16,7 @@ use crate::prelude::*;
 declare_program!(
     "dnft",
     "5UAQGzYRWKEgdbpZCqoUjKDKiWpNbHeataWknRpvswEH",
-    [
-        program::Root,
-        program::Mint,
-        // program::Token,
-    ]
+    [program::Root, program::Mint, program::Token,]
 );
 
 cfg_if! {

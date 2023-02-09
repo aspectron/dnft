@@ -3,6 +3,7 @@
 //!
 
 use crate::prelude::*;
+use program::Mint;
 
 pub type DataVec = Vec<program::Data>;
 
@@ -26,17 +27,25 @@ pub struct Token<'info, 'refs> {
 }
 
 impl<'info, 'refs> Token<'info, 'refs> {
-    pub fn test(ctx: &ContextReference) -> ProgramResult {
-        log_info!("TestInterface::test_handler CTX: {:#?}", ctx);
+    pub fn create(ctx: &ContextReference) -> ProgramResult {
+        let mut mint = Mint::try_load(&ctx.handler_accounts[0])?;
 
-        Ok(())
-    }
+        let (tpl_data, tpl_account_info) = ctx.try_consume_collection_template_address_data()?;
+        let token = mint.tokens.try_create_container::<Token>(
+            ctx,
+            tpl_data.seed,
+            tpl_account_info,
+            None,
+        )?;
 
-    pub fn init(&mut self, _ctx: &ContextReference) -> ProgramResult {
-        self.meta.borrow_mut().set_version(1);
+        let mut meta = token.meta.borrow_mut();
+        meta.set_version(1);
+        drop(meta);
 
-        // TODO - init token data structure
+        ctx.sync_rent(token.account(), &RentCollector::default())?;
 
         Ok(())
     }
 }
+
+declare_handlers!(Token::<'info, 'refs>, [Token::create,]);

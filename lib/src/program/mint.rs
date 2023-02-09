@@ -5,7 +5,7 @@
 use crate::prelude::*;
 use kaizen::error::program_error_code;
 use program::DataType;
-use program::Token;
+use program::Root;
 
 #[derive(Clone, Debug, Default, BorshSerialize, BorshDeserialize)]
 pub struct MintCreationArgs {
@@ -38,16 +38,24 @@ pub struct Mint<'info, 'refs> {
 }
 
 impl<'info, 'refs> Mint<'info, 'refs> {
-    pub fn init(&mut self, _ctx: &ContextReference, args: &MintCreationArgs) -> ProgramResult {
-        // set container version
-        let mut meta = self.meta.borrow_mut();
+    pub fn create(ctx: &ContextReference) -> ProgramResult {
+        let args = MintCreationArgs::try_from_slice(ctx.instruction_data)?;
+        let mut root = Root::try_load(&ctx.handler_accounts[0])?;
+
+        let (tpl_data, tpl_account_info) = ctx.try_consume_collection_template_address_data()?;
+        let mut mint =
+            root.mints
+                .try_create_container::<Mint>(ctx, tpl_data.seed, tpl_account_info, None)?;
+
+        let mut meta = mint.meta.borrow_mut();
         meta.set_version(1);
         meta.set_frozen(false);
         drop(meta);
-        // init token chain
-        self.tokens.try_create()?;
-        // update mint settings during init stage (meant to be schema only)
-        self.update_data(args)?;
+
+        mint.tokens.try_create()?;
+        mint.update_data(&args)?;
+
+        ctx.sync_rent(mint.account(), &RentCollector::default())?;
 
         Ok(())
     }
@@ -59,15 +67,6 @@ impl<'info, 'refs> Mint<'info, 'refs> {
         }
         let args = MintCreationArgs::try_from_slice(ctx.instruction_data)?;
         mint.update_data(&args)?;
-        Ok(())
-    }
-
-    pub fn freeze(ctx: &ContextReference) -> ProgramResult {
-        let mint = Mint::try_load(&ctx.handler_accounts[0])?;
-        if mint.meta.borrow().frozen {
-            return Err(program_error_code!(ErrorCode::AccessDenied));
-        }
-        mint.meta.borrow_mut().set_frozen(true);
         Ok(())
     }
 
@@ -89,30 +88,14 @@ impl<'info, 'refs> Mint<'info, 'refs> {
         Ok(())
     }
 
-    pub fn create_token(ctx: &ContextReference) -> ProgramResult {
-        let (tpl_data, tpl_account_info) = ctx.try_consume_collection_template_address_data()?;
-
-        let mut mint = Mint::try_load(&ctx.handler_accounts[0])?;
-
-        let mut token = mint.tokens.try_create_container::<Token>(
-            ctx,
-            tpl_data.seed,
-            tpl_account_info,
-            None,
-        )?;
-
-        token.init(ctx)?;
-
-        ctx.sync_rent(token.account(), &RentCollector::default())?;
-
+    pub fn freeze(ctx: &ContextReference) -> ProgramResult {
+        let mint = Mint::try_load(&ctx.handler_accounts[0])?;
+        if mint.meta.borrow().frozen {
+            return Err(program_error_code!(ErrorCode::AccessDenied));
+        }
+        mint.meta.borrow_mut().set_frozen(true);
         Ok(())
     }
 }
 
-declare_handlers!(
-    Mint::<'info, 'refs>,
-    [
-        // Mint::update,
-        Mint::create_token,
-    ]
-);
+declare_handlers!(Mint::<'info, 'refs>, [Mint::create, Mint::update,]);

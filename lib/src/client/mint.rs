@@ -22,7 +22,7 @@ impl Mint {
             .await?
             .ok_or_else(|| "Unable to load root container".to_string())?;
 
-        let builder = client::Root::execution_context_for(program::Root::create_mint)
+        let builder = client::Mint::execution_context_for(program::Mint::create)
             .with_authority(authority_pubkey)
             .with_collection_template(&root.mints)
             .await?
@@ -47,7 +47,7 @@ impl Mint {
         args: &MintCreationArgs,
         mint_pubkey: &Pubkey,
     ) -> Result<TransactionList> {
-        let builder = client::Root::execution_context_for(program::Root::create_mint)
+        let builder = client::Mint::execution_context_for(program::Mint::update)
             .with_authority(authority_pubkey)
             .with_handler_accounts(&[AccountMeta::new(*mint_pubkey, false)])
             .with_instruction_data(&args.try_to_vec()?)

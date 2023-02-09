@@ -2,7 +2,7 @@ use crate::{prelude::*, program::TokenCreationArgs};
 use kaizen::result::Result;
 
 pub struct Token;
-// declare_client!(program::Token, Token);
+declare_client!(program::Token, Token);
 
 impl Token {
     pub async fn create<'channel>(
@@ -14,7 +14,7 @@ impl Token {
             .await?
             .ok_or_else(|| "Unable to load mint container".to_string())?;
 
-        let builder = client::Mint::execution_context_for(program::Mint::create_token)
+        let builder = client::Token::execution_context_for(program::Token::create)
             .with_authority(authority_pubkey)
             .with_collection_template(&mint.tokens)
             .await?

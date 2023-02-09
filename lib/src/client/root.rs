@@ -41,7 +41,7 @@ impl Root {
         authority_pubkey: &Pubkey,
         args: &program::RootCreationArgs,
     ) -> Result<TransactionList> {
-        let builder = Root::execution_context_for(program::Root::create_root)
+        let builder = Root::execution_context_for(program::Root::create)
             .with_authority(authority_pubkey)
             .with_generic_account_templates_with_seeds(&[(AddressDomain::None, b"root")])
             .with_instruction_data(&args.try_to_vec()?)

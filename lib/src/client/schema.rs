@@ -90,9 +90,9 @@ impl Schema {
         }
     }
 
-    pub fn fields(&self) -> js_sys::Array{
-        let result = js_sys::Array::new();//self.fields.len() as u32);
-        for field in self.fields.clone(){
+    pub fn fields(&self) -> js_sys::Array {
+        let result = js_sys::Array::new(); //self.fields.len() as u32);
+        for field in self.fields.clone() {
             result.push(&field.into());
         }
         result
