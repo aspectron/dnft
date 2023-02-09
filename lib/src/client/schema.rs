@@ -6,9 +6,11 @@ use crate::program::*;
 pub type Description = String;
 pub type Name = String;
 
-#[derive(Debug, Clone, TryFromJsValue)]
+#[derive(Debug, Clone, TryFromJsValue, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 #[wasm_bindgen]
 pub struct Field {
+    #[serde(rename = "type")]
     data_type: DataType,
     name: String,
     description: String,
@@ -32,7 +34,7 @@ impl Field {
 
     #[wasm_bindgen(js_name="dataType")]
     pub fn data_type(&self) -> DataType {
-        self.data_type.clone()
+        self.data_type
     }
 
     #[wasm_bindgen]

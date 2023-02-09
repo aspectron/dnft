@@ -6,5 +6,5 @@ pub mod root;
 pub use root::*;
 pub mod mint;
 pub use mint::*;
-pub mod dnft;
-pub use dnft::*;
+pub mod token;
+pub use token::*;

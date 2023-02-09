@@ -28,6 +28,7 @@ js-sys = "0.3.61"
 kaizen = { path = "../kaizen" }
 num = "0.4.0"
 rand = "0.8.5"
+serde = { version = "1.0.152", features = ["derive"] }
 sha2 = "0.10.6"
 solana-program = "1.15.0"
 thiserror = "1.0.38"

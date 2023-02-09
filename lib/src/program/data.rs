@@ -8,6 +8,7 @@ pub enum Data {
     u16(u16),
     u32(u32),
     u64(u64),
+    u128(u128),
     i8(i8),
     i16(i16),
     i32(i32),
@@ -30,7 +31,7 @@ pub enum Data {
 
 u16_try_from! {
     #[allow(non_camel_case_types)]
-    #[derive(Debug, Clone, Copy, BorshSerialize, BorshDeserialize)]
+    #[derive(Debug, Clone, Copy, BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
     #[wasm_bindgen]
     #[repr(u16)]
     pub enum DataType {
@@ -39,6 +40,7 @@ u16_try_from! {
         u16,
         u32,
         u64,
+        u128,
         i8,
         i16,
         i32,
@@ -58,7 +60,7 @@ u16_try_from! {
 }
 
 #[cfg(not(target_os = "solana"))]
-impl fmt::Display for super::Data {
+impl fmt::Display for Data {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // use super::Data;
         match self {
@@ -75,6 +77,9 @@ impl fmt::Display for super::Data {
                 write!(f, "{v}")
             }
             Data::u64(v) => {
+                write!(f, "{v}")
+            }
+            Data::u128(v) => {
                 write!(f, "{v}")
             }
             Data::i8(v) => {

@@ -11,6 +11,7 @@ borsh-derive.workspace = true
 borsh.workspace = true
 cfg-if.workspace = true
 kaizen.workspace = true
+serde.workspace = true
 solana-program.workspace = true
 wasm-bindgen.workspace = true
 workflow-core.workspace = true

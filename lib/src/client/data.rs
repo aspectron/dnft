@@ -1,8 +1,9 @@
 use super::error::Error;
 use super::result::Result;
 use crate::prelude::*;
-use crate::program;
-use crate::program::DataType;
+// use crate::program;
+// use crate::program::DataType;
+use program::DataType;
 
 #[derive(Debug, Clone, TryFromJsValue)]
 #[wasm_bindgen]
