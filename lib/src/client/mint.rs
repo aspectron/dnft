@@ -117,7 +117,18 @@ impl Mint {
 
 mod wasm {
     use super::Mint;
+    use crate::client::Schema;
     use crate::prelude::*;
+
+    /// Create mint information/schema
+    #[wasm_bindgen(js_name = "createMint")]
+    pub async fn create_mint_data(schema: Schema) -> Result<Pubkey, JsValue> {
+        let pubkey = Transport::global()?.get_authority_pubkey()?;
+        let tx = Mint::create(&pubkey, &schema.into()).await?;
+        let mint_account_pubkey = tx.target_account()?;
+        tx.execute().await?;
+        Ok(mint_account_pubkey)
+    }
 
     /// Returns general mint information
     #[wasm_bindgen(js_name = "getMintData")]

@@ -4,8 +4,8 @@ pub mod tests {
     use crate::prelude::*;
     use kaizen::result::Result;
     use program::MintCreationArgs;
-    use workflow_log::style;
     use std::str::FromStr;
+    use workflow_log::style;
 
     const AUTHORITY: &str = "42bML5qB3WkMwfa2cosypjUrN7F2PLQm4qhxBdRDyW7f";
 
@@ -106,7 +106,7 @@ pub mod tests {
                 log_info!("creating token {mint_seq}:{token_seq}");
 
                 let mint_account_pubkey = mint_pubkeys.get(mint_seq).unwrap();
-                let mint_container = reload_container::<program::Mint>(&mint_account_pubkey)
+                let mint_container = reload_container::<program::Mint>(mint_account_pubkey)
                     .await?
                     .expect("¯\\_(ツ)_/¯");
 

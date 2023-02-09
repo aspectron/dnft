@@ -242,8 +242,8 @@ class App{
 
             console.log("fields[0]", fields[0].dataType(), fields[0].name(), fields[0].description())
             let schema = new this.dnft.Schema(fields)
-            let pubkey = await this.dnft.createDnftMint(schema);
-            console.log("create_dnft_mint: result", pubkey);
+            let pubkey = await this.dnft.createMint(schema);
+            console.log("createMint: result", pubkey);
 
             this.loadSchema(pubkey);
         })
@@ -285,8 +285,8 @@ class App{
         //fields = schema.fields();
         console.log("mintData: result", mintData);
 
-        //this.buildMintForm(fields);
-        //this.activateMintForm();
+        this.buildMintForm(mintData.schema);
+        this.activateMintForm();
     }
 
     initMintDnftPage(){
@@ -301,6 +301,7 @@ class App{
             if(!btn || !el)
                 return
             
+            /*
             //TODO get schema/fields
             const { Field, DataType, Data } = this.dnft;
 
@@ -315,17 +316,20 @@ class App{
 
             this.buildMintForm(fields);
             this.activateMintForm();
+            */
             
         })
     }
 
     activateTab(tab){
-
+        let tabEl = $(`#top-tabs [href='#${tab}']`);
+        tabEl?.show();
     }
 
     activateMintForm(){
         this.mintFormPanel.classList.add("is-active");
         this.schemaListPanel.classList.remove("is-active");
+        this.activateTab("mint-dnft");
     }
 
     buildMintForm(fields){
@@ -339,12 +343,12 @@ class App{
     }
 
     createFormField(field, attributes={}){
-        let type = this.dnft.DataType[field.dataType()];
+        let type = field.type;
 
-        console.log("createFormField: type", type )
+        console.log("createFormField: type", type)
         let createField = ()=>{
             if (type == "Bool"){
-                let checkbox = createCheckbox("ON", field.name());
+                let checkbox = createCheckbox("ON", field.name);
                 return checkbox
             }
         
@@ -362,7 +366,7 @@ class App{
             
             let label = document.createElement("label");
             label.setAttribute("class", "mdl-textfield__label");
-            label.innerHTML = field.name();
+            label.innerHTML = field.name;
 
             let error = document.createElement("span");
             error.setAttribute("class", "mdl-textfield__error");
@@ -401,7 +405,7 @@ class App{
         let fieldEl = createField();
         let info = document.createElement("div");
         info.setAttribute("class", "form-field__info-text");
-        info.innerHTML = field.description();
+        info.innerHTML = field.description;
         //let infoIcon = document.createElement("i");
         //infoIcon.setAttribute("class", "material-icons");
         //infoIcon.innerHTML = "info";

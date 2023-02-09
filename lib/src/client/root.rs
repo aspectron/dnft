@@ -85,10 +85,21 @@ impl Root {
 mod wasm {
     use super::Root;
     use crate::prelude::*;
+    use crate::program::RootCreationArgs;
 
     /// Returns a range of mint pubkeys for a specific mint
     #[wasm_bindgen(js_name = "getMintPubkeys")]
     pub async fn get_token_pubkeys(from: u64, to: u64) -> Result<JsValue, JsValue> {
         Ok(to_value(&Root::get_mint_pubkeys(from, to).await?).unwrap())
+    }
+
+    /// create root account
+    #[wasm_bindgen(js_name = "createRoot")]
+    pub async fn create_root() -> Result<Pubkey, JsValue> {
+        let pubkey = Transport::global()?.get_authority_pubkey()?;
+        let tx = Root::create(&pubkey, &RootCreationArgs {}).await?;
+        let root_pubkey = tx.target_account()?;
+        tx.execute().await?;
+        Ok(root_pubkey)
     }
 }
