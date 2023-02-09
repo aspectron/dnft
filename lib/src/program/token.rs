@@ -40,6 +40,7 @@ impl<'info, 'refs> Token<'info, 'refs> {
 
         let mut meta = token.meta.borrow_mut();
         meta.set_version(1);
+        meta.set_mint(*mint.pubkey());
         drop(meta);
 
         ctx.sync_rent(token.account(), &RentCollector::default())?;
