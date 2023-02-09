@@ -3,14 +3,14 @@
 //!
 
 use crate::prelude::*;
-use program::Token;
 use kaizen::error::program_error_code;
+use program::Token;
 
 #[derive(Clone, Debug, Default, BorshSerialize, BorshDeserialize)]
 pub struct MintCreationArgs {
-    pub schema : Option<program::Schema>,
-    pub names : Option<Vec<String>>,
-    pub descriptions : Option<Vec<String>>,
+    pub schema: Option<program::Schema>,
+    pub names: Option<Vec<String>>,
+    pub descriptions: Option<Vec<String>>,
 }
 
 // ~
@@ -37,7 +37,6 @@ pub struct Mint<'info, 'refs> {
 }
 
 impl<'info, 'refs> Mint<'info, 'refs> {
-
     pub fn init(&mut self, _ctx: &ContextReference, args: &MintCreationArgs) -> ProgramResult {
         // set container version
         let mut meta = self.meta.borrow_mut();
@@ -90,7 +89,6 @@ impl<'info, 'refs> Mint<'info, 'refs> {
     }
 
     pub fn create_token(ctx: &ContextReference) -> ProgramResult {
-
         let (tpl_data, tpl_account_info) = ctx.try_consume_collection_template_address_data()?;
 
         let mut mint = Mint::try_load(&ctx.handler_accounts[0])?;
@@ -110,7 +108,10 @@ impl<'info, 'refs> Mint<'info, 'refs> {
     }
 }
 
-declare_handlers!(Mint::<'info, 'refs>, [
-    // Mint::update,
-    Mint::create_token,
-    ]);
+declare_handlers!(
+    Mint::<'info, 'refs>,
+    [
+        // Mint::update,
+        Mint::create_token,
+    ]
+);

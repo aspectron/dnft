@@ -70,14 +70,14 @@ pub mod tests {
 
         log_info!("creating mint");
         let mut schema = program::Schema::default();
-        
+
         schema.push(program::DataType::u32);
         schema.push(program::DataType::u8);
         schema.push(program::DataType::String);
         schema.push(program::DataType::u64);
 
         let args = MintCreationArgs {
-            schema : Some(schema),
+            schema: Some(schema),
             ..MintCreationArgs::default()
         };
 

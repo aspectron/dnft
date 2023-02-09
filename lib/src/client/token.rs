@@ -10,7 +10,7 @@ impl Token {
         mint_pubkey: &Pubkey,
         args: &TokenCreationArgs,
     ) -> Result<TransactionList> {
-        let mint = reload_container::<program::Mint>(&mint_pubkey)
+        let mint = reload_container::<program::Mint>(mint_pubkey)
             .await?
             .ok_or_else(|| "Unable to load mint container".to_string())?;
 

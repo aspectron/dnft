@@ -23,8 +23,11 @@ declare_program!(
     ]
 );
 
-#[wasm_bindgen]
-pub fn dnft_program_id() -> Pubkey {
-    program_id()
+cfg_if! {
+    if #[cfg(not(target_os = "solana"))] {
+        #[wasm_bindgen]
+        pub fn dnft_program_id() -> Pubkey {
+            program_id()
+        }
+    }
 }
-

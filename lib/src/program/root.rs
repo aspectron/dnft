@@ -3,7 +3,7 @@
 //!
 
 use crate::prelude::*;
-use program::{Mint,MintCreationArgs};
+use program::{Mint, MintCreationArgs};
 
 #[derive(Clone, Debug, BorshSerialize, BorshDeserialize)]
 pub struct RootCreationArgs {}
