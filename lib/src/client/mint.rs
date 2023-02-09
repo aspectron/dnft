@@ -1,5 +1,14 @@
 use crate::{prelude::*, program::MintCreationArgs};
+use client::Field;
 use kaizen::result::Result;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MintData {
+    tokens: u64,
+    root: Pubkey,
+    frozen: bool,
+    schema: Vec<Field>,
+}
 
 pub struct Mint;
 declare_client!(program::Mint, Mint);
@@ -52,5 +61,73 @@ impl Mint {
         );
 
         Ok(TransactionList::new(vec![transaction]))
+    }
+
+    pub async fn get_data(pubkey: Pubkey) -> Result<MintData> {
+        let mint = load_container::<program::Mint>(&pubkey)
+            .await?
+            .ok_or_else(|| "Unable to load root container".to_string())?;
+
+        let data_types = mint.data_types.load()?;
+        let names = mint.names.load()?;
+        let descriptions = mint.descriptions.load()?;
+
+        let mut schema = Vec::<Field>::new();
+        for (idx, data_type) in data_types.iter().enumerate() {
+            let name = names
+                .get(idx)
+                .ok_or_else(|| error!("invalid mint schema range (name)"))?;
+            let description = descriptions
+                .get(idx)
+                .ok_or_else(|| error!("invalid mint schema range (description)"))?;
+            schema.push(Field::new(*data_type, name.clone(), description.clone()));
+        }
+
+        let meta = mint.meta.borrow();
+        Ok(MintData {
+            tokens: mint.tokens.len() as u64,
+            schema,
+            frozen: meta.get_frozen(),
+            root: meta.get_root(),
+        })
+    }
+
+    pub async fn get_token_pubkeys(pubkey: Pubkey, from: u64, to: u64) -> Result<Vec<Pubkey>> {
+        let mint = load_container::<program::Mint>(&pubkey)
+            .await?
+            .ok_or_else(|| "Unable to load root container".to_string())?;
+
+        let len = mint.tokens.len() as u64;
+
+        if from > len {
+            return Err(kaizen::error!(
+                "invalid token sequence range from: {from} but length is: {len}"
+            ));
+        }
+
+        let to = std::cmp::min(to, len);
+
+        let list = (from..to)
+            .map(|idx| mint.tokens.get_pubkey_at(&crate::program_id(), idx))
+            .collect::<std::result::Result<Vec<Pubkey>, _>>()?;
+
+        Ok(list)
+    }
+}
+
+mod wasm {
+    use super::Mint;
+    use crate::prelude::*;
+
+    /// Returns general mint information
+    #[wasm_bindgen(js_name = "getMintData")]
+    pub async fn get_mint_data(pubkey: Pubkey) -> Result<JsValue, JsValue> {
+        Ok(to_value(&Mint::get_data(pubkey).await?).unwrap())
+    }
+
+    /// Returns a range of token pubkeys for a specific mint
+    #[wasm_bindgen(js_name = "getTokenPubkeys")]
+    pub async fn get_token_pubkeys(pubkey: Pubkey, from: u64, to: u64) -> Result<JsValue, JsValue> {
+        Ok(to_value(&Mint::get_token_pubkeys(pubkey, from, to).await?).unwrap())
     }
 }

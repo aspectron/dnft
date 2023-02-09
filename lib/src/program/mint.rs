@@ -4,11 +4,12 @@
 
 use crate::prelude::*;
 use kaizen::error::program_error_code;
+use program::DataType;
 use program::Token;
 
 #[derive(Clone, Debug, Default, BorshSerialize, BorshDeserialize)]
 pub struct MintCreationArgs {
-    pub schema: Option<program::Schema>,
+    pub data_types: Option<Vec<DataType>>,
     pub names: Option<Vec<String>>,
     pub descriptions: Option<Vec<String>>,
 }
@@ -31,7 +32,7 @@ pub struct Mint<'info, 'refs> {
     #[collection(seed(b"token"), container(program::Token))]
     pub tokens: PdaCollection<'info, 'refs>,
     // ---
-    pub schema: Serialized<'info, 'refs, program::Schema>,
+    pub data_types: Serialized<'info, 'refs, Vec<DataType>>,
     pub names: Serialized<'info, 'refs, Vec<String>>,
     pub descriptions: Serialized<'info, 'refs, Vec<String>>,
 }
@@ -73,8 +74,8 @@ impl<'info, 'refs> Mint<'info, 'refs> {
     pub fn update_data(&mut self, args: &MintCreationArgs) -> ProgramResult {
         log_info!("Mint::update CTX: {:#?}", args);
 
-        if let Some(schema) = &args.schema {
-            self.schema.store(schema)?;
+        if let Some(data_types) = &args.data_types {
+            self.data_types.store(data_types)?;
         }
 
         if let Some(names) = &args.names {

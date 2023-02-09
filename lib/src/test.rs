@@ -69,10 +69,10 @@ pub mod tests {
         log_info!("root creation ok {}", root_container.pubkey());
 
         // ----------------------------------------------------------------------------
-        use program::MintCreationArgs;
+        use program::{DataType, MintCreationArgs};
 
         log_info!("creating mint");
-        let schema = vec![
+        let data_types = vec![
             program::DataType::u32,
             program::DataType::u8,
             program::DataType::String,
@@ -80,7 +80,7 @@ pub mod tests {
         ];
 
         let args = MintCreationArgs {
-            schema: Some(schema),
+            data_types: Some(data_types),
             ..MintCreationArgs::default()
         };
 
@@ -121,7 +121,7 @@ pub mod tests {
         let token_len = mint_container.tokens.len();
         log_info!("... tokens created: {token_len}");
 
-        let schema = mint_container.schema.load()?;
+        let schema = mint_container.data_types.load()?;
         log_info!("\n\nmint container schema: {:#?}\n", schema);
 
         Ok(())
@@ -181,7 +181,7 @@ pub mod tests {
         let key = mint_container.pubkey();
         log_info!("mint creation ok {}", key);
 
-        let data_types = mint_container.schema.load()?;
+        let data_types = mint_container.data_types.load()?;
         let names = mint_container.names.load()?;
         let descriptions = mint_container.descriptions.load()?;
         let mut fields = vec![];
