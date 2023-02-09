@@ -107,18 +107,18 @@ impl Schema {
 
 impl From<Schema> for MintCreationArgs {
     fn from(value: Schema) -> Self {
-        let mut schema = program::Schema::default();
+        let mut data_types = program::DataTypes::default();
         let mut names = vec![];
         let mut descriptions = vec![];
 
         for field in value.fields {
-            schema.push(field.data_type());
+            data_types.push(field.data_type());
             names.push(field.name());
             descriptions.push(field.description());
         }
 
         Self {
-            schema: Some(schema),
+            data_types: Some(data_types),
             names: Some(names),
             descriptions: Some(descriptions),
         }
