@@ -66,9 +66,21 @@ pub mod tests {
         log_info!("root creation ok {}", root_container.pubkey());
 
         // ----------------------------------------------------------------------------
+        use program::MintCreationArgs;
 
         log_info!("creating mint");
-        let args = program::MintCreationArgs {};
+        let mut schema = program::Schema::default();
+        
+        schema.push(program::DataType::u32);
+        schema.push(program::DataType::u8);
+        schema.push(program::DataType::String);
+        schema.push(program::DataType::u64);
+
+        let args = MintCreationArgs {
+            schema : Some(schema),
+            ..MintCreationArgs::default()
+        };
+
         let tx = client::Mint::create(&authority, &args).await?;
         let mint_account_pubkey = tx.target_account()?;
         tx.execute().await?;
@@ -105,6 +117,9 @@ pub mod tests {
 
         let token_len = mint_container.tokens.len();
         log_info!("... tokens created: {token_len}");
+
+        let schema = mint_container.schema.load()?;
+        log_info!("\n\nmint container schema: {:#?}\n", schema);
 
         Ok(())
     }

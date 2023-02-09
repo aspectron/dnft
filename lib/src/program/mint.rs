@@ -4,9 +4,14 @@
 
 use crate::prelude::*;
 use program::Token;
+use kaizen::error::program_error_code;
 
-#[derive(Clone, Debug, BorshSerialize, BorshDeserialize)]
-pub struct MintCreationArgs {}
+#[derive(Clone, Debug, Default, BorshSerialize, BorshDeserialize)]
+pub struct MintCreationArgs {
+    pub schema : Option<program::Schema>,
+    pub names : Option<Vec<String>>,
+    pub descriptions : Option<Vec<String>>,
+}
 
 // ~
 
@@ -15,6 +20,7 @@ pub struct MintCreationArgs {}
 pub struct MintMeta {
     version: u32,
     root: Pubkey,
+    frozen: bool,
 }
 
 #[container(Containers::Mint)]
@@ -24,28 +30,66 @@ pub struct Mint<'info, 'refs> {
     // ---
     #[collection(seed(b"token"), container(program::Token))]
     pub tokens: PdaCollection<'info, 'refs>,
-
+    // ---
     pub schema: Serialized<'info, 'refs, program::Schema>,
+    pub names: Serialized<'info, 'refs, Vec<String>>,
+    pub descriptions: Serialized<'info, 'refs, Vec<String>>,
 }
 
 impl<'info, 'refs> Mint<'info, 'refs> {
-    pub fn test(ctx: &ContextReference) -> ProgramResult {
-        log_info!("TestInterface::test_handler CTX: {:#?}", ctx);
+
+    pub fn init(&mut self, _ctx: &ContextReference, args: &MintCreationArgs) -> ProgramResult {
+        // set container version
+        let mut meta = self.meta.borrow_mut();
+        meta.set_version(1);
+        meta.set_frozen(false);
+        drop(meta);
+        // init token chain
+        self.tokens.try_create()?;
+        // update mint settings during init stage (meant to be schema only)
+        self.update_data(args)?;
 
         Ok(())
     }
 
-    pub fn init(&mut self, _ctx: &ContextReference) -> ProgramResult {
-        self.meta.borrow_mut().set_version(1);
-        self.tokens.try_create()?;
+    pub fn update(ctx: &ContextReference) -> ProgramResult {
+        let mut mint = Mint::try_load(&ctx.handler_accounts[0])?;
+        if mint.meta.borrow().frozen {
+            return Err(program_error_code!(ErrorCode::AccessDenied));
+        }
+        let args = MintCreationArgs::try_from_slice(ctx.instruction_data)?;
+        mint.update_data(&args)?;
+        Ok(())
+    }
 
-        // TODO - init mint data structure
+    pub fn freeze(ctx: &ContextReference) -> ProgramResult {
+        let mint = Mint::try_load(&ctx.handler_accounts[0])?;
+        if mint.meta.borrow().frozen {
+            return Err(program_error_code!(ErrorCode::AccessDenied));
+        }
+        mint.meta.borrow_mut().set_frozen(true);
+        Ok(())
+    }
+
+    pub fn update_data(&mut self, args: &MintCreationArgs) -> ProgramResult {
+        log_info!("Mint::update CTX: {:#?}", args);
+
+        if let Some(schema) = &args.schema {
+            self.schema.store(schema)?;
+        }
+
+        if let Some(names) = &args.names {
+            self.names.store(names)?;
+        }
+
+        if let Some(descriptions) = &args.descriptions {
+            self.descriptions.store(descriptions)?;
+        }
 
         Ok(())
     }
 
     pub fn create_token(ctx: &ContextReference) -> ProgramResult {
-        // msg!("TestInterface::test_handler CTX: {:#?}", ctx);
 
         let (tpl_data, tpl_account_info) = ctx.try_consume_collection_template_address_data()?;
 
@@ -66,4 +110,7 @@ impl<'info, 'refs> Mint<'info, 'refs> {
     }
 }
 
-declare_handlers!(Mint::<'info, 'refs>, [Mint::test, Mint::create_token,]);
+declare_handlers!(Mint::<'info, 'refs>, [
+    // Mint::update,
+    Mint::create_token,
+    ]);

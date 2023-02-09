@@ -3,7 +3,7 @@
 //!
 
 use crate::prelude::*;
-use program::Mint;
+use program::{Mint,MintCreationArgs};
 
 #[derive(Clone, Debug, BorshSerialize, BorshDeserialize)]
 pub struct RootCreationArgs {}
@@ -48,6 +48,8 @@ impl<'info, 'refs> Root<'info, 'refs> {
     pub fn create_mint(ctx: &ContextReference) -> ProgramResult {
         // msg!("TestInterface::test_handler CTX: {:#?}", ctx);
 
+        let args = MintCreationArgs::try_from_slice(ctx.instruction_data)?;
+
         let (tpl_data, tpl_account_info) = ctx.try_consume_collection_template_address_data()?;
 
         let mut root = Root::try_load(&ctx.handler_accounts[0])?;
@@ -56,7 +58,7 @@ impl<'info, 'refs> Root<'info, 'refs> {
             root.mints
                 .try_create_container::<Mint>(ctx, tpl_data.seed, tpl_account_info, None)?;
 
-        mint.init(ctx)?;
+        mint.init(ctx, &args)?;
 
         ctx.sync_rent(mint.account(), &RentCollector::default())?;
 
