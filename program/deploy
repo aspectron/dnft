@@ -1,1 +1,1 @@
-solana program deploy ../target/deploy/dynamic_nft_program.so --program-id ../keys/keypair.json
+solana program deploy ../target/deploy/dnft_program.so --program-id ../keys/keypair.json

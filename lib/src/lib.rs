@@ -18,7 +18,7 @@ use crate::prelude::*;
 
 declare_program!(
     "dnft",
-    "DeQU1vwCQZjnVEuzviqd8wo7nU7uKgDQJz1D1XHEiYV1",
+    "5UAQGzYRWKEgdbpZCqoUjKDKiWpNbHeataWknRpvswEH",
     [program::Root, program::Mint, program::Token,]
 );
 

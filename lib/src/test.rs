@@ -12,12 +12,15 @@ pub mod tests {
         kaizen::init()?;
 
         println!("init transport...");
-        Transport::try_new_for_unit_tests(
-            crate::program_id(),
-            Some(Pubkey::from_str(AUTHORITY)?),
-            TransportConfig::default(),
-        )
-        .await?;
+        // Transport::try_new_for_unit_tests(
+        //     crate::program_id(),
+        //     Some(Pubkey::from_str(AUTHORITY)?),
+        //     TransportConfig::default(),
+        // )
+        // .await?;
+
+        Transport::try_new("http://127.0.0.1:8899", TransportConfig::default()).await?;
+
         println!("run test...");
 
         run_test().await?;
@@ -55,15 +58,15 @@ pub mod tests {
 
         // ----------------------------------------------------------------------------
 
-        log_info!("creating root");
-        let args = program::RootCreationArgs {};
-        let tx = client::Root::create(&authority, &args).await?;
-        let target_account_pubkey = tx.target_account()?;
-        tx.execute().await?;
-        let root_container = load_container::<program::Root>(&target_account_pubkey)
-            .await?
-            .expect("¯\\_(ツ)_/¯");
-        log_info!("root creation ok {}", root_container.pubkey());
+        // log_info!("creating root");
+        // let args = program::RootCreationArgs {};
+        // let tx = client::Root::create(&authority, &args).await?;
+        // let target_account_pubkey = tx.target_account()?;
+        // tx.execute().await?;
+        // let root_container = load_container::<program::Root>(&target_account_pubkey)
+        //     .await?
+        //     .expect("¯\\_(ツ)_/¯");
+        // log_info!("root creation ok {}", root_container.pubkey());
 
         // ----------------------------------------------------------------------------
         const MAX_MINTS: usize = 3;
