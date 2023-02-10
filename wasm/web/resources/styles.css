@@ -62,23 +62,40 @@ h1, h2, h3, h4 {
 #add-field-dialog .mdl-dialog__actions{
   padding:15px 24px 8px 24px
 }
-td[contenteditable]{
-  position:relative;
+.edit-container:hover,
+.edit-container:focus-visible,
+.edit-container:focus,
+.edit-container:focus-within{
+  background-color: #FFF;
 }
-td[contenteditable]:focus-visible,
-td[contenteditable]:hover{
+.editable{
+  position:relative;
+  padding:4px 0;
+}
+.editable:focus-visible,
+.editable:hover{
   outline:none;
   background-color: #FFF;
-  border-bottom-color: #512da9;
 }
-td[contenteditable]:focus-visible:after,
-td[contenteditable]:hover:after{
-  position:absolute;
+
+.editable:after{
+  background-color: rgb(103,58,183);
   bottom:0px;
-  right:0px;
-  left:0px;
-  content:"";
-  border-bottom: 1px solid #512da9;
+  content: '';
+  height: 2px;
+  left: 45%;
+  position: absolute;
+  transition-duration: .2s;
+  transition-timing-function: cubic-bezier(.4,0,.2,1);
+  visibility: hidden;
+  width: 10px;
+  font-size:0px;
+}
+.editable:focus-visible:after,
+.editable:hover:after{
+  visibility:visible;
+  left:0;
+  width:100%;
 }
 .sortable-list>tr:first-child [data-action="move-up"],
 .sortable-list>tr:last-child [data-action="move-down"]{
@@ -108,16 +125,30 @@ td[contenteditable]:hover:after{
   height:50px;
   line-height:50px;
 }
-.mdl-data-table{
-  font-size: 1.4rem;
-}
-.mdl-data-table th{
+
+.mdl-button,
+.mdl-layout__container,
+.mdl-data-table,
+.mdl-data-table th,
+.mdl-textfield--floating-label.is-invalid .mdl-textfield__label,
+.mdl-textfield--floating-label.is-focused .mdl-textfield__label,
+.mdl-textfield--floating-label.is-dirty .mdl-textfield__label,
+.mdl-textfield--floating-label.has-placeholder .mdl-textfield__label{
   font-size: 1.4rem;
 }
 
 .mdl-data-table .mdl-data-table__cell--wrap-text{
   white-space:normal;
   text-align: left;
+}
+
+.form-panel{
+  padding:20px;
+  border: 1px solid rgba(0,0,0,.12);
+}
+.form-panel .form-field--with-info{
+  padding-top:7px;
+  padding-bottom:7px;
 }
 
 /*

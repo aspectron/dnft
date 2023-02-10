@@ -11,11 +11,14 @@ pub mod containers;
 pub mod error;
 pub mod program;
 
+#[cfg(not(target_os = "solana"))]
+pub mod wallet;
+
 use crate::prelude::*;
 
 declare_program!(
     "dnft",
-    "5UAQGzYRWKEgdbpZCqoUjKDKiWpNbHeataWknRpvswEH",
+    "DeQU1vwCQZjnVEuzviqd8wo7nU7uKgDQJz1D1XHEiYV1",
     [program::Root, program::Mint, program::Token,]
 );
 

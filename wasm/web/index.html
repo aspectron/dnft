@@ -55,18 +55,25 @@
     <link rel="stylesheet" href="resources/fonts/blender-pro/stylesheet.css">
     <link rel="stylesheet" href="resources/styles.css">
     <script src="resources/js/app.js"></script>
+    <script src="/static/node_modules/@solana/web3.js/lib/index.iife.js"></script>
     <script type="module">
       import * as dnft from './dnft/dnft.js';
       (async () => {
+          let {PhantomWalletAdapter, WalletReadyState} = await import("/static/solana.js");
           const wasm = await dnft.default('./dnft/dnft_bg.wasm');
           
           dnft.init_console_panic_hook();
           console.log("init kaizen");
-          dnft.init_kaizen(dnft,{},{});
+          //dnft.init_kaizen(dnft,{},{});
+          dnft.init_kaizen(dnft, solanaWeb3, {PhantomWalletAdapter, WalletReadyState});
           let program_id = dnft.dnft_program_id();
           let authority = new dnft.Pubkey("42bML5qB3WkMwfa2cosypjUrN7F2PLQm4qhxBdRDyW7f");
           console.log("program_id: ",program_id, "authority: ",authority);
-          let transport = await dnft.Transport.InProcUnitTests(program_id,authority);
+          console.dir(dnft)
+          //let transport = await dnft.Transport.InProcUnitTests(program_id,authority);
+          let transport = new dnft.Transport("http://localhost:8899");
+          console.log("transport", transport)
+          await dnft.connectWallet();
           console.log("init kaizen done");
           await dnft.createRoot();
           //let a = dnft.check_f64_number("-1.7976931348623158e+308");
@@ -92,14 +99,59 @@
       </header>
       <main class="mdl-layout__content">
         <div class="mdl-layout__tab-panel" id="browse">
-          browse
+          <div class="main-container no-records" id="browse-main-container">
+            <h2>Select DNFT MINT (Schema)</h2>
+            <table width="100%" class="mdl-data-table">
+              <thead>
+                <tr>
+                  <th class="mdl-data-table__cell--non-numeric" width="30%">Name</th>
+                  <th class="mdl-data-table__cell--non-numeric" width="65%">Description</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="schema-list">
+                <tr class="schema-item">
+                  <td class="mdl-data-table__cell--non-numeric">DNFT 1</td>
+                  <td class="mdl-data-table__cell--wrap-text">
+                    <p>
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                      Cras eu tincidunt magna. Donec molestie placerat augue.
+                      Aliquam lobortis nulla nibh, ultricies tincidunt felis
+                      pharetra nec. Sed vehicula at lectus sed gravida.
+                    </p>
+                  </td>
+                  <td>
+                    <button class="mdl-button mint-dnft">
+                      Mint it
+                    </button>
+                  </td>
+                </tr>
+                <tr class="schema-item">
+                  <td class="mdl-data-table__cell--non-numeric">DNFT 2</td>
+                  <td class="mdl-data-table__cell--wrap-text">
+                    <p>
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                      Cras eu tincidunt magna. Donec molestie placerat augue.
+                      Aliquam lobortis nulla nibh, ultricies tincidunt felis
+                      pharetra nec. Sed vehicula at lectus sed gravida.
+                    </p>
+                  </td>
+                  <td>
+                    <button class="mdl-button mint-dnft">
+                      Mint it
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
         <div class="mdl-layout__tab-panel is-active" id="create-dnft">
           <div class="main-container no-fields" id="create-dnft-main-container">
             <h2>Create DNFT MINT</h2>
 
             <div class="add-field-msg">
-              <button class="add-field-btn mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+              <button class="add-field-btn mdl-button mdl-button--big mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
                 Add fields
               </button>
             </div>
@@ -195,8 +247,8 @@
                 <table width="100%" class="mdl-data-table">
                   <thead>
                     <tr>
-                      <th> </th>
-                      <th class="mdl-data-table__cell--non-numeric" width="20%">Data Type</th>
+                      <!--th> </th-->
+                      <th class="mdl-data-table__cell--non-numeric" width="30%">Data Type</th>
                       <th class="mdl-data-table__cell--non-numeric" width="70%">Description</th>
                     </tr>
                   </thead>
@@ -205,9 +257,9 @@
                 </table>
               </div>
               <div class="mdl-dialog__actions">
-                <button class="mdl-button mdl-js-button add-fields mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                <!--button class="mdl-button mdl-js-button add-fields mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
                   Add
-                </button>
+                </button-->
                 <button type="button" class="mdl-button close-dialog">Close</button>
               </div>
             </dialog>
@@ -215,67 +267,15 @@
         </div>
         <div class="mdl-layout__tab-panel" id="mint-dnft">
           <div class="main-container" id="mint-dnft-main-container">
-            <div class="mdl-tabs mdl-js-tabs">
-              <div class="mdl-tabs__tab-bar">
-                <a href="#schema-list-panel" class="mdl-tabs__tab is-active">Select DNFT MINT (Schema)</a>
-                <a href="#mint-form-panel" class="mdl-tabs__tab">Mint DNFT</a>
-              </div>
-              <div class="mdl-tabs__panel is-active" id="schema-list-panel">
-                <h2>Select DNFT MINT (Schema)</h2>
-                <table width="100%" class="mdl-data-table">
-                  <thead>
-                    <tr>
-                      <th class="mdl-data-table__cell--non-numeric" width="30%">Name</th>
-                      <th class="mdl-data-table__cell--non-numeric" width="65%">Description</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody id="schema-list">
-                    <tr class="schema-item">
-                      <td class="mdl-data-table__cell--non-numeric">DNFT 1</td>
-                      <td class="mdl-data-table__cell--wrap-text">
-                        <p>
-                          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                          Cras eu tincidunt magna. Donec molestie placerat augue.
-                          Aliquam lobortis nulla nibh, ultricies tincidunt felis
-                          pharetra nec. Sed vehicula at lectus sed gravida.
-                        </p>
-                      </td>
-                      <td>
-                        <button class="mdl-button mint-dnft">
-                          Mint it
-                        </button>
-                      </td>
-                    </tr>
-                    <tr class="schema-item">
-                      <td class="mdl-data-table__cell--non-numeric">DNFT 2</td>
-                      <td class="mdl-data-table__cell--wrap-text">
-                        <p>
-                          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                          Cras eu tincidunt magna. Donec molestie placerat augue.
-                          Aliquam lobortis nulla nibh, ultricies tincidunt felis
-                          pharetra nec. Sed vehicula at lectus sed gravida.
-                        </p>
-                      </td>
-                      <td>
-                        <button class="mdl-button mint-dnft">
-                          Mint it
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <div class="mdl-tabs__panel" id="mint-form-panel">
+              <div id="mint-form-panel">
                 <h2 id="mint-form-title">Mint DNFT</h2>
-                <div id="mint-form-fields"></div>
+                <div id="mint-form-fields" class="mdl-shadow--2dp form-panel"></div>
                 <div class="action-bar">
                   <button id="mint-dnft-btn" class="mdl-button mdl-js-button mdl-button--big mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
                     Mint DNFT
                   </button>
                 </div>
               </div>
-            </div>
           </div>
         </div>
         <footer class="mdl-mega-footer">

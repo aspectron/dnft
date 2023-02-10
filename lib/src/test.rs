@@ -1,6 +1,5 @@
 #[cfg(not(target_os = "solana"))]
 pub mod tests {
-    use crate::client::schema::Schema;
     use crate::prelude::*;
     use kaizen::result::Result;
     use program::MintCreationArgs;
@@ -159,6 +158,7 @@ pub mod tests {
         Ok(())
     }
 
+    /*
     #[wasm_bindgen(js_name = "createDnftMint")]
     pub async fn create_dnft_mint(schema: Schema) -> Result<Pubkey> {
         let transport = Transport::global()?;
@@ -204,4 +204,5 @@ pub mod tests {
 
         Ok(*key)
     }
+    */
 }
