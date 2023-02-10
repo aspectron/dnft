@@ -60,7 +60,7 @@ impl Root {
     }
 
     pub async fn get_mint_pubkeys(from: u64, to: u64) -> Result<Vec<Pubkey>> {
-        let root = load_container::<program::Root>(&Root::pubkey())
+        let root = reload_container::<program::Root>(&Root::pubkey())
             .await?
             .ok_or_else(|| "Unable to load root container".to_string())?;
 
@@ -89,8 +89,13 @@ mod wasm {
 
     /// Returns a range of mint pubkeys for a specific mint
     #[wasm_bindgen(js_name = "getMintPubkeys")]
-    pub async fn get_token_pubkeys(from: u64, to: u64) -> Result<JsValue, JsValue> {
-        Ok(to_value(&Root::get_mint_pubkeys(from, to).await?).unwrap())
+    pub async fn get_mint_pubkeys(from: u64, to: u64) -> Result<js_sys::Array, JsValue> {
+        let keys = Root::get_mint_pubkeys(from, to).await?;
+        let result = js_sys::Array::new(); //self.fields.len() as u32);
+        for key in keys {
+            result.push(&key.into());
+        }
+        Ok(result)
     }
 
     /// create root account
