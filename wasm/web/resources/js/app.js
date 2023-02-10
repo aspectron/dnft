@@ -97,8 +97,18 @@ class App{
     }
 
     init(){
+        this.initBrowsePage();
         this.initCreateDnftForm();
         this.initMintDnftPage();
+    }
+
+    async initBrowsePage(){
+        this.refreshBrowsePage();
+    }
+
+    async refreshBrowsePage(){
+        let result = await this.dnft.getMintPubkeys(0n, 100n);
+        console.log("getMintPubkeys: ", result)
     }
 
     initCreateDnftForm(){
@@ -262,6 +272,7 @@ class App{
             let schema = new this.dnft.Schema(fields)
             let pubkey = await this.dnft.createMint(schema);
             console.log("createMint: result", pubkey);
+            this.refreshBrowsePage();
 
             this.loadSchema(pubkey);
         })
@@ -309,7 +320,7 @@ class App{
 
     initMintDnftPage(){
         let schemaListEl = $("#schema-list");
-        this.schemaListPanel = $("#schema-list-panel");
+        this.schemaListPanel = $("#browse-main-container");
         this.mintFormPanel = $("#mint-form-panel");
         this.mintFormFieldsEl = $("#mint-form-fields");
 
@@ -345,8 +356,6 @@ class App{
     }
 
     activateMintForm(){
-        this.mintFormPanel.classList.add("is-active");
-        this.schemaListPanel.classList.remove("is-active");
         this.activateTab("mint-dnft");
     }
 
