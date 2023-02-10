@@ -11,28 +11,34 @@ pub mod tests {
     async fn example_test() -> Result<()> {
         kaizen::init()?;
 
-        println!("init transport...");
-        // Transport::try_new_for_unit_tests(
-        //     crate::program_id(),
-        //     Some(Pubkey::from_str(AUTHORITY)?),
-        //     TransportConfig::default(),
-        // )
-        // .await?;
+        const USE_EMULATOR: bool = true;
 
-        Transport::try_new("http://127.0.0.1:8899", TransportConfig::default()).await?;
+        println!("init transport...");
+        let transport = if USE_EMULATOR{
+            Transport::try_new_for_unit_tests(
+                crate::program_id(),
+                Some(Pubkey::from_str(AUTHORITY)?),
+                TransportConfig::default(),
+            )
+            .await?
+        }else{
+            Transport::try_new("http://127.0.0.1:8899", TransportConfig::default()).await?
+        };
 
         println!("run test...");
 
         run_test().await?;
 
         log_info!("");
-        Transport::global()?
-            .simulator()
-            .store
-            .list()
-            .await?
-            .to_log();
-        log_info!("");
+        if transport.mode().is_emulator(){
+            transport
+                .simulator()
+                .store
+                .list()
+                .await?
+                .to_log();
+            log_info!("");
+        }
 
         log_trace!("all looks good ... 😎");
 
@@ -57,16 +63,19 @@ pub mod tests {
         let authority = transport.get_authority_pubkey()?;
 
         // ----------------------------------------------------------------------------
-
-        // log_info!("creating root");
-        // let args = program::RootCreationArgs {};
-        // let tx = client::Root::create(&authority, &args).await?;
-        // let target_account_pubkey = tx.target_account()?;
-        // tx.execute().await?;
-        // let root_container = load_container::<program::Root>(&target_account_pubkey)
-        //     .await?
-        //     .expect("¯\\_(ツ)_/¯");
-        // log_info!("root creation ok {}", root_container.pubkey());
+        let root = reload_container::<program::Root>(&client::Root::pubkey())
+            .await?;
+        if root.is_none(){
+            log_info!("creating root");
+            let args = program::RootCreationArgs {};
+            let tx = client::Root::create(&authority, &args).await?;
+            let target_account_pubkey = tx.target_account()?;
+            tx.execute().await?;
+            let root_container = load_container::<program::Root>(&target_account_pubkey)
+                .await?
+                .expect("¯\\_(ツ)_/¯");
+            log_info!("root creation ok {}", root_container.pubkey());
+        }
 
         // ----------------------------------------------------------------------------
         const MAX_MINTS: usize = 3;
