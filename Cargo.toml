@@ -12,7 +12,7 @@ version = "0.1.0"
 authors = ["Anton Yemelyanov <anton.yemelyanov@gmail.com>", "Surinder Singh Matoo Mattaur <surinder83singh@gmail.com>"]
 license = "MIT OR Apache-2.0"
 edition = "2021"
-repository = "https://github.com/aspectron/dynamic-nft"
+repository = "https://github.com/aspectron/dnft"
 
 
 [workspace.dependencies]
