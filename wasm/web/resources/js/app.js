@@ -270,11 +270,17 @@ class App{
 
             console.log("fields[0]", fields[0].dataType(), fields[0].name(), fields[0].description())
             let schema = new this.dnft.Schema(fields)
-            let pubkey = await this.dnft.createMint(schema);
-            console.log("createMint: result", pubkey);
-            this.refreshBrowsePage();
+            let pubkey = await this.dnft.createMint(schema)
+            .catch(err=>{
+                console.log("Unable to create MINT: ", err);
+            })
 
-            this.loadSchema(pubkey);
+            if(pubkey){
+                console.log("createMint: result", pubkey, pubkey.toString());
+                this.refreshBrowsePage();
+
+                this.loadSchema(pubkey);
+            }
         })
         
 

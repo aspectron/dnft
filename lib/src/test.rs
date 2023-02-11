@@ -11,7 +11,7 @@ pub mod tests {
     async fn example_test() -> Result<()> {
         kaizen::init()?;
 
-        const USE_EMULATOR: bool = true;
+        const USE_EMULATOR: bool = false;
 
         println!("init transport...");
         let transport = if USE_EMULATOR{
