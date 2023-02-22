@@ -96,10 +96,52 @@ class App{
         this.init();
     }
 
-    init(){
+    async init(){
+        await this.initApp();
         this.initBrowsePage();
         this.initCreateDnftForm();
         this.initMintDnftPage();
+
+        this.setLoading(false);
+    }
+
+    async initApp(){
+        this.dnftApp = await new this.dnft.Application("dnft-store-name");
+        this.dnftApp.onWalletConnect(this.onWalletConnect.bind(this));
+
+        let layoutEl = $(".mdl-js-layout");
+        layoutEl.addEventListener("mdl-componentupgraded", this.afterLayoutReady.bind(this));
+        if (layoutEl.classList.contains("is-upgraded")){
+            await this.afterLayoutReady();
+        }
+        let connectBtn = $("#wallet-connect");
+        connectBtn.addEventListener("click", async ()=>{
+            await this.dnftApp.connectWallet();
+        });
+        
+    }
+
+    async afterLayoutReady(){
+        let connected = await this.dnftApp.checkWalletState();
+        if (!connected){
+            //$(".wallet-connect-container").classList.remove("connected");
+        }
+    }
+
+    onWalletConnect(key){
+        console.log("wallet-connected ::: ####", key);
+        console.log("wallet-connected ::: #### pubkey: ", key.toString());
+        $("#wallet-pubkey").innerHTML = key.toString();
+        $(".wallet-connect-container").classList.add("connected");
+        console.log($(".wallet-connect-container"))
+    }
+
+    setLoading(loading){
+        if(loading){
+            document.body.classList.add("loading")
+        }else{
+            document.body.classList.remove("loading")
+        }
     }
 
     async initBrowsePage(){

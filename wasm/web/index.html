@@ -56,7 +56,7 @@
         top:0px;left:0px;bottom:0px;right:0px;
         width:100vw;height:100%;z-index:1000;
         background:center no-repeat url("/resources/images/loading.svg");
-        background-size:100px;/*pointer-events:none;*/
+        background-size:100px;pointer-events:none;
         z-index:10000;
       }
       body.loading>.mdl-layout__container,
@@ -64,6 +64,7 @@
       body.loading:after,
       body:not(.loading)>.mdl-layout__container,
       body:not(.loading)>.mdl-layout{opacity:1}
+      body.loading:after{pointer-events:initial;}
     </style>
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en">
@@ -90,13 +91,6 @@
           //let transport = await dnft.Transport.InProcUnitTests(program_id,authority);
           let transport = new dnft.Transport("http://localhost:8899");
           console.log("transport", transport)
-          let dnftApp = await new dnft.Application("dnft-store-name");
-          console.log("dnftApp", dnftApp)
-          await dnftApp.checkWalletState();
-          dnftApp.onWalletConnect(()=>{
-            console.log("wallet-connected :::");
-          })
-          await dnftApp.connectWallet();
           console.log("init kaizen done");
 
           //await dnft.createRoot();
@@ -114,6 +108,17 @@
       <header class="mdl-layout__header mdl-layout__header--fixed mdl-color--primary">
         <div class="mdl-layout--large-screen-only mdl-layout__header-row">
           <h3>Dynamic NFT</h3>
+          <div class="mdl-layout-spacer"></div>
+          <div class="wallet-connect-container">
+            <div class="connect-btn">
+              <button id="wallet-connect" class="mdl-button mdl-button--big mdl-js-button mdl-button--raised mdl-button--accent">Connect Wallet</button>
+            </div>
+            <div class="connected-msg">
+              <!--button id="wallet-disconnect" class="mdl-button mdl-button--big mdl-js-button mdl-button--raised mdl-button--accent">Disconnect Wallet</button-->
+              <div>Connected</div>
+              <div id="wallet-pubkey"></div>
+            </div>
+          </div>
         </div>
         <div id="top-tabs" class="mdl-layout__tab-bar mdl-js-ripple-effect mdl-color--primary-dark">
             <a href="#browse" class="mdl-layout__tab">Browse Mints</a>

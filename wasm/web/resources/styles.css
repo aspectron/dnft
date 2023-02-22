@@ -444,3 +444,8 @@ td.actions .material-icons{
 .mdl-dnft .page-content{
   padding:50px 20px;
 }
+
+.wallet-connect-container:not(.connected) .connected-msg,
+.wallet-connect-container.connected .connect-btn{
+  display:none;
+}

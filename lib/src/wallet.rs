@@ -1,14 +1,13 @@
 use borsh::{BorshSerialize, BorshDeserialize};
 use kaizen::wallet::foreign::*;
-//use kaizen::wasm::adapters;
 use wasm_bindgen::prelude::*;
 use crate::client::result::Result;
 use workflow_log::log_trace;
 use workflow_store::Store;
 use std::sync::{Arc,Mutex};
 use workflow_wasm::prelude::*;
-
-//static mut STORE_NAME:Option<String> = None;
+use kaizen::prelude::Pubkey;
+//use kaizen::transport::Transport;
 
 static mut APPLICATION:Option<Application> = None;
 
@@ -24,6 +23,7 @@ pub struct Application{
 
 #[wasm_bindgen]
 impl Application{
+
     #[wasm_bindgen(constructor)]
     pub async fn new(store_name: &str)->Self{
         let data = match StoreData::get(store_name).await{
@@ -45,9 +45,9 @@ impl Application{
 
     #[wasm_bindgen(js_name="onWalletConnect")]
     pub fn on_wallet_connect(&self, callback: js_sys::Function) -> Result<()>{
-        let callback_ = callback!(move ||{
+        let callback_ = callback!(move |pubkey:Pubkey|{
             let this = JsValue::null();
-            let _ = callback.call0(&this);
+            let _ = callback.call1(&this, &pubkey.into());
         });
 
         self.connect_callbacks.retain(callback_)?;
@@ -60,10 +60,28 @@ impl Application{
         let adapters = Self::get_adapter_list().await?;
         for adapter in adapters{
             if adapter.detected{
-                self.connect(adapter).await?;
+                match self.connect(adapter).await{
+                    Ok(_)=>{
+
+                    }
+                    Err(err)=>{
+                        if err.to_string().contains("User rejected"){
+                            self.set_wallet_auto_connect(false).await?;
+                        }
+
+                        return Err(err)
+                    }
+                }
             }
         }
 
+        Ok(())
+    }
+
+    async fn set_wallet_auto_connect(&self, auto_connect:bool)->Result<()>{
+        let mut data = self.data.lock()?;
+        data.wallet_auto_connect = auto_connect;
+        data.save(&self.store_name).await?;
         Ok(())
     }
 
@@ -84,12 +102,16 @@ impl Application{
     async fn connect(&self, adapter: Adapter)->Result<()>{
         let wallet = Wallet::try_new()?;
         wallet.connect(Some(adapter)).await?;
+
         let mut data = self.data.lock()?;
         data.wallet_auto_connect = true;
         data.save(&self.store_name).await?;
+        //let transport = Transport::global()?;
+        //let pubkey = transport.wallet();
+        let pubkey = wallet.pubkey()?;
 
         for (_id, callback) in self.connect_callbacks.inner().iter(){
-            let _ = callback.get_fn().call0(&JsValue::null());
+            let _ = callback.get_fn().call1(&JsValue::null(), &pubkey.into());
         }
     
         Ok(())
@@ -100,20 +122,6 @@ impl Application{
 
         Ok(wallet.get_adapter_list().await?.unwrap_or(vec![]))
     }
-    
-    /*
-    #[wasm_bindgen(js_name="setStoreName")]
-    pub fn set_store_name(&self, store_name: &str)->Result<()>{
-        *self.store_name.lock()? =  store_name.to_string();
-        Ok(())
-    }
-
-    #[wasm_bindgen(js_name="getStoreName")]
-    pub fn store_name(&self)->Result<String>{
-        Ok(self.store_name.lock()?.clone())
-    }
-    */
-
 
 }
 
@@ -121,9 +129,6 @@ impl Application{
 #[derive(Debug, BorshDeserialize, BorshSerialize)]
 struct StoreData{
     pub wallet_auto_connect: bool,
-
-    //#[borsh_skip]
-    //_store_name: String
 }
 
 impl StoreData{
