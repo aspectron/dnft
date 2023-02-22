@@ -149,8 +149,13 @@ class App{
     }
 
     async refreshBrowsePage(){
-        let result = await this.dnft.getMintPubkeys(0n, 100n);
-        console.log("getMintPubkeys: ", result)
+        let pubkeys = await this.dnft.getMintPubkeys(0n, 100n);
+        console.log("getMintPubkeys: ", pubkeys)
+        for (let pubkey of pubkeys){
+            console.log("pubkey", pubkey.toString())
+            let data = await this.dnft.getMintData(pubkey);
+            console.log("pubkey data", data);
+        }
     }
 
     initCreateDnftForm(){

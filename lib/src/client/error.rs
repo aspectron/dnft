@@ -1,9 +1,9 @@
-use thiserror::Error;
-use wasm_bindgen::prelude::*;
-use workflow_store::error::Error as StoreError;
 use kaizen::error::Error as KaizenError;
 use std::io::Error as IOError;
 use std::sync::PoisonError;
+use thiserror::Error;
+use wasm_bindgen::prelude::*;
+use workflow_store::error::Error as StoreError;
 use workflow_wasm::callback::CallbackError;
 
 #[derive(Error, Debug)]
