@@ -1,6 +1,7 @@
 use crate::client::result::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
 use kaizen::prelude::Pubkey;
+use kaizen::utils::shorten_pubkey_str as shorten_pubkey_str_impl;
 use kaizen::wallet::foreign::*;
 use std::sync::{Arc, Mutex};
 use wasm_bindgen::prelude::*;
@@ -162,4 +163,9 @@ impl StoreData {
         store.with_generic(&format!("~/.{name}"));
         store
     }
+}
+
+#[wasm_bindgen(js_name = "shortenPubkey")]
+pub fn shorten_pubkey(pubkey: &str) -> String {
+    shorten_pubkey_str_impl(pubkey)
 }

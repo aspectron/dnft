@@ -134,7 +134,7 @@ class App{
 
     onWalletConnect(key){
         console.log("wallet-connected ::: pubkey: ", key.toString());
-        $("#wallet-pubkey").innerHTML = key.toString();
+        $("#wallet-pubkey").innerHTML = this.dnft.shortenPubkey(key.toString());
         $(".wallet-connect-container").classList.add("connected");
     }
 

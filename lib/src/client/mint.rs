@@ -130,6 +130,7 @@ mod wasm {
     use super::Mint;
     use crate::client::Schema;
     use crate::prelude::*;
+    use std::str::FromStr;
 
     /// Create mint information/schema
     #[wasm_bindgen(js_name = "createMint")]
@@ -143,9 +144,9 @@ mod wasm {
 
     /// Returns general mint information
     #[wasm_bindgen(js_name = "getMintData")]
-    pub async fn get_mint_data(pubkey: JsValue) -> Result<JsValue, JsValue> {
-        let pubkey: Pubkey = from_value(pubkey)?;
-        //let pubkey = Pubkey::from_str(&pubkey).map_err(|_| JsValue::from("Invalid pubkey"))?;
+    pub async fn get_mint_data(pubkey: String) -> Result<JsValue, JsValue> {
+        //let pubkey: Pubkey = from_value(pubkey)?;
+        let pubkey = Pubkey::from_str(&pubkey).map_err(|_| JsValue::from("Invalid pubkey"))?;
         Ok(to_value(&Mint::get_data(pubkey).await?).unwrap())
     }
 
