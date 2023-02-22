@@ -14,29 +14,25 @@ pub mod tests {
         const USE_EMULATOR: bool = false;
 
         println!("init transport...");
-        let transport = if USE_EMULATOR{
+        let transport = if USE_EMULATOR {
             Transport::try_new_for_unit_tests(
                 crate::program_id(),
                 Some(Pubkey::from_str(AUTHORITY)?),
                 TransportConfig::default(),
             )
             .await?
-        }else{
+        } else {
             Transport::try_new("http://127.0.0.1:8899", TransportConfig::default()).await?
         };
 
         println!("run test...");
 
-        run_test().await?;
+        //run_test().await?;
+        run_mint_test().await?;
 
         log_info!("");
-        if transport.mode().is_emulator(){
-            transport
-                .simulator()
-                .store
-                .list()
-                .await?
-                .to_log();
+        if transport.mode().is_emulator() {
+            transport.simulator().store.list().await?.to_log();
             log_info!("");
         }
 
@@ -63,9 +59,8 @@ pub mod tests {
         let authority = transport.get_authority_pubkey()?;
 
         // ----------------------------------------------------------------------------
-        let root = reload_container::<program::Root>(&client::Root::pubkey())
-            .await?;
-        if root.is_none(){
+        let root = reload_container::<program::Root>(&client::Root::pubkey()).await?;
+        if root.is_none() {
             log_info!("creating root");
             let args = program::RootCreationArgs {};
             let tx = client::Root::create(&authority, &args).await?;
@@ -170,6 +165,16 @@ pub mod tests {
         Ok(())
     }
 
+    pub async fn run_mint_test() -> Result<()> {
+        let pubkeys = crate::client::root::Root::get_mint_pubkeys(0, 100).await?;
+        log_trace!("min pubkeys: {:?}", pubkeys);
+        for pubkey in pubkeys {
+            let data = crate::client::mint::Mint::get_data(pubkey).await?;
+            log_trace!("min data: {:?}", data);
+        }
+
+        Ok(())
+    }
     /*
     #[wasm_bindgen(js_name = "createDnftMint")]
     pub async fn create_dnft_mint(schema: Schema) -> Result<Pubkey> {

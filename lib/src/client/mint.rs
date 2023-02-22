@@ -1,3 +1,4 @@
+use crate::program::DataType;
 use crate::{prelude::*, program::MintCreationArgs};
 use client::Field;
 use kaizen::result::Result;
@@ -68,19 +69,29 @@ impl Mint {
             .await?
             .ok_or_else(|| "Unable to load root container".to_string())?;
 
-        let data_types = mint.data_types.load()?;
-        let names = mint.names.load()?;
-        let descriptions = mint.descriptions.load()?;
+        let data_types = mint
+            .data_types
+            .load()?
+            .unwrap_or(Box::<Vec<DataType>>::default());
+
+        let names = mint.names.load()?.unwrap_or(Box::<Vec<String>>::default());
+
+        let descriptions = mint
+            .descriptions
+            .load()?
+            .unwrap_or(Box::<Vec<String>>::default());
 
         let mut schema = Vec::<Field>::new();
-        for (idx, data_type) in data_types.iter().enumerate() {
-            let name = names
-                .get(idx)
-                .ok_or_else(|| error!("invalid mint schema range (name)"))?;
-            let description = descriptions
-                .get(idx)
-                .ok_or_else(|| error!("invalid mint schema range (description)"))?;
-            schema.push(Field::new(*data_type, name.clone(), description.clone()));
+        if !names.is_empty() {
+            for (idx, data_type) in data_types.iter().enumerate() {
+                let name = names
+                    .get(idx)
+                    .ok_or_else(|| error!("invalid mint schema range (name)"))?;
+                let description = descriptions
+                    .get(idx)
+                    .ok_or_else(|| error!("invalid mint schema range (description)"))?;
+                schema.push(Field::new(*data_type, name.clone(), description.clone()));
+            }
         }
 
         let meta = mint.meta.borrow();
@@ -133,7 +144,12 @@ mod wasm {
     /// Returns general mint information
     #[wasm_bindgen(js_name = "getMintData")]
     pub async fn get_mint_data(pubkey: Pubkey) -> Result<JsValue, JsValue> {
-        Ok(to_value(&Mint::get_data(pubkey).await?).unwrap())
+        log_trace!("get_mint_data request pubkey {:?}", pubkey);
+        let data = &Mint::get_data(pubkey).await?;
+        log_trace!("get_mint_data data {:?}", data);
+        let result = to_value(data).unwrap();
+        log_trace!("get_mint_data result {:?}", result);
+        Ok(result)
     }
 
     /// Returns a range of token pubkeys for a specific mint

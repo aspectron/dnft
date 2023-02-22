@@ -41,3 +41,4 @@ workflow-log = { path = "../workflow-rs/log" }
 workflow-panic-hook = { path = "../workflow-rs/panic-hook" }
 workflow-rpc = { path = "../workflow-rs/rpc" }
 workflow-wasm = { path = "../workflow-rs/wasm" }
+workflow-store = { path = "../workflow-rs/store" }
