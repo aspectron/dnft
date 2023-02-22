@@ -1,4 +1,5 @@
 use kaizen::error::Error as KaizenError;
+use solana_program::pubkey::ParsePubkeyError;
 use std::io::Error as IOError;
 use std::sync::PoisonError;
 use thiserror::Error;
@@ -31,6 +32,9 @@ pub enum Error {
 
     #[error("CallbackError: {0}")]
     CallbackError(#[from] CallbackError),
+
+    #[error("ParsePubkeyError: {0}")]
+    ParsePubkeyError(#[from] ParsePubkeyError),
 }
 
 impl From<KaizenError> for Error {

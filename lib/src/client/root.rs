@@ -94,6 +94,7 @@ mod wasm {
         let result = js_sys::Array::new();
         for key in keys {
             result.push(&key.to_string().into());
+            //result.push(&to_value(&key).unwrap());
         }
         Ok(result)
     }
