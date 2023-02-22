@@ -118,10 +118,13 @@ class App{
         connectBtn.addEventListener("click", async ()=>{
             await this.dnftApp.connectWallet();
         });
-        
     }
 
-    async afterLayoutReady(){
+    async afterLayoutReady(e){
+        if (this._layoutReady)
+            return
+        this._layoutReady = true;
+        
         let connected = await this.dnftApp.checkWalletState();
         if (!connected){
             //$(".wallet-connect-container").classList.remove("connected");
@@ -152,9 +155,8 @@ class App{
         let pubkeys = await this.dnft.getMintPubkeys(0n, 100n);
         console.log("getMintPubkeys: ", pubkeys)
         for (let pubkey of pubkeys){
-            console.log("pubkey", pubkey.toString())
             let data = await this.dnft.getMintData(pubkey);
-            console.log("pubkey data", data);
+            console.log("pubkey data", pubkey, data);
         }
     }
 

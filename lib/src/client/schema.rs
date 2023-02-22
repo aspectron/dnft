@@ -78,16 +78,11 @@ pub struct Schema {
 #[wasm_bindgen]
 impl Schema {
     #[wasm_bindgen(constructor)]
-    // pub fn new(fields : Vec<Field>) -> Self {
-    // pub fn try_new(array: js_sys::Array) -> Result<Schema, JsError> {
     pub fn try_new(array: js_sys::Array) -> Result<Schema> {
         let fields = array
             .to_vec()
             .iter()
-            // .map(|f| f.try_into())
-            //.map(|f| Field::try_from_any(f))
             .map(Field::try_from_any)
-            // .collect::<Result<Vec<Field>, _>>()
             .collect::<std::result::Result<Vec<Field>, _>>()
             .map_err(|_| JsError::new("Unable to convert array item to `Field` structure."))?;
 
@@ -101,7 +96,7 @@ impl Schema {
     }
 
     pub fn fields(&self) -> js_sys::Array {
-        let result = js_sys::Array::new(); //self.fields.len() as u32);
+        let result = js_sys::Array::new();
         for field in self.fields.clone() {
             result.push(&field.into());
         }
