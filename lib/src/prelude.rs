@@ -7,6 +7,7 @@ pub use kaizen::utils;
 pub use serde::*;
 pub use std::fmt;
 pub use workflow_core::enums::*;
+pub use kaizen::wasm_bindgen;
 
 cfg_if! {
     if #[cfg(not(target_os = "solana"))] {
