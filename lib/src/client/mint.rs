@@ -130,6 +130,7 @@ mod wasm {
     use super::Mint;
     use crate::client::Schema;
     use crate::prelude::*;
+    use kaizen::prelude::PubkeyExt;
 
     /// Create mint information/schema
     #[wasm_bindgen(js_name = "createMint")]
@@ -144,7 +145,7 @@ mod wasm {
     /// Returns general mint information
     #[wasm_bindgen(js_name = "getMintData")]
     pub async fn get_mint_data(pubkey: JsValue) -> Result<JsValue, JsValue> {
-        Ok(to_value(&Mint::get_data(pubkey_from_value(pubkey)?).await?).unwrap())
+        Ok(to_value(&Mint::get_data(Pubkey::from_value(&pubkey)?).await?).unwrap())
     }
 
     /// Returns a range of token pubkeys for a specific mint
