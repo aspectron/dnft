@@ -1,5 +1,10 @@
 use thiserror::Error;
 use wasm_bindgen::prelude::*;
+use workflow_store::error::Error as StoreError;
+use kaizen::error::Error as KaizenError;
+use std::io::Error as IOError;
+use std::sync::PoisonError;
+use workflow_wasm::callback::CallbackError;
 
 #[derive(Error, Debug)]
 pub enum Error {
@@ -8,6 +13,33 @@ pub enum Error {
 
     #[error("{0}")]
     String(String),
+
+    #[error("StoreError: {0}")]
+    StoreError(#[from] StoreError),
+
+    #[error("KaizenError: {0}")]
+    KaizenError(KaizenError),
+
+    #[error("IOError: {0}")]
+    IOError(#[from] IOError),
+
+    #[error("PoisonError: {0}")]
+    PoisonError(String),
+
+    #[error("CallbackError: {0}")]
+    CallbackError(#[from] CallbackError),
+}
+
+impl From<KaizenError> for Error {
+    fn from(err: KaizenError) -> Self {
+        Error::KaizenError(err)
+    }
+}
+
+impl<T> From<PoisonError<T>> for Error {
+    fn from(err: PoisonError<T>) -> Self {
+        Error::PoisonError(err.to_string())
+    }
 }
 
 impl From<JsError> for Error {
