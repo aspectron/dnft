@@ -93,7 +93,7 @@ mod wasm {
         let keys = Root::get_mint_pubkeys(from, to).await?;
         let result = js_sys::Array::new();
         for key in keys {
-            result.push(&key.into());
+            result.push(&key.to_string().into());
         }
         Ok(result)
     }

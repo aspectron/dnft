@@ -85,7 +85,8 @@ impl Schema {
             .to_vec()
             .iter()
             // .map(|f| f.try_into())
-            .map(|f| Field::try_from_any(f))
+            //.map(|f| Field::try_from_any(f))
+            .map(Field::try_from_any)
             // .collect::<Result<Vec<Field>, _>>()
             .collect::<std::result::Result<Vec<Field>, _>>()
             .map_err(|_| JsError::new("Unable to convert array item to `Field` structure."))?;

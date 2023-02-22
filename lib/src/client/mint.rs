@@ -130,26 +130,24 @@ mod wasm {
     use super::Mint;
     use crate::client::Schema;
     use crate::prelude::*;
+    use std::str::FromStr;
 
     /// Create mint information/schema
     #[wasm_bindgen(js_name = "createMint")]
-    pub async fn create_mint_data(schema: Schema) -> Result<Pubkey, JsValue> {
+    pub async fn create_mint_data(schema: Schema) -> Result<JsValue, JsValue> {
         let pubkey = Transport::global()?.get_authority_pubkey()?;
         let tx = Mint::create(&pubkey, &schema.into()).await?;
         let mint_account_pubkey = tx.target_account()?;
         tx.execute().await?;
-        Ok(mint_account_pubkey)
+        Ok(to_value(&mint_account_pubkey.to_string()).unwrap())
     }
 
     /// Returns general mint information
     #[wasm_bindgen(js_name = "getMintData")]
-    pub async fn get_mint_data(pubkey: Pubkey) -> Result<JsValue, JsValue> {
-        log_trace!("get_mint_data request pubkey {:?}", pubkey);
-        let data = &Mint::get_data(pubkey).await?;
-        log_trace!("get_mint_data data {:?}", data);
-        let result = to_value(data).unwrap();
-        log_trace!("get_mint_data result {:?}", result);
-        Ok(result)
+    pub async fn get_mint_data(pubkey: String) -> Result<JsValue, JsValue> {
+        //let pubkey:Pubkey = from_value(pubkey)?;
+        let pubkey = Pubkey::from_str(&pubkey).map_err(|_| JsValue::from("Invalid pubkey"))?;
+        Ok(to_value(&Mint::get_data(pubkey).await?).unwrap())
     }
 
     /// Returns a range of token pubkeys for a specific mint

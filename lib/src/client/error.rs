@@ -16,7 +16,7 @@ pub enum Error {
 
     #[error("Deserialization error: {0}")]
     SerdeWasmBindgen(#[from] serde_wasm_bindgen::Error),
-    
+
     #[error("StoreError: {0}")]
     StoreError(#[from] StoreError),
 
