@@ -142,16 +142,16 @@ impl TryFrom<(DataType, Vec<JsValue>)> for program::Data {
                     .ok_or_else(|| JsError::new("Supplied argument must be a string"))?;
                 program::Data::ImageUrl(v)
             }
-            DataType::Geo => {
-                ensure_args(&args, 1)?;
-                let v: program::Geo = args
-                    .get(0)
-                    .unwrap()
-                    .try_into()
-                    .map_err(|err: String| JsError::new(&err))?;
-                // let v = args.get(0).unwrap().as_string().ok_or_else(||JsError::new("Supplied argument must be a string"))?;
-                program::Data::Geo(v)
-            }
+            // DataType::Geo => {
+            //     ensure_args(&args, 1)?;
+            //     let v: program::Geo = args
+            //         .get(0)
+            //         .unwrap()
+            //         .try_into()
+            //         .map_err(|err: String| JsError::new(&err))?;
+            //     // let v = args.get(0).unwrap().as_string().ok_or_else(||JsError::new("Supplied argument must be a string"))?;
+            //     program::Data::Geo(v)
+            // }
             DataType::Pubkey => {
                 ensure_args(&args, 1)?;
                 program::Data::Pubkey(ref_from_abi!(Pubkey, args.get(0).unwrap())?)

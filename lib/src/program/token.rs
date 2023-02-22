@@ -8,7 +8,14 @@ use program::Mint;
 pub type DataVec = Vec<program::Data>;
 
 #[derive(Clone, Debug, BorshSerialize, BorshDeserialize)]
-pub struct TokenCreationArgs {}
+pub struct TokenCreationArgs {
+    pub data : Vec<Option<program::Data>>
+}
+
+#[derive(Clone, Debug, BorshSerialize, BorshDeserialize)]
+pub struct TokenUpdateArgs {
+    pub data : Vec<(u16,program::Data)>
+}
 
 #[derive(Meta, Copy, Clone)]
 #[repr(packed)]
@@ -43,7 +50,19 @@ impl<'info, 'refs> Token<'info, 'refs> {
         meta.set_mint(*mint.pubkey());
         drop(meta);
 
+        let args = TokenCreationArgs::try_from_slice(ctx.instruction_data)?;
+        token.update_data(&mint, &args)?;
+
         ctx.sync_rent(token.account(), &RentCollector::default())?;
+
+        Ok(())
+    }
+
+    pub fn update_data(&self, mint: &Mint, _args : &TokenCreationArgs) -> ProgramResult {
+
+        if let Some(_data_types) = mint.data_types.load()? {
+
+        }
 
         Ok(())
     }

@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use wasm_bindgen::prelude::*;
 
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, BorshSerialize, BorshDeserialize)]
@@ -93,59 +94,59 @@ impl fmt::Display for Data {
     }
 }
 
-cfg_if! {
-    if #[cfg(target_os = "solana")] {
+// cfg_if! {
+    // if #[cfg(target_os = "solana")] {
 
-        u16_try_from! {
-            #[allow(non_camel_case_types)]
-            #[derive(Debug, Clone, Copy, BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
-            #[repr(u16)]
-            pub enum DataType {
-                Bool,
-                u8,
-                u16,
-                u32,
-                u64,
-                u128,
-                i8,
-                i16,
-                i32,
-                i64,
-                f32,
-                f64,
-                String,
-                PageUrl,
-                ImageUrl,
-                Geo,
-                Pubkey,
-                Array,
-                Table,
-                // TODO
-                // Hash
-            }
-        }
+    //     u16_try_from! {
+    //         #[allow(non_camel_case_types)]
+    //         #[derive(Debug, Clone, Copy, BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
+    //         #[repr(u16)]
+    //         pub enum DataType {
+    //             Bool,
+    //             u8,
+    //             u16,
+    //             u32,
+    //             u64,
+    //             u128,
+    //             i8,
+    //             i16,
+    //             i32,
+    //             i64,
+    //             f32,
+    //             f64,
+    //             String,
+    //             PageUrl,
+    //             ImageUrl,
+    //             Geo,
+    //             Pubkey,
+    //             Array,
+    //             Table,
+    //             // TODO
+    //             // Hash
+    //         }
+    //     }
 
-        #[derive(Debug, Clone, BorshSerialize, BorshDeserialize)]
-        pub struct Geo {
-            pub latitude: f64,
-            pub longitude: f64,
-        }
+    //     #[derive(Debug, Clone, BorshSerialize, BorshDeserialize)]
+    //     pub struct Geo {
+    //         pub latitude: f64,
+    //         pub longitude: f64,
+    //     }
 
-        impl Geo {
-            pub fn new(latitude: f64, longitude: f64) -> Self {
-                Self {
-                    latitude,
-                    longitude,
-                }
-            }
-        }
+    //     impl Geo {
+    //         pub fn new(latitude: f64, longitude: f64) -> Self {
+    //             Self {
+    //                 latitude,
+    //                 longitude,
+    //             }
+    //         }
+    //     }
 
 
-        #[derive(Debug, Clone, BorshSerialize, BorshDeserialize)]
-        pub struct Hash256 {
-            hash: [u8; 32],
-        }
-    }else{
+    //     #[derive(Debug, Clone, BorshSerialize, BorshDeserialize)]
+    //     pub struct Hash256 {
+    //         hash: [u8; 32],
+    //     }
+    // }else{
 
         u16_try_from! {
             #[allow(non_camel_case_types)]
@@ -177,7 +178,8 @@ cfg_if! {
             }
         }
 
-        #[derive(Debug, Clone, TryFromJsValue, BorshSerialize, BorshDeserialize)]
+        // #[derive(Debug, Clone, TryFromJsValue, BorshSerialize, BorshDeserialize)]
+        #[derive(Debug, Clone, BorshSerialize, BorshDeserialize)]
         #[wasm_bindgen]
         pub struct Geo {
             pub latitude: f64,
@@ -196,12 +198,15 @@ cfg_if! {
         }
 
 
-        #[derive(Debug, Clone, TryFromJsValue, BorshSerialize, BorshDeserialize)]
+        // #[derive(Debug, Clone, TryFromJsValue, BorshSerialize, BorshDeserialize)]
+        #[derive(Debug, Clone, BorshSerialize, BorshDeserialize)]
         #[wasm_bindgen]
         pub struct Hash256 {
             hash: [u8; 32],
         }
 
+cfg_if! {
+    if #[cfg(not(target_os = "solana"))] {
         #[wasm_bindgen]
         impl Hash256 {
             #[wasm_bindgen(constructor)]
@@ -212,14 +217,17 @@ cfg_if! {
                 let hash = hasher.finalize();
                 Self { hash: hash.into() }
             }
-
+        
             pub fn check(&self) -> bool {
                 true
             }
         }
-
     }
 }
+
+
+    // }
+// }
 
 // TODO
 #[derive(Debug, Clone, BorshSerialize, BorshDeserialize)]

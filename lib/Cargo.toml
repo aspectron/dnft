@@ -18,9 +18,9 @@ workflow-core.workspace = true
 workflow-log.workspace = true
 workflow-wasm.workspace = true
 workflow-store.workspace = true
+wasm-bindgen.workspace = true
 
 [target.'cfg(not(target_os = "solana"))'.dependencies]
-wasm-bindgen.workspace = true
 serde-wasm-bindgen.workspace = true
 inventory.workspace = true
 num.workspace = true

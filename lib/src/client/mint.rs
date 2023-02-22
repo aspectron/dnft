@@ -134,9 +134,9 @@ mod wasm {
 
     /// Create mint information/schema
     #[wasm_bindgen(js_name = "createMint")]
-    pub async fn create_mint_data(schema: Schema) -> Result<JsValue, JsValue> {
-        let pubkey = Transport::global()?.get_authority_pubkey()?;
-        let tx = Mint::create(&pubkey, &schema.into()).await?;
+    pub async fn create_mint(schema: Schema) -> Result<JsValue, JsValue> {
+        let authority = Transport::global()?.get_authority_pubkey()?;
+        let tx = Mint::create(&authority, &schema.into()).await?;
         let mint_account_pubkey = tx.target_account()?;
         tx.execute().await?;
         Ok(to_value(&mint_account_pubkey.to_string()).unwrap())

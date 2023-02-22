@@ -34,3 +34,23 @@ impl Token {
         Ok(TransactionList::new(vec![transaction]))
     }
 }
+
+
+mod wasm {
+    use super::Token;
+    use crate::prelude::*;
+    use crate::program::TokenCreationArgs;
+
+    /// Returns a range of mint pubkeys for a specific mint
+    #[wasm_bindgen(js_name = "createToken")]
+    pub async fn create_token(mint : JsValue) -> Result<JsValue, JsValue> {
+        let mint = Pubkey::from_value(&mint)?;
+        let authority = Transport::global()?.get_authority_pubkey()?;
+        let args = TokenCreationArgs { data : vec![] };
+        let tx = Token::create(&authority, &mint, &args).await?;
+        let token_account_pubkey = tx.target_account()?;
+        tx.execute().await?;
+        Ok(to_value(&token_account_pubkey.to_string()).unwrap())
+    }
+
+}
