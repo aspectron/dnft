@@ -57,18 +57,20 @@ impl Application {
     pub async fn connect_wallet(&self) -> Result<()> {
         let adapters = Self::get_adapter_list().await?;
         for adapter in adapters {
-            if adapter.detected {
-                match self.connect(adapter).await {
-                    Ok(_) => {}
-                    Err(err) => {
-                        if err.to_string().contains("User rejected") {
-                            self.set_wallet_auto_connect(false).await?;
-                        }
-
-                        return Err(err);
+            if !adapter.detected {
+                continue;
+            }
+            match self.connect(adapter).await {
+                Ok(_) => {}
+                Err(err) => {
+                    if err.to_string().contains("User rejected") {
+                        self.set_wallet_auto_connect(false).await?;
                     }
+
+                    return Err(err);
                 }
             }
+            break;
         }
 
         Ok(())
@@ -115,7 +117,7 @@ impl Application {
         Ok(())
     }
 
-    pub async fn save(&self, data: &[u8]) -> Result<()> {
+    async fn save(&self, data: &[u8]) -> Result<()> {
         let store = StoreData::get_store(&self.store_name);
         store.write(data).await?;
         Ok(())

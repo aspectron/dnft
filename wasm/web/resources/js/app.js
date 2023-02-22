@@ -114,6 +114,7 @@ class App{
         if (layoutEl.classList.contains("is-upgraded")){
             await this.afterLayoutReady();
         }
+
         let connectBtn = $("#wallet-connect");
         connectBtn.addEventListener("click", async ()=>{
             await this.dnftApp.connectWallet();
@@ -132,11 +133,9 @@ class App{
     }
 
     onWalletConnect(key){
-        console.log("wallet-connected ::: ####", key);
-        console.log("wallet-connected ::: #### pubkey: ", key.toString());
+        console.log("wallet-connected ::: pubkey: ", key.toString());
         $("#wallet-pubkey").innerHTML = key.toString();
         $(".wallet-connect-container").classList.add("connected");
-        console.log($(".wallet-connect-container"))
     }
 
     setLoading(loading){
@@ -148,16 +147,50 @@ class App{
     }
 
     async initBrowsePage(){
+        this.schemaListEl = $("#schema-list");
         this.refreshBrowsePage();
     }
 
     async refreshBrowsePage(){
         let pubkeys = await this.dnft.getMintPubkeys(0n, 100n);
         console.log("getMintPubkeys: ", pubkeys)
+        let index = 1;
         for (let pubkey of pubkeys){
             let data = await this.dnft.getMintData(pubkey);
             console.log("pubkey data", pubkey, data);
+            let el = this.createMinRow(index++, pubkey, data);
+            this.schemaListEl.appendChild(el);
         }
+    }
+
+    createMinRow(index, pubkey, data){
+        let td_name = document.createElement("td");
+        td_name.innerHTML = "DNFT "+index;
+        td_name.setAttribute("class", "mdl-data-table__cell--non-numeric");
+
+        let td_description = document.createElement("td");
+        let description = ["<bold>Fields</bold>"];
+        for (let field of data.schema){
+            description.push(`${field.type}: ${field.name}, ${field.description}`)
+        }
+        td_description.innerHTML = `<p>${description.join("<br />")}</p>`;
+        td_description.setAttribute("class", "mdl-data-table__cell--wrap-text");
+
+        
+        let btn = document.createElement("button");
+        btn.classList.add("mdl-button", "mint-dnft");
+        btn.innerHTML = "Mint it";
+        btn.dataset.pubkey = pubkey;
+
+        let td_action = document.createElement("td");
+        td_action.appendChild(btn);
+
+        let tr = document.createElement("tr");
+        tr.appendChild(td_name);
+        tr.appendChild(td_description);
+        tr.appendChild(td_action);
+
+        return tr;
     }
 
     initCreateDnftForm(){
@@ -248,44 +281,6 @@ class App{
             dialog.close();
         });
 
-        /*
-        let getSelected = ()=>{
-            let list = [];
-            this.fieldTypeListEl.querySelectorAll("input.field-type:checked").forEach(checkbox=>{
-                if (checkbox.checked){
-                    let dataType = +checkbox.value
-                    if (DataType[dataType]){
-                        list.push(dataType)
-                    }
-                }
-            });
-
-            return list;
-        }
-        let clearSelected = ()=>{
-            this.fieldTypeListEl.querySelectorAll("input.field-type:checked").forEach(checkbox=>{
-                checkbox.parentElement.MaterialCheckbox.uncheck()
-            });
-        }
-        
-
-        dialog.querySelector('.add-fields').addEventListener('click', ()=>{
-            let list = getSelected();
-            if (list.length){
-                dialog.close();
-                let fields = list.map(dataType=>{
-                    return new Field(dataType, "", "")
-                });
-
-                if (fields.length){
-                    $("#create-dnft-main-container").classList.remove("no-fields");
-                }
-
-                this.appendToFieldList(fields);
-            }
-        });
-        */
-
         this.fieldListEl.addEventListener("click", event=>{
             let tr = event.target.closest("tr");
             let actionEl = event.target.closest("[data-action]");
@@ -331,42 +326,11 @@ class App{
                 this.loadSchema(pubkey);
             }
         })
-        
 
-        /*
-        let floatingInputBox = document.createElement("input");
-        floatingInputBox.setAttribute("class", "edit-box__input");
-        this.floatingInputBox = floatingInputBox;
-        this.floatingInputBox.addEventListener("keypress", (event)=>{
-            console.log("event.key", event)
-            if (event.key == "Enter"){
-                this.floatingInputBox.saveValue?.(this.floatingInputBox.value);
-                this.floatingInputBox.value = "";
-            }
-        })
-
-        this.fieldListEl.addEventListener("click", (event)=>{
-            let editBox = event.target.closest(".edit-box");
-            if (!editBox){
-                return
-            }
-
-            if(this.floatingInputBox.parentElement == editBox)
-                return
-            this.floatingInputBox.value = editBox.innerText;
-            this.floatingInputBox.saveValue = (value)=>{
-                editBox.innerText = value;
-            }
-
-            editBox.appendChild(this.floatingInputBox)
-            this.floatingInputBox.focus();
-        })
-        */
     }
 
     async loadSchema(pubkey){
         let mintData = await this.dnft.getMintData(pubkey);
-        //fields = schema.fields();
         console.log("mintData: result", mintData);
 
         this.buildMintForm(mintData.schema);
@@ -380,34 +344,21 @@ class App{
         this.mintFormFieldsEl = $("#mint-form-fields");
 
         schemaListEl.addEventListener("click", event=>{
-            let el = event.target.closest(".schema-item");
             let btn = event.target.closest("button.mint-dnft");
-            if(!btn || !el)
+            if(!btn)
                 return
             
-            /*
-            //TODO get schema/fields
-            const { Field, DataType, Data } = this.dnft;
-
-            let fields = [];
-            let dataTypes = Object.keys(DataType).filter(k => !isFinite(+k));
-            for (let dataType of dataTypes) {
-                let name = "Field "+dataType;
-                let descr = `Descr for ${dataType}`;
-
-                fields.push(new Field(DataType[dataType], name, descr));
-            }
-
-            this.buildMintForm(fields);
-            this.activateMintForm();
-            */
-            
+            this.loadSchema(btn.dataset.pubkey);
         })
     }
 
     activateTab(tab){
         let tabEl = $(`#top-tabs [href='#${tab}']`);
         tabEl?.show();
+        $(`main`).scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
     }
 
     activateMintForm(){
