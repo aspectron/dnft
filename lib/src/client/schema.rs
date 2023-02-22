@@ -41,6 +41,14 @@ impl Field {
     pub fn description(&self) -> String {
         self.description.clone()
     }
+
+    fn try_from_any(v: &JsValue) -> Result<Self> {
+        if let Ok(f) = Field::try_from(v) {
+            Ok(f)
+        } else {
+            Ok(from_value(v.clone())?)
+        }
+    }
 }
 
 impl fmt::Display for Field {
@@ -76,7 +84,8 @@ impl Schema {
         let fields = array
             .to_vec()
             .iter()
-            .map(|f| f.try_into())
+            // .map(|f| f.try_into())
+            .map(|f| Field::try_from_any(f))
             // .collect::<Result<Vec<Field>, _>>()
             .collect::<std::result::Result<Vec<Field>, _>>()
             .map_err(|_| JsError::new("Unable to convert array item to `Field` structure."))?;

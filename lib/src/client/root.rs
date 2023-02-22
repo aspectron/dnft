@@ -91,7 +91,7 @@ mod wasm {
     #[wasm_bindgen(js_name = "getMintPubkeys")]
     pub async fn get_mint_pubkeys(from: u64, to: u64) -> Result<js_sys::Array, JsValue> {
         let keys = Root::get_mint_pubkeys(from, to).await?;
-        let result = js_sys::Array::new(); //self.fields.len() as u32);
+        let result = js_sys::Array::new();
         for key in keys {
             result.push(&key.into());
         }

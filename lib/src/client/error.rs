@@ -8,6 +8,9 @@ pub enum Error {
 
     #[error("{0}")]
     String(String),
+
+    #[error("Deserialization error: {0}")]
+    SerdeWasmBindgen(#[from] serde_wasm_bindgen::Error),
 }
 
 impl From<JsError> for Error {

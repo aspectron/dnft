@@ -29,8 +29,6 @@ pub enum Data {
     // Table(Vec<(Data, Data)>),
 }
 
-
-
 #[cfg(not(target_os = "solana"))]
 impl fmt::Display for Data {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -222,9 +220,6 @@ cfg_if! {
 
     }
 }
-
-
-
 
 // TODO
 #[derive(Debug, Clone, BorshSerialize, BorshDeserialize)]
