@@ -3,6 +3,7 @@ use crate::prelude::*;
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, BorshSerialize, BorshDeserialize)]
 pub enum Data {
+    None,
     Bool(bool),
     u8(u8),
     u16(u16),
@@ -29,11 +30,53 @@ pub enum Data {
     // Table(Vec<(Data, Data)>),
 }
 
+impl Data {
+    pub fn get_data_type(&self) -> DataType {
+        match self {
+            Data::None => DataType::None,
+            Data::Bool(_) => DataType::Bool,
+            Data::u8(_) => DataType::u8,
+            Data::u16(_) => DataType::u16,
+            Data::u32(_) => DataType::u32,
+            Data::u64(_) => DataType::u64,
+            Data::u128(_) => DataType::u128,
+            Data::i8(_) => DataType::i8,
+            Data::i16(_) => DataType::i16,
+            Data::i32(_) => DataType::i32,
+            Data::i64(_) => DataType::i64,
+            Data::f32(_) => DataType::f32,
+            Data::f64(_) => DataType::f64,
+            Data::Flags32(_) => DataType::Flags32,
+            Data::Flags64(_) => DataType::Flags64,
+            Data::String(_) => DataType::String,
+            Data::PageUrl(_) => DataType::PageUrl,
+            Data::ImageUrl(_) => DataType::ImageUrl,
+            Data::Date(_) => DataType::Date,
+            Data::Time(_) => DataType::Time,
+            Data::Geo(_) => DataType::Geo,
+            Data::Pubkey(_) => DataType::Pubkey,
+            // Data::Array(_) => DataType::Array,
+            // Data::Table(_) => DataType::Table,
+        }
+    }
+
+    pub fn is_none(&self) -> bool {
+        matches!(self, Data::None)
+    }
+
+    pub fn is_some(&self) -> bool {
+        !matches!(self, Data::None)
+    }
+}
+
 #[cfg(not(target_os = "solana"))]
 impl fmt::Display for Data {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // use super::Data;
         match self {
+            Data::None => {
+                write!(f, "None")
+            }
             Data::Bool(v) => {
                 write!(f, "{v}")
             }
@@ -150,10 +193,11 @@ impl fmt::Display for Data {
 
 u16_try_from! {
     #[allow(non_camel_case_types)]
-    #[derive(Debug, Clone, Copy, BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
+    #[derive(Debug, Clone, Copy, BorshSerialize, BorshDeserialize, Serialize, Deserialize, Eq, PartialEq)]
     #[wasm_bindgen]
     #[repr(u16)]
     pub enum DataType {
+        None,
         Bool,
         u8,
         u16,
@@ -167,8 +211,12 @@ u16_try_from! {
         f32,
         f64,
         String,
+        Flags32,
+        Flags64,
         PageUrl,
         ImageUrl,
+        Date,
+        Time,
         Geo,
         Pubkey,
         Array,

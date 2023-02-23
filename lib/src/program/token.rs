@@ -3,17 +3,23 @@
 //!
 
 use crate::prelude::*;
-use program::Mint;
+use program::{Data,Mint};
+use kaizen::program_error_code;
 
 pub type DataVec = Vec<program::Data>;
 
-#[derive(Clone, Debug, BorshSerialize, BorshDeserialize)]
+#[derive(Default, Clone, Debug, BorshSerialize, BorshDeserialize)]
 pub struct TokenCreationArgs {
-    pub data: Vec<Option<program::Data>>,
+    pub data : TokenDataArgs,
 }
 
-#[derive(Clone, Debug, BorshSerialize, BorshDeserialize)]
+#[derive(Default, Clone, Debug, BorshSerialize, BorshDeserialize)]
 pub struct TokenUpdateArgs {
+    pub data: TokenDataArgs,
+}
+
+#[derive(Default, Clone, Debug, BorshSerialize, BorshDeserialize)]
+pub struct TokenDataArgs {
     pub data: Vec<(u16, program::Data)>,
 }
 
@@ -38,7 +44,7 @@ impl<'info, 'refs> Token<'info, 'refs> {
         let mut mint = Mint::try_load(&ctx.handler_accounts[0])?;
 
         let (tpl_data, tpl_account_info) = ctx.try_consume_collection_template_address_data()?;
-        let token = mint.tokens.try_create_container::<Token>(
+        let mut token = mint.tokens.try_create_container::<Token>(
             ctx,
             tpl_data.seed,
             tpl_account_info,
@@ -51,18 +57,56 @@ impl<'info, 'refs> Token<'info, 'refs> {
         drop(meta);
 
         let args = TokenCreationArgs::try_from_slice(ctx.instruction_data)?;
-        token.update_data(&mint, &args)?;
+        token.update_data(&mint, &args.data)?;
 
         ctx.sync_rent(token.account(), &RentCollector::default())?;
 
         Ok(())
     }
 
-    pub fn update_data(&self, mint: &Mint, _args: &TokenCreationArgs) -> ProgramResult {
-        if let Some(_data_types) = mint.data_types.load()? {}
+    pub fn update(ctx: &ContextReference) -> ProgramResult {
+        let mint = Mint::try_load(&ctx.handler_accounts[0])?;
+        let mut token = Token::try_load(&ctx.handler_accounts[1])?;
+        let args = TokenUpdateArgs::try_from_slice(ctx.instruction_data)?;
+        token.update_data(&mint, &args.data)?;
+        Ok(())
+    }
+
+    pub fn update_data(&mut self, mint: &Mint, args: &TokenDataArgs) -> ProgramResult {
+        // let data_types = mint.data_types.load()?.ok_or(ProgramError::Custom(ErrorCode::MintData.into()))?;
+        let data_types = mint.data_types.load()?.ok_or::<ProgramError>(program_error_code!(ErrorCode::MintData))?;
+        let mut token_data = self.data.load_or_default()?;
+        if token_data.is_empty() {
+            token_data.resize(args.data.len(), Data::None);
+        }
+
+        for (idx, incoming_data) in args.data.iter() {
+            let idx = *idx as usize;
+            let src_dt = data_types.get(idx).ok_or::<ProgramError>(ErrorCode::DataIndex.into())?;
+            let dst_dt = incoming_data.get_data_type();
+            if src_dt != &dst_dt {
+                return Err(program_error_code!(ErrorCode::DataTypeMismatch));
+            }
+
+            *token_data.get_mut(idx).unwrap() = incoming_data.clone();
+        }
+
+        self.data.store(&token_data)?;
+
+        // TODO - seal token
 
         Ok(())
     }
+
+    pub fn check_data(&self, data: &[Data]) -> ProgramResult {
+        for item in data.iter() {
+            if item.is_none() {
+                return Err(program_error_code!(ErrorCode::PartialTokenData));
+            }
+        }
+        Ok(())
+    }
+
 }
 
-declare_handlers!(Token::<'info, 'refs>, [Token::create,]);
+declare_handlers!(Token::<'info, 'refs>, [Token::create,Token::update]);
