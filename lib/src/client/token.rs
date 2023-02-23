@@ -1,4 +1,4 @@
-use crate::{prelude::*, program::TokenCreationArgs};
+use crate::{prelude::*, program::TokenCreateFinalArgs};
 use kaizen::result::Result;
 
 pub struct Token;
@@ -8,13 +8,13 @@ impl Token {
     pub async fn create<'channel>(
         authority_pubkey: &Pubkey,
         mint_pubkey: &Pubkey,
-        args: &TokenCreationArgs,
+        args: &TokenCreateFinalArgs,
     ) -> Result<TransactionList> {
         let mint = reload_container::<program::Mint>(mint_pubkey)
             .await?
             .ok_or_else(|| "Unable to load mint container".to_string())?;
 
-        let builder = client::Token::execution_context_for(program::Token::create)
+        let builder = client::Token::execution_context_for(program::Token::create_final)
             .with_authority(authority_pubkey)
             .with_collection_template(&mint.tokens)
             .await?
@@ -38,14 +38,14 @@ impl Token {
 mod wasm {
     use super::Token;
     use crate::prelude::*;
-    use crate::program::TokenCreationArgs;
+    use crate::program::TokenCreateFinalArgs;
 
     /// Returns a range of mint pubkeys for a specific mint
     #[wasm_bindgen(js_name = "createToken")]
     pub async fn create_token(mint: JsValue) -> Result<JsValue, JsValue> {
         let mint = Pubkey::from_value(&mint)?;
         let authority = Transport::global()?.get_authority_pubkey()?;
-        let args = TokenCreationArgs {
+        let args = TokenCreateFinalArgs {
             data: Default::default(),
         };
         let tx = Token::create(&authority, &mint, &args).await?;

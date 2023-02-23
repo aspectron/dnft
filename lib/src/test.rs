@@ -115,7 +115,7 @@ pub mod tests {
                     .await?
                     .expect("¯\\_(ツ)_/¯");
 
-                let args = program::TokenCreationArgs {
+                let args = program::TokenCreateFinalArgs {
                     data: Default::default(),
                 };
                 let tx = client::Token::create(&authority, mint_container.pubkey(), &args).await?;

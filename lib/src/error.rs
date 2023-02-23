@@ -4,7 +4,8 @@ use solana_program::program_error::ProgramError;
 pub enum ErrorCode {
     DataIndex,
     DataTypeMismatch,
-    MintData,
+    // MintData,
+    MintSchema,
     PartialTokenData,
     AccessDenied,
 }

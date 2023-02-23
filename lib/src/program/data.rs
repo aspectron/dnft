@@ -3,7 +3,7 @@ use crate::prelude::*;
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, BorshSerialize, BorshDeserialize)]
 pub enum Data {
-    None,
+    // None,
     Bool(bool),
     u8(u8),
     u16(u16),
@@ -33,7 +33,7 @@ pub enum Data {
 impl Data {
     pub fn get_data_type(&self) -> DataType {
         match self {
-            Data::None => DataType::None,
+            // Data::None => DataType::None,
             Data::Bool(_) => DataType::Bool,
             Data::u8(_) => DataType::u8,
             Data::u16(_) => DataType::u16,
@@ -60,13 +60,13 @@ impl Data {
         }
     }
 
-    pub fn is_none(&self) -> bool {
-        matches!(self, Data::None)
-    }
+    // pub fn is_none(&self) -> bool {
+    //     matches!(self, Data::None)
+    // }
 
-    pub fn is_some(&self) -> bool {
-        !matches!(self, Data::None)
-    }
+    // pub fn is_some(&self) -> bool {
+    //     !matches!(self, Data::None)
+    // }
 }
 
 #[cfg(not(target_os = "solana"))]
@@ -74,9 +74,9 @@ impl fmt::Display for Data {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // use super::Data;
         match self {
-            Data::None => {
-                write!(f, "None")
-            }
+            // Data::None => {
+            //     write!(f, "None")
+            // }
             Data::Bool(v) => {
                 write!(f, "{v}")
             }
