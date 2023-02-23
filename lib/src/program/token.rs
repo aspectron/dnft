@@ -3,14 +3,14 @@
 //!
 
 use crate::prelude::*;
-use program::{Data,Mint};
 use kaizen::program_error_code;
+use program::{Data, Mint};
 
 pub type DataVec = Vec<program::Data>;
 
 #[derive(Default, Clone, Debug, BorshSerialize, BorshDeserialize)]
 pub struct TokenCreationArgs {
-    pub data : TokenDataArgs,
+    pub data: TokenDataArgs,
 }
 
 #[derive(Default, Clone, Debug, BorshSerialize, BorshDeserialize)]
@@ -74,7 +74,10 @@ impl<'info, 'refs> Token<'info, 'refs> {
 
     pub fn update_data(&mut self, mint: &Mint, args: &TokenDataArgs) -> ProgramResult {
         // let data_types = mint.data_types.load()?.ok_or(ProgramError::Custom(ErrorCode::MintData.into()))?;
-        let data_types = mint.data_types.load()?.ok_or::<ProgramError>(program_error_code!(ErrorCode::MintData))?;
+        let data_types = mint
+            .data_types
+            .load()?
+            .ok_or::<ProgramError>(program_error_code!(ErrorCode::MintData))?;
         let mut token_data = self.data.load_or_default()?;
         if token_data.is_empty() {
             token_data.resize(args.data.len(), Data::None);
@@ -82,7 +85,9 @@ impl<'info, 'refs> Token<'info, 'refs> {
 
         for (idx, incoming_data) in args.data.iter() {
             let idx = *idx as usize;
-            let src_dt = data_types.get(idx).ok_or::<ProgramError>(ErrorCode::DataIndex.into())?;
+            let src_dt = data_types
+                .get(idx)
+                .ok_or::<ProgramError>(ErrorCode::DataIndex.into())?;
             let dst_dt = incoming_data.get_data_type();
             if src_dt != &dst_dt {
                 return Err(program_error_code!(ErrorCode::DataTypeMismatch));
@@ -106,7 +111,6 @@ impl<'info, 'refs> Token<'info, 'refs> {
         }
         Ok(())
     }
-
 }
 
-declare_handlers!(Token::<'info, 'refs>, [Token::create,Token::update]);
+declare_handlers!(Token::<'info, 'refs>, [Token::create, Token::update]);

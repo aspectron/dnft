@@ -45,7 +45,9 @@ mod wasm {
     pub async fn create_token(mint: JsValue) -> Result<JsValue, JsValue> {
         let mint = Pubkey::from_value(&mint)?;
         let authority = Transport::global()?.get_authority_pubkey()?;
-        let args = TokenCreationArgs { data: Default::default() };
+        let args = TokenCreationArgs {
+            data: Default::default(),
+        };
         let tx = Token::create(&authority, &mint, &args).await?;
         let token_account_pubkey = tx.target_account()?;
         tx.post().await?;
