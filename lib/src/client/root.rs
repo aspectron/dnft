@@ -93,9 +93,9 @@ mod wasm {
         let keys = Root::get_mint_pubkeys(from, to).await?;
         let result = js_sys::Array::new();
         for key in keys {
-            result.push(&key.to_string().into());//as string
-            //result.push(&to_value(&key).unwrap());//as bytes
-            //result.push(&key.into()); //as object
+            result.push(&key.to_string().into()); //as string
+                                                  //result.push(&to_value(&key).unwrap());//as bytes
+                                                  //result.push(&key.into()); //as object
         }
         Ok(result)
     }
@@ -106,7 +106,7 @@ mod wasm {
         let pubkey = Transport::global()?.get_authority_pubkey()?;
         let tx = Root::create(&pubkey, &RootCreationArgs {}).await?;
         let root_pubkey = tx.target_account()?;
-        tx.execute().await?;
+        tx.post().await?;
         Ok(root_pubkey)
     }
 }

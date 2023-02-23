@@ -94,6 +94,8 @@ class App{
     constructor(dnft){
         this.dnft = dnft;
         this.init();
+
+        window._app = this;
     }
 
     async init(){
@@ -119,6 +121,25 @@ class App{
         connectBtn.addEventListener("click", async ()=>{
             await this.dnftApp.connectWallet();
         });
+
+        this.txObserver = new this.dnft.TransactionObserver();
+        this.txObserver.setHandler(({event, data})=>{
+            console.log("txObserver:", event, data);
+            if (event == "transaction-success"){
+                if (data?.transaction.name.toLowerCase().includes("creating mint")){
+                    this.refreshBrowsePage();
+                }
+            }
+        })
+
+        /*
+        this.reflectorClient = new this.dnft.ReflectorClient()
+
+        this.reflectorClient.setHandler((e)=>{
+            console.log("reflectorClient: handler:", e);
+        })
+        this.reflectorClient.start();
+        */
     }
 
     async afterLayoutReady(e){
@@ -149,18 +170,56 @@ class App{
     async initBrowsePage(){
         this.schemaListEl = $("#schema-list");
         this.refreshBrowsePage();
+        let mainEl = $("main");
+        let browseEl = $("#browse");
+        let footerEl = $(".mdl-mega-footer");
+        mainEl.addEventListener("scroll", (event)=>{
+            if(!browseEl.classList.contains("is-active"))
+                return;
+            
+            let contentHeight = mainEl.scrollHeight - footerEl.offsetHeight;
+            let scrolled = mainEl.scrollTop + mainEl.offsetHeight;
+            //let height_90 = contentHeight*0.9;
+            let margin = 500;
+            /*
+            console.log(
+                "contentHeight", contentHeight, 
+                "offsetHeight", mainEl.offsetHeight, 
+                "scrollTop", mainEl.scrollTop , 
+                "scrolled", scrolled, 
+                //"height_90", height_90,
+                //scrolled>height_90
+            )
+            */
+            if (scrolled>contentHeight-margin){
+                this.refreshBrowsePage();
+            }
+        })
     }
 
     async refreshBrowsePage(){
-        let pubkeys = await this.dnft.getMintPubkeys(0n, 100n);
-        console.log("getMintPubkeys: ", pubkeys)
-        let index = 1;
+        if (this._browseLoading)
+            return
+        this._browseLoading = true;
+        let count = 5n;
+        let mainEl = $("main");
+        let start = this._startIndex || 0n;
+        let pubkeys = await this.dnft.getMintPubkeys(start, start+count);
+        let scrollTop = mainEl.scrollTop;
+        console.log("getMintPubkeys: start:", start, "pubkeys:", pubkeys)
+        let index = start+1n;
         for (let pubkey of pubkeys){
             let data = await this.dnft.getMintData(pubkey);
-            console.log("pubkey data", pubkey, data);
+            //console.log("pubkey data", pubkey, data);
             let el = this.createMinRow(index++, pubkey, data);
             this.schemaListEl.appendChild(el);
         }
+        let length = pubkeys.length;
+        if (length){
+            this._startIndex = start + BigInt(length);
+            mainEl.scrollTop = scrollTop;
+        }
+        this._browseLoading = false;
     }
 
     createMinRow(index, pubkey, data){
@@ -314,16 +373,13 @@ class App{
 
             console.log("fields[0]", fields[0].dataType(), fields[0].name(), fields[0].description())
             let schema = new this.dnft.Schema(fields)
-            let pubkey = await this.dnft.createMint(schema)
+            let ids = await this.dnft.createMint(schema)
             .catch(err=>{
                 console.log("Unable to create MINT: ", err);
             })
 
-            if(pubkey){
-                console.log("createMint: result", pubkey, pubkey.toString());
-                this.refreshBrowsePage();
-
-                this.loadSchema(pubkey);
+            if(ids){
+                console.log("createMint: result", ids);
             }
         })
 

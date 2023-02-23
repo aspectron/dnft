@@ -29,8 +29,6 @@ pub enum Data {
     // Table(Vec<(Data, Data)>),
 }
 
-
-
 #[cfg(not(target_os = "solana"))]
 impl fmt::Display for Data {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -144,69 +142,67 @@ impl fmt::Display for Data {
 //             }
 //         }
 
-
 //         #[derive(Debug, Clone, BorshSerialize, BorshDeserialize)]
 //         pub struct Hash256 {
 //             hash: [u8; 32],
 //         }
 //     }else{
 
-        u16_try_from! {
-            #[allow(non_camel_case_types)]
-            #[derive(Debug, Clone, Copy, BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
-            #[wasm_bindgen]
-            #[repr(u16)]
-            pub enum DataType {
-                Bool,
-                u8,
-                u16,
-                u32,
-                u64,
-                u128,
-                i8,
-                i16,
-                i32,
-                i64,
-                f32,
-                f64,
-                String,
-                PageUrl,
-                ImageUrl,
-                Geo,
-                Pubkey,
-                Array,
-                Table,
-                // TODO
-                // Hash
-            }
-        }
+u16_try_from! {
+    #[allow(non_camel_case_types)]
+    #[derive(Debug, Clone, Copy, BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
+    #[wasm_bindgen]
+    #[repr(u16)]
+    pub enum DataType {
+        Bool,
+        u8,
+        u16,
+        u32,
+        u64,
+        u128,
+        i8,
+        i16,
+        i32,
+        i64,
+        f32,
+        f64,
+        String,
+        PageUrl,
+        ImageUrl,
+        Geo,
+        Pubkey,
+        Array,
+        Table,
+        // TODO
+        // Hash
+    }
+}
 
-        // #[derive(Debug, Clone, TryFromJsValue, BorshSerialize, BorshDeserialize)]
-        #[derive(Debug, Clone, BorshSerialize, BorshDeserialize)]
-        #[wasm_bindgen]
-        pub struct Geo {
-            pub latitude: f64,
-            pub longitude: f64,
-        }
+// #[derive(Debug, Clone, TryFromJsValue, BorshSerialize, BorshDeserialize)]
+#[derive(Debug, Clone, BorshSerialize, BorshDeserialize)]
+#[wasm_bindgen]
+pub struct Geo {
+    pub latitude: f64,
+    pub longitude: f64,
+}
 
-        #[wasm_bindgen]
-        impl Geo {
-            #[wasm_bindgen(constructor)]
-            pub fn new(latitude: f64, longitude: f64) -> Self {
-                Self {
-                    latitude,
-                    longitude,
-                }
-            }
+#[wasm_bindgen]
+impl Geo {
+    #[wasm_bindgen(constructor)]
+    pub fn new(latitude: f64, longitude: f64) -> Self {
+        Self {
+            latitude,
+            longitude,
         }
+    }
+}
 
-
-        // #[derive(Debug, Clone, TryFromJsValue, BorshSerialize, BorshDeserialize)]
-        #[derive(Debug, Clone, BorshSerialize, BorshDeserialize)]
-        #[wasm_bindgen]
-        pub struct Hash256 {
-            hash: [u8; 32],
-        }
+// #[derive(Debug, Clone, TryFromJsValue, BorshSerialize, BorshDeserialize)]
+#[derive(Debug, Clone, BorshSerialize, BorshDeserialize)]
+#[wasm_bindgen]
+pub struct Hash256 {
+    hash: [u8; 32],
+}
 
 cfg_if! {
 
@@ -230,9 +226,6 @@ cfg_if! {
 }
 //     }
 // }
-
-
-
 
 // TODO
 #[derive(Debug, Clone, BorshSerialize, BorshDeserialize)]

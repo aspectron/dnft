@@ -137,9 +137,10 @@ mod wasm {
     pub async fn create_mint(schema: Schema) -> Result<JsValue, JsValue> {
         let authority = Transport::global()?.get_authority_pubkey()?;
         let tx = Mint::create(&authority, &schema.into()).await?;
-        let mint_account_pubkey = tx.target_account()?;
-        tx.execute().await?;
-        Ok(to_value(&mint_account_pubkey.to_string()).unwrap())
+        //let mint_account_pubkey = tx.target_account()?;
+        let ids = tx.ids()?;
+        tx.post().await?;
+        Ok(to_value(&ids).unwrap())
     }
 
     /// Returns general mint information

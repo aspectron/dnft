@@ -9,12 +9,12 @@ pub type DataVec = Vec<program::Data>;
 
 #[derive(Clone, Debug, BorshSerialize, BorshDeserialize)]
 pub struct TokenCreationArgs {
-    pub data : Vec<Option<program::Data>>
+    pub data: Vec<Option<program::Data>>,
 }
 
 #[derive(Clone, Debug, BorshSerialize, BorshDeserialize)]
 pub struct TokenUpdateArgs {
-    pub data : Vec<(u16,program::Data)>
+    pub data: Vec<(u16, program::Data)>,
 }
 
 #[derive(Meta, Copy, Clone)]
@@ -58,11 +58,8 @@ impl<'info, 'refs> Token<'info, 'refs> {
         Ok(())
     }
 
-    pub fn update_data(&self, mint: &Mint, _args : &TokenCreationArgs) -> ProgramResult {
-
-        if let Some(_data_types) = mint.data_types.load()? {
-
-        }
+    pub fn update_data(&self, mint: &Mint, _args: &TokenCreationArgs) -> ProgramResult {
+        if let Some(_data_types) = mint.data_types.load()? {}
 
         Ok(())
     }
