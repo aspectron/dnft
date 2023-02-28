@@ -19,8 +19,10 @@ pub enum Data {
     Flags32(u32),
     Flags64(u64),
     String(String),
-    PageUrl(String),
-    ImageUrl(String),
+    // Url(String),
+    Url(Url),
+    // PageUrl(String),
+    // ImageUrl(String),
     // ResourceUrl(String),
     Date(u32), // <-- TODO
     Time(u32), // <-- TODO
@@ -49,8 +51,9 @@ impl Data {
             Data::Flags32(_) => DataType::Flags32,
             Data::Flags64(_) => DataType::Flags64,
             Data::String(_) => DataType::String,
-            Data::PageUrl(_) => DataType::PageUrl,
-            Data::ImageUrl(_) => DataType::ImageUrl,
+            Data::Url(_) => DataType::Url,
+            // Data::PageUrl(_) => DataType::PageUrl,
+            // Data::ImageUrl(_) => DataType::ImageUrl,
             Data::Date(_) => DataType::Date,
             Data::Time(_) => DataType::Time,
             Data::Geo(_) => DataType::Geo,
@@ -116,12 +119,15 @@ impl fmt::Display for Data {
             Data::String(v) => {
                 write!(f, "{v}")
             }
-            Data::PageUrl(v) => {
+            Data::Url(v) => {
                 write!(f, "{v}")
             }
-            Data::ImageUrl(v) => {
-                write!(f, "{v}")
-            }
+            // Data::PageUrl(v) => {
+            //     write!(f, "{v}")
+            // }
+            // Data::ImageUrl(v) => {
+            //     write!(f, "{v}")
+            // }
             Data::Geo(v) => {
                 write!(f, "{},{}", v.latitude, v.longitude)
             }
@@ -213,8 +219,9 @@ u16_try_from! {
         String,
         Flags32,
         Flags64,
-        PageUrl,
-        ImageUrl,
+        Url,
+        // PageUrl,
+        // ImageUrl,
         Date,
         Time,
         Geo,
@@ -276,8 +283,39 @@ cfg_if! {
 // }
 
 // TODO
-#[derive(Debug, Clone, BorshSerialize, BorshDeserialize)]
+#[derive(Debug, Clone, BorshSerialize, BorshDeserialize, Serialize, Deserialize, Eq, PartialEq)]
+pub enum UrlType {
+    StorageProviderAccess,
+    Page,
+    Image,
+}
+
+#[derive(Debug, Clone, BorshSerialize, BorshDeserialize, Serialize, Deserialize, Eq, PartialEq)]
+#[serde(rename_all = "kebab-case")]
 pub enum Url {
+    StorageProviderAccess(String),
     Page(String),
     Image(String),
+}
+
+#[cfg(not(target_os = "solana"))]
+impl fmt::Display for Url {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // use super::Data;
+        match self {
+            Url::StorageProviderAccess(url) => write!(f, "{}", url),
+            Url::Page(url) => write!(f, "{}", url),
+            Url::Image(url) => write!(f, "{}", url),
+        }
+    }
+}
+
+impl From<(UrlType, &str)> for Url {
+    fn from((kind, url): (UrlType, &str)) -> Self {
+        match kind {
+            UrlType::StorageProviderAccess => Url::StorageProviderAccess(url.to_string()),
+            UrlType::Page => Url::Page(url.to_string()),
+            UrlType::Image => Url::Image(url.to_string()),
+        }
+    }
 }

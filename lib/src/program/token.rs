@@ -37,7 +37,8 @@ pub struct Token<'info, 'refs> {
     pub meta: RefCell<&'info mut TokenMeta>,
     pub store: SegmentStore<'info, 'refs>,
     // ---
-    pub data: Serialized<'info, 'refs, DataVec>,
+    pub data: Serialized<'info, 'refs, Vec<program::Data>>,
+    // pub exchange: Serialized<'info, 'refs, program::Rules>,
 }
 
 impl<'info, 'refs> Token<'info, 'refs> {
@@ -84,6 +85,13 @@ impl<'info, 'refs> Token<'info, 'refs> {
 
         Ok(())
     }
+
+    // pub fn exchange(ctx: &ContextReference) -> ProgramResult {
+
+
+    //     // - LIST FOR SALE
+
+    // }
 
     // pub fn update(ctx: &ContextReference) -> ProgramResult {
     //     let mint = Mint::try_load(&ctx.handler_accounts[0])?;

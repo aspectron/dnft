@@ -3,7 +3,8 @@ use super::result::Result;
 use crate::prelude::*;
 // use crate::program;
 // use crate::program::DataType;
-use program::DataType;
+use program::{DataType, Url, UrlType};
+// use program::Url;
 
 #[derive(Debug, Clone, TryFromJsValue)]
 #[wasm_bindgen]
@@ -124,24 +125,30 @@ impl TryFrom<(DataType, Vec<JsValue>)> for program::Data {
                     .ok_or_else(|| JsError::new("Supplied argument must be a string"))?;
                 program::Data::String(v)
             }
-            DataType::PageUrl => {
-                ensure_args(&args, 1)?;
-                let v = args
+            DataType::Url => {
+                ensure_args(&args, 2)?;
+                let url_str = args
                     .get(0)
                     .unwrap()
                     .as_string()
                     .ok_or_else(|| JsError::new("Supplied argument must be a string"))?;
-                program::Data::PageUrl(v)
+                let kind = args.get(0).unwrap().clone();
+                let kind: UrlType = from_value(kind).map_err(|err| {
+                    JsError::new(&format!("Supplied argument must be a URL type: {err}"))
+                })?;
+
+                let url: Url = (kind, url_str.as_str()).into();
+                program::Data::Url(url)
             }
-            DataType::ImageUrl => {
-                ensure_args(&args, 1)?;
-                let v = args
-                    .get(0)
-                    .unwrap()
-                    .as_string()
-                    .ok_or_else(|| JsError::new("Supplied argument must be a string"))?;
-                program::Data::ImageUrl(v)
-            }
+            // DataType::ImageUrl => {
+            //     ensure_args(&args, 1)?;
+            //     let v = args
+            //         .get(0)
+            //         .unwrap()
+            //         .as_string()
+            //         .ok_or_else(|| JsError::new("Supplied argument must be a string"))?;
+            //     program::Data::Url(Url::Image(v))
+            // }
             // DataType::Geo => {
             //     ensure_args(&args, 1)?;
             //     let v: program::Geo = args
