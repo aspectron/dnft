@@ -2,9 +2,9 @@
 //! Storage Provider Index
 //!
 
-use crate::prelude::*;
-use kaizen::error::program_error_code;
-use program::DataType;
+// use crate::prelude::*;
+// use kaizen::error::program_error_code;
+// use program::DataType;
 // use program::Root;
 // use program::Data;
 
@@ -14,11 +14,11 @@ pub enum StorageProviderData {
     DataUrl,
 }
 
-const STORAGE_PROVIDER_SCHEMA: [(StorageProviderData, DataType); 3] = [
-    (StorageProviderData::Name, DataType::String),
-    (StorageProviderData::SiteUrl, DataType::Url),
-    (StorageProviderData::DataUrl, DataType::Url),
-];
+// const STORAGE_PROVIDER_SCHEMA: [(StorageProviderData, DataType); 3] = [
+//     (StorageProviderData::Name, DataType::String),
+//     (StorageProviderData::SiteUrl, DataType::Url),
+//     (StorageProviderData::DataUrl, DataType::Url),
+// ];
 
 // #[derive(Clone, Debug, Default, BorshSerialize, BorshDeserialize)]
 // pub struct MintCreationArgs {

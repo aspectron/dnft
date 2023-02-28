@@ -46,6 +46,7 @@ mod wasm {
         let mint = Pubkey::from_value(&mint)?;
         let authority = Transport::global()?.get_authority_pubkey()?;
         let args = TokenCreateFinalArgs {
+            available: 1,
             data: Default::default(),
         };
         let tx = Token::create(&authority, &mint, &args).await?;

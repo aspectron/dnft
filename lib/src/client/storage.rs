@@ -16,10 +16,11 @@ impl StorageProviderSchema {
         if self.name.is_empty() || self.provider_url.is_empty() || self.data_url.is_empty() {
             return Err(error!("Storage Provider Schema data is empty"));
         }
-        let mut data = Vec::new();
-        data.push(Data::String(self.name.clone()));
-        data.push(Data::String(self.provider_url.clone()));
-        data.push(Data::String(self.data_url.clone()));
-        Ok(data)
+
+        Ok(vec![
+            Data::String(self.name.clone()),
+            Data::String(self.provider_url.clone()),
+            Data::String(self.data_url.clone()),
+        ])
     }
 }

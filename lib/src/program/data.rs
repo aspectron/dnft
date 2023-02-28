@@ -303,9 +303,9 @@ impl fmt::Display for Url {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // use super::Data;
         match self {
-            Url::StorageProviderAccess(url) => write!(f, "{}", url),
-            Url::Page(url) => write!(f, "{}", url),
-            Url::Image(url) => write!(f, "{}", url),
+            Url::StorageProviderAccess(url) => write!(f, "{url}"),
+            Url::Page(url) => write!(f, "{url}"),
+            Url::Image(url) => write!(f, "{url}"),
         }
     }
 }

@@ -32,10 +32,9 @@ pub enum ExchangeMechanics {
 //     pub mechanics: ExchangeMechanics,
 // }
 
-
 // #[derive(Clone, BorshSerialize, BorshDeserialize)]
 // pub enum ExchangeOp {
 //     List,
 //     Unlist,
-    
+
 // }

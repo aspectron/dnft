@@ -27,8 +27,8 @@ pub mod tests {
 
         println!("run test...");
 
-        //run_test().await?;
-        run_mint_test().await?;
+        run_test().await?;
+        //run_mint_test().await?;
 
         log_info!("");
         if transport.mode().is_emulator() {
@@ -73,8 +73,8 @@ pub mod tests {
         }
 
         // ----------------------------------------------------------------------------
-        const MAX_MINTS: usize = 3;
-        const MAX_TOKENS: usize = 5;
+        const MAX_MINTS: usize = 1;
+        const MAX_TOKENS: usize = 2;
         // ----------------------------------------------------------------------------
 
         let mut mint_pubkeys = vec![];
@@ -86,6 +86,7 @@ pub mod tests {
                 program::DataType::u8,
                 program::DataType::String,
                 program::DataType::u64,
+                program::DataType::Url,
             ];
 
             let args = MintCreationArgs {
@@ -116,7 +117,16 @@ pub mod tests {
                     .expect("¯\\_(ツ)_/¯");
 
                 let args = program::TokenCreateFinalArgs {
-                    data: Default::default(),
+                    available: token_seq as u8,
+                    data: vec![
+                        program::Data::u32(20),
+                        program::Data::u8(token_seq as u8),
+                        program::Data::String("hello".to_string()),
+                        program::Data::u64(5),
+                        program::Data::Url(program::Url::Image(
+                            "https://tinyurl.com/mzs8fxya".to_string(),
+                        )),
+                    ],
                 };
                 let tx = client::Token::create(&authority, mint_container.pubkey(), &args).await?;
                 let target_account_pubkey = tx.target_account()?;

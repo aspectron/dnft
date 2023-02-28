@@ -10,11 +10,13 @@ pub type DataVec = Vec<program::Data>;
 
 #[derive(Default, Clone, Debug, BorshSerialize, BorshDeserialize)]
 pub struct TokenCreateFinalArgs {
+    pub available: u8,
     pub data: Vec<Data>,
 }
 
 #[derive(Default, Clone, Debug, BorshSerialize, BorshDeserialize)]
 pub struct TokenUpdateArgs {
+    pub available: Option<u8>,
     pub data: Vec<(u16, program::Data)>,
     // pub data: TokenDataArgs,
 }
@@ -30,6 +32,7 @@ pub struct TokenMeta {
     version: u32,
     // identity: Pubkey,
     mint: Pubkey,
+    available: u8,
 }
 
 #[container(Containers::Token)]
@@ -77,6 +80,7 @@ impl<'info, 'refs> Token<'info, 'refs> {
         let mut meta = token.meta.borrow_mut();
         meta.set_version(1);
         meta.set_mint(*mint.pubkey());
+        meta.set_available(args.available);
         drop(meta);
 
         token.data.store(&args.data)?;
@@ -87,7 +91,6 @@ impl<'info, 'refs> Token<'info, 'refs> {
     }
 
     // pub fn exchange(ctx: &ContextReference) -> ProgramResult {
-
 
     //     // - LIST FOR SALE
 
