@@ -6,3 +6,4 @@ wasm/web/LICENSE
 wasm/web/resources/js/material.js
 wasm/web/static/
 *.json
+test/node_modules
