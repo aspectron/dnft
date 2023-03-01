@@ -23,3 +23,11 @@ Security, Vulnerabilities and Spam:
 
 - Like any asset, the token has a dedicated account and its authenticity should be validated by the account key.
 - Anyone can create as many tokens as they like - it is the responsibility of the data service providers and applications to filter out invalid tokens.
+
+
+#### Setup development environment
+- Start test validator: `solana-test-validator`, then open new terminal window/tab
+- clone this repository `git clone https://github.com/aspectron/dnft.git`
+- Build and deploy program: `cd dnft/program && ./build && ./deploy`
+- Build wasm : `cd ../wasm && ./build-web-dev`
+- Start http server : `cd ./web && simple-http server ./`
