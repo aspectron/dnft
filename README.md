@@ -30,4 +30,4 @@ Security, Vulnerabilities and Spam:
 - clone this repository `git clone https://github.com/aspectron/dnft.git`
 - Build and deploy program: `cd dnft/program && ./build && ./deploy`
 - Build wasm : `cd ../wasm && ./build-web-dev`
-- Start http server : `cd ./web && simple-http server ./`
+- Start http server : `cd ./web && simple-http-server ./`
