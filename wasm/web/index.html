@@ -89,9 +89,29 @@
           console.log("program_id: ",program_id, "authority: ",authority);
           console.dir(dnft)
           //let transport = await dnft.Transport.InProcUnitTests(program_id,authority);
-          let transport = new dnft.Transport("http://localhost:8899");
+          let transport = await new dnft.Transport("http://localhost:8899");
           console.log("transport", transport)
           console.log("init kaizen done");
+
+          let mint = new dnft.Pubkey("6QJ6DFusKuQMdZLrQixdGFmC8WLnzMSuq9KJPpavbhrS");
+          let accounts = await transport.getProgramAccounts(program_id, {
+            filters: [
+                {
+                    memcmp: {
+                        offset: 8, // number of bytes
+                        bytes: mint.toString(), // base58 encoded string
+                    },
+                },
+                {
+                    memcmp: {
+                        offset: 40, // number of bytes
+                        bytes: "1" //base58.encode([0]), // base58 encoded string
+                    },
+                },
+            ]
+          });
+
+          console.log("getProgramAccounts:::: ", accounts);
 
           //await dnft.createRoot();
           //let a = dnft.check_f64_number("-1.7976931348623158e+308");
