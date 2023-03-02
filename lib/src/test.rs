@@ -193,11 +193,10 @@ pub mod tests {
 
             let config = GetProgramAccountsConfig::new()
                 .add_filters(vec![
-                    GetProgramAccountsFilter::MemcmpEncodedBase58(8, pubkey.to_string()),
-                    GetProgramAccountsFilter::MemcmpEncodeBase58(40, vec![1]),
+                    AccountFilter::MemcmpEncodedBase58(8, pubkey.to_string()),
+                    AccountFilter::MemcmpEncodeBase58(40, vec![1]),
                 ])?
-                .encoding(UiAccountEncoding::Base64)?
-                .build()?;
+                .encoding(AccountEncoding::Base64)?;
 
             let accounts = transport
                 .get_program_accounts_with_config(&crate::program_id(), config)
