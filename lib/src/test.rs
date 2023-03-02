@@ -1,5 +1,6 @@
 #[cfg(not(target_os = "solana"))]
 pub mod tests {
+    use crate::api::*;
     use crate::prelude::*;
     use kaizen::result::Result;
     use program::MintCreationArgs;
@@ -27,8 +28,8 @@ pub mod tests {
 
         println!("run test...");
 
-        run_test().await?;
-        //run_mint_test().await?;
+        //run_test().await?;
+        run_mint_test().await?;
 
         log_info!("");
         if transport.mode().is_emulator() {
@@ -177,61 +178,34 @@ pub mod tests {
         Ok(())
     }
 
+    #[wasm_bindgen]
     pub async fn run_mint_test() -> Result<()> {
+        let transport = Transport::global()?;
         let pubkeys = crate::client::root::Root::get_mint_pubkeys(0, 100).await?;
-        log_trace!("min pubkeys: {:?}", pubkeys);
+        log_trace!("mint pubkeys: {:?}", pubkeys);
         for pubkey in pubkeys {
             let data = crate::client::mint::Mint::get_data(pubkey).await?;
-            log_trace!("min data: {:?}", data);
+            log_trace!(
+                "mint {:02X?} => data: {:?}",
+                pubkey.to_bytes().to_vec(),
+                data
+            );
+
+            let config = GetProgramAccountsConfig::new()
+                .add_filters(vec![
+                    GetProgramAccountsFilter::MemcmpEncodedBase58(8, pubkey.to_string()),
+                    GetProgramAccountsFilter::MemcmpEncodeBase58(40, vec![1]),
+                ])?
+                .encoding(UiAccountEncoding::Base64)?
+                .build()?;
+
+            let accounts = transport
+                .get_program_accounts_with_config(&crate::program_id(), config)
+                .await?;
+
+            log_trace!("accounts: {accounts:#?}");
         }
 
         Ok(())
     }
-    /*
-    #[wasm_bindgen(js_name = "createDnftMint")]
-    pub async fn create_dnft_mint(schema: Schema) -> Result<Pubkey> {
-        let transport = Transport::global()?;
-        if let Some(emulator) = transport.emulator() {
-            let authority = Pubkey::from_str(AUTHORITY)?;
-            transport.set_custom_authority(Some(authority))?;
-            emulator
-                .fund(
-                    &authority,
-                    &Pubkey::default(),
-                    utils::sol_to_lamports(500.0),
-                )
-                .await?;
-        }
-
-        let authority = transport.get_authority_pubkey()?;
-
-        // ----------------------------------------------------------------------------
-
-        log_info!("creating root ----------------------------------------------------------------------------");
-        let args = program::RootCreationArgs {};
-        let tx = client::Root::create(&authority, &args).await?;
-        let target_account_pubkey = tx.target_account()?;
-        tx.execute().await?;
-        let root_container = load_container::<program::Root>(&target_account_pubkey)
-            .await?
-            .expect("¯\\_(ツ)_/¯");
-        log_info!("root creation ok {}", root_container.pubkey());
-
-        // ----------------------------------------------------------------------------
-
-        log_info!("creating mint ----------------------------------------------------------------------------");
-        let args: MintCreationArgs = schema.into();
-
-        let tx = client::Mint::create(&authority, &args).await?;
-        let mint_account_pubkey = tx.target_account()?;
-        tx.execute().await?;
-        let mint_container = load_container::<program::Mint>(&mint_account_pubkey)
-            .await?
-            .expect("¯\\_(ツ)_/¯");
-        let key = mint_container.pubkey();
-        log_info!("mint creation ok {}", key);
-
-        Ok(*key)
-    }
-    */
 }
