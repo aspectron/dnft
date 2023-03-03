@@ -261,11 +261,8 @@ class App{
                 let el = document.createElement("div");
                 let value = data[index];
                 console.log("index, type, value", index, field.type, value)
-                if (["ImageUrl", "PageUrl", "StorageProviderAccess"].includes(field.type)){
-                    if (field.type == "ImageUrl"){
-                        img.style.backgroundImage = `url(${value.image})`;
-                    }
-                    value = value.image||value.page||value.storageProviderAccess;
+                if (field.type == "ImageUrl"){
+                    img.style.backgroundImage = `url(${value})`;
                 }
                 el.innerHTML = `<label>${field.name}: </label> <span>${value||""}</span>`;
                 description.appendChild(el);

@@ -149,14 +149,14 @@ impl fmt::Display for Data {
 #[cfg(not(target_os = "solana"))]
 use wasm_bindgen::prelude::*;
 
-#[cfg(not(target_os = "solana"))]
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub enum UrlInfo{
-    Image(String),
-    Page(String),
-    StorageProviderAccess(String)
-}
+// #[cfg(not(target_os = "solana"))]
+// #[derive(Debug, Serialize, Deserialize)]
+// #[serde(rename_all = "camelCase")]
+// pub enum UrlInfo{
+//     Image(String),
+//     Page(String),
+//     StorageProviderAccess(String)
+// }
 
 #[cfg(not(target_os = "solana"))]
 impl From<Data> for JsValue{
@@ -180,13 +180,13 @@ impl From<Data> for JsValue{
             Data::Url(v) => {
                 match v{
                     Url::Image(base, url)=>{
-                        to_value(&UrlInfo::Image(Url::build_url(base, &url))).unwrap()
+                        Url::build_url(base, &url).into()
                     },
                     Url::Page(base, url)=>{
-                        to_value(&UrlInfo::Page(Url::build_url(base, &url))).unwrap()
+                        Url::build_url(base, &url).into()
                     },
                     Url::StorageProviderAccess(url)=>{
-                        to_value(&UrlInfo::StorageProviderAccess(url)).unwrap()
+                        url.into()
                     },
                 }
             },
