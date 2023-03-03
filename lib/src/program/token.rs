@@ -31,8 +31,10 @@ pub struct TokenUpdateArgs {
 pub struct TokenMeta {
     version: u32,
     // identity: Pubkey,
+    page : u32, // TODO - derive from sequence
     mint: Pubkey,
-    available: u8,
+    available: u8, // TODO - remov this
+    sale_type : program::SaleType,
 }
 
 #[container(Containers::Token)]
