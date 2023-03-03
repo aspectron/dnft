@@ -28,7 +28,7 @@ pub mod tests {
 
         println!("run test...");
 
-        //run_test().await?;
+        run_test().await?;
         run_mint_test().await?;
 
         log_info!("");
@@ -83,16 +83,29 @@ pub mod tests {
         for mint_seq in 0..MAX_MINTS {
             log_info!("creating mint {mint_seq}");
             let data_types = vec![
+                program::DataType::String,
                 program::DataType::u32,
                 program::DataType::u8,
-                program::DataType::String,
                 program::DataType::u64,
-                program::DataType::Url,
+                program::DataType::ImageUrl,
             ];
 
             let args = MintCreationArgs {
                 data_types: Some(data_types),
-                ..MintCreationArgs::default()
+                names: Some(vec![
+                    "Name".to_string(),
+                    "Number".to_string(),
+                    "Age".to_string(),
+                    "Index".to_string(),
+                    "Avatar".to_string(),
+                ]),
+                descriptions: Some(vec![
+                    "Your full name".to_string(),
+                    "Any number".to_string(),
+                    "Age".to_string(),
+                    "".to_string(),
+                    "Avatar image url. Use any shorten url service".to_string(),
+                ])
             };
 
             let tx = client::Mint::create(&authority, &args).await?;
@@ -118,14 +131,18 @@ pub mod tests {
                     .expect("¯\\_(ツ)_/¯");
 
                 let args = program::TokenCreateFinalArgs {
-                    available: token_seq as u8,
+                    available: 1,
                     data: vec![
+                        program::Data::String("Hello".to_string()),
                         program::Data::u32(20),
-                        program::Data::u8(token_seq as u8),
-                        program::Data::String("hello".to_string()),
+                        program::Data::u8((token_seq+1) as u8),
                         program::Data::u64(5),
-                        program::Data::Url(program::Url::Image(
-                            "https://tinyurl.com/mzs8fxya".to_string(),
+                        program::Data::Url(program::Url::image(
+                            if token_seq==0 {
+                                "https://tinyurl.com/mzs8fxya"
+                            }else{
+                                "https://images.freeimages.com/images/large-previews/028/green-unicorn-1578145.jpg"
+                            },
                         )),
                     ],
                 };
@@ -186,8 +203,8 @@ pub mod tests {
         for pubkey in pubkeys {
             let data = crate::client::mint::Mint::get_data(pubkey).await?;
             log_trace!(
-                "mint {:02X?} => data: {:?}",
-                pubkey.to_bytes().to_vec(),
+                "mint {} => data: {:?}",
+                pubkey.to_string(),
                 data
             );
 

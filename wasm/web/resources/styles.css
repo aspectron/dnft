@@ -102,8 +102,9 @@ h1, h2, h3, h4 {
   visibility: hidden;
 }
 
-#mint-dnft-main-container>.mdl-tabs>.mdl-tabs__tab-bar{
-  display:none;
+.mint-form-dialog{
+  max-width:600px;
+  width:90vw;
 }
 
 .form-field--with-info{
@@ -143,8 +144,8 @@ h1, h2, h3, h4 {
 }
 
 .form-panel{
-  padding:20px;
-  border: 1px solid rgba(0,0,0,.12);
+  padding:20px 0px;
+  /*border: 1px solid rgba(0,0,0,.12);*/
 }
 .form-panel .form-field--with-info{
   padding-top:7px;
@@ -216,6 +217,10 @@ td.actions .material-icons{
   max-width:700px;
   width:90%;
   margin: 0px auto 100px;
+}
+.main-container#browse-nft-container{
+  max-width:1110px;
+  width:90%;
 }
 .mdl-textfield.block{
   display:block;
@@ -448,4 +453,66 @@ td.actions .material-icons{
 .wallet-connect-container:not(.connected) .connected-msg,
 .wallet-connect-container.connected .connect-btn{
   display:none;
+}
+
+.bold{font-weight: bold;}
+.big{font-size:1.3rem;}
+.small{font-size:0.9rem;}
+
+.mdl-dnft .nft-panel{
+  /*
+  width:400px;
+  margin: auto;
+  */
+  max-width:100%;
+  margin-bottom:20px;
+  display:inline-flex;
+}
+.nft-image{
+  background:center/cover no-repeat rgb(103,59,183, 0.65);
+}
+.nft-panel .mdl-card__actions{
+  text-align: right;
+}
+.nft-panel .mdl-card__title{
+  color: #fff;
+  height:300px;
+  position: relative;
+}
+.nft-panel .mdl-card__title-text{
+  color: #ffffff;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 15px;
+  position: absolute;
+  left:0px;
+  bottom:0px;
+  right:0px;
+  font-weight: bold;
+}
+@media (max-width: 600px){
+  .mdl-dnft .nft-panel{
+    width:calc(100% - 16px);
+  }
+}
+@media (min-width: 800px) and (max-width: 1000px){
+  .mdl-dnft .nft-panel{
+    width:calc(50% - 16px);
+  }
+}
+
+/*
+@media (min-width: 1000px){
+  .mdl-dnft .nft-panel{
+    width: 400px;
+  }
+}
+*/
+
+.mdl-dnft form.search-form{
+  margin-top:0px;
+  padding:15px;
+}
+.search-form>h1{
+  font-size:2rem;
+  margin-top:0px;
 }

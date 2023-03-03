@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[allow(non_camel_case_types)]
-#[derive(Debug, Clone, BorshSerialize, BorshDeserialize)]
+#[derive(Debug, Clone, BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
 pub enum Data {
     // None,
     Bool(bool),
@@ -51,9 +51,13 @@ impl Data {
             Data::Flags32(_) => DataType::Flags32,
             Data::Flags64(_) => DataType::Flags64,
             Data::String(_) => DataType::String,
-            Data::Url(_) => DataType::Url,
-            // Data::PageUrl(_) => DataType::PageUrl,
-            // Data::ImageUrl(_) => DataType::ImageUrl,
+            Data::Url(url) => {
+                match url{
+                    Url::Image(_, _)=>DataType::ImageUrl,
+                    Url::Page(_, _)=>DataType::PageUrl,
+                    Url::StorageProviderAccess(_)=>DataType::StorageProviderUrl
+                }
+            },
             Data::Date(_) => DataType::Date,
             Data::Time(_) => DataType::Time,
             Data::Geo(_) => DataType::Geo,
@@ -142,60 +146,57 @@ impl fmt::Display for Data {
     }
 }
 
-// cfg_if! {
-//     if #[cfg(target_os = "solana")] {
-// // use wasm_bindgen::prelude::*;
+#[cfg(not(target_os = "solana"))]
+use wasm_bindgen::prelude::*;
 
-//         u16_try_from! {
-//             #[allow(non_camel_case_types)]
-//             #[derive(Debug, Clone, Copy, BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
-//             #[repr(u16)]
-//             pub enum DataType {
-//                 Bool,
-//                 u8,
-//                 u16,
-//                 u32,
-//                 u64,
-//                 u128,
-//                 i8,
-//                 i16,
-//                 i32,
-//                 i64,
-//                 f32,
-//                 f64,
-//                 String,
-//                 PageUrl,
-//                 ImageUrl,
-//                 Geo,
-//                 Pubkey,
-//                 Array,
-//                 Table,
-//                 // TODO
-//                 // Hash
-//             }
-//         }
+#[cfg(not(target_os = "solana"))]
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum UrlInfo{
+    Image(String),
+    Page(String),
+    StorageProviderAccess(String)
+}
 
-//         #[derive(Debug, Clone, BorshSerialize, BorshDeserialize)]
-//         // #[wasm_bindgen]
-//         pub struct Geo {
-//             pub latitude: f64,
-//             pub longitude: f64,
-//         }
-
-//         impl Geo {
-//             pub fn new(latitude: f64, longitude: f64) -> Self {
-//                 Self {
-//                     latitude,
-//                     longitude,
-//                 }
-//             }
-//         }
-
-//         #[derive(Debug, Clone, BorshSerialize, BorshDeserialize)]
-//         pub struct Hash256 {
-//             hash: [u8; 32],
-//         }
-//     }else{
+#[cfg(not(target_os = "solana"))]
+impl From<Data> for JsValue{
+    fn from(data: Data)->JsValue{
+        match data {
+            Data::Bool(v) => v.into(),
+            Data::u8(v) => v.into(),
+            Data::u16(v) => v.into(),
+            Data::u32(v) => v.into(),
+            Data::u64(v) => v.into(),
+            Data::u128(v) => v.into(),
+            Data::i8(v) => v.into(),
+            Data::i16(v) => v.into(),
+            Data::i32(v) => v.into(),
+            Data::i64(v) => v.into(),
+            Data::f32(v) => v.into(),
+            Data::f64(v) => v.into(),
+            Data::Flags32(v) => v.into(),
+            Data::Flags64(v) => v.into(),
+            Data::String(v) => v.into(),
+            Data::Url(v) => {
+                match v{
+                    Url::Image(base, url)=>{
+                        to_value(&UrlInfo::Image(Url::build_url(base, &url))).unwrap()
+                    },
+                    Url::Page(base, url)=>{
+                        to_value(&UrlInfo::Page(Url::build_url(base, &url))).unwrap()
+                    },
+                    Url::StorageProviderAccess(url)=>{
+                        to_value(&UrlInfo::StorageProviderAccess(url)).unwrap()
+                    },
+                }
+            },
+            Data::Date(v) => v.into(),
+            Data::Time(v) => v.into(),
+            Data::Geo(v) => v.into(),
+            Data::Pubkey(v) => v.into(),
+        }
+    }
+}
 
 u16_try_from! {
     #[allow(non_camel_case_types)]
@@ -219,9 +220,9 @@ u16_try_from! {
         String,
         Flags32,
         Flags64,
-        Url,
-        // PageUrl,
-        // ImageUrl,
+        PageUrl,
+        ImageUrl,
+        StorageProviderUrl,
         Date,
         Time,
         Geo,
@@ -234,7 +235,7 @@ u16_try_from! {
 }
 
 // #[derive(Debug, Clone, TryFromJsValue, BorshSerialize, BorshDeserialize)]
-#[derive(Debug, Clone, BorshSerialize, BorshDeserialize)]
+#[derive(Debug, Clone, BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
 #[wasm_bindgen]
 pub struct Geo {
     pub latitude: f64,
@@ -294,8 +295,42 @@ pub enum UrlType {
 #[serde(rename_all = "kebab-case")]
 pub enum Url {
     StorageProviderAccess(String),
-    Page(String),
-    Image(String),
+    Page(u16, String),
+    Image(u16, String),
+}
+
+#[cfg(not(target_os = "solana"))]
+impl Url{
+    pub fn parse_url(url: &str) ->(u16, String){
+        let mut parts = url.split("/");
+        parts.next();
+        parts.next();
+        if let Some(domain) = parts.next(){
+            let url_path = url.replace(&format!("https://{domain}/"), "");
+            match domain{
+                "tinyurl.com"=>(1, url_path),
+                _=>(0, url.to_string())
+            }
+        }else{
+            return (0, url.to_string())
+        }
+    }
+
+    pub fn build_url(base: u16, url: &str)->String{
+        match base{
+            1=>format!("https://tinyurl.com/{url}"),
+            _=>url.to_string()
+        }
+    }
+
+    pub fn image(url:&str)->Self{
+        let (base, url) = Self::parse_url(url);
+        Self::Image(base, url)
+    }
+    pub fn page(url:&str)->Self{
+        let (base, url) = Self::parse_url(url);
+        Self::Page(base, url)
+    }
 }
 
 #[cfg(not(target_os = "solana"))]
@@ -304,18 +339,25 @@ impl fmt::Display for Url {
         // use super::Data;
         match self {
             Url::StorageProviderAccess(url) => write!(f, "{url}"),
-            Url::Page(url) => write!(f, "{url}"),
-            Url::Image(url) => write!(f, "{url}"),
+            Url::Page(base, url) => write!(f, "{}", Self::build_url(*base, url)),
+            Url::Image(base, url) => write!(f, "{}", Self::build_url(*base, url)),
         }
     }
 }
 
+#[cfg(not(target_os = "solana"))]
 impl From<(UrlType, &str)> for Url {
     fn from((kind, url): (UrlType, &str)) -> Self {
         match kind {
             UrlType::StorageProviderAccess => Url::StorageProviderAccess(url.to_string()),
-            UrlType::Page => Url::Page(url.to_string()),
-            UrlType::Image => Url::Image(url.to_string()),
+            UrlType::Page => {
+                let (base, url) = Self::parse_url(url);
+                Url::Page(base, url)
+            },
+            UrlType::Image =>{
+                let (base, url) = Self::parse_url(url);
+                Url::Image(base, url)
+            },
         }
     }
 }

@@ -39,8 +39,10 @@ mod wasm {
     use super::Token;
     use crate::prelude::*;
     use crate::program::TokenCreateFinalArgs;
+    use kaizen::transport::api::*;
+    use solana_program::account_info::IntoAccountInfo;
 
-    /// Returns a range of mint pubkeys for a specific mint
+    /// create a token for a specific mint
     #[wasm_bindgen(js_name = "createToken")]
     pub async fn create_token(mint: JsValue) -> Result<JsValue, JsValue> {
         let mint = Pubkey::from_value(&mint)?;
@@ -53,5 +55,44 @@ mod wasm {
         let token_account_pubkey = tx.target_account()?;
         tx.post().await?;
         Ok(to_value(&token_account_pubkey.to_string()).unwrap())
+    }
+
+    /// Returns a range of mint pubkeys for a specific mint
+    #[wasm_bindgen(js_name = "getTokens")]
+    pub async fn get_tokens(mint: JsValue) -> Result<JsValue, JsValue> {
+        let mint = Pubkey::from_value(&mint)?;
+        let transport = Transport::global()?;
+        let config = GetProgramAccountsConfig::new()
+            .add_filters(vec![
+                AccountFilter::MemcmpEncodedBase58(8, mint.to_string()),
+                AccountFilter::MemcmpEncodeBase58(40, vec![1]),
+            ])?
+            .encoding(AccountEncoding::Base64)?;
+
+        let accounts = transport
+            .get_program_accounts_with_config(&crate::program_id(), config)
+            .await?;
+
+        let result = js_sys::Array::new();
+        for (key, account) in accounts{
+            let mut account_clone = account.clone();
+            let account_info = (&key, &mut account_clone).into_account_info();
+            let token = program::Token::try_load(&account_info)?;
+            let data = js_sys::Array::new();
+            if let Some(items) = token.data.load()?{
+                log_trace!("data: {items:?}");
+                for item in items.into_iter(){
+                    data.push(&item.into());
+                }
+            }
+            let item = js_sys::Array::new();
+            item.push(&key.to_string().into());
+            item.push(&data);
+            item.push(&to_value(&account).unwrap());
+
+            result.push(&item);
+        }
+
+        Ok(result.into())
     }
 }

@@ -1,21 +1,4 @@
-
 <!doctype html>
-<!--
-  Material Design Lite
-  Copyright 2015 Google Inc. All rights reserved.
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      https://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License
--->
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -93,6 +76,7 @@
           console.log("transport", transport)
           console.log("init kaizen done");
 
+          /*
           let mint = new dnft.Pubkey("6QJ6DFusKuQMdZLrQixdGFmC8WLnzMSuq9KJPpavbhrS");
           let accounts = await transport.getProgramAccounts(program_id, {
             filters: [
@@ -112,14 +96,15 @@
           });
 
           console.log("getProgramAccounts:::: ", accounts);
+          */
 
-          await dnft.run_mint_test();
+          //await dnft.run_mint_test();
 
           //await dnft.createRoot();
           //let a = dnft.check_f64_number("-1.7976931348623158e+308");
           //console.log("check_f64_number:" , a)
           
-          let app = new App(dnft);
+          let app = new App(dnft, transport);
           //dnft.run_test();
           //window.app = app
       })();
@@ -143,14 +128,36 @@
           </div>
         </div>
         <div id="top-tabs" class="mdl-layout__tab-bar mdl-js-ripple-effect mdl-color--primary-dark">
-            <a href="#browse" class="mdl-layout__tab">Browse Mints</a>
-            <a href="#create-dnft" class="mdl-layout__tab is-active">Create DNFT Mint</a>
-            <a href="#mint-dnft" class="mdl-layout__tab">Mint DNFT</a>
+            <a href="#browse" class="mdl-layout__tab is-active">Browse DNFT</a>
+            <a href="#browse-mints" class="mdl-layout__tab">Browse Mints(schema)</a>
+            <a href="#create-dnft" class="mdl-layout__tab">Create DNFT Mint</a>
         </div>
       </header>
       <main class="mdl-layout__content">
-        <div class="mdl-layout__tab-panel" id="browse">
-          <div class="main-container no-records" id="browse-main-container">
+        <div class="mdl-layout__tab-panel is-active" id="browse">
+          <div class="main-container no-records" id="browse-nft-container">
+            <h2>DNFTs</h2>
+            <div class="mdl-grid" id="nft-list">
+
+            </div>
+            <template id="nft-panel-tpl">
+              <div class="nft-panel mdl-cell mdl-card mdl-shadow--2dp">
+                <div class="nft-image mdl-card__title">
+                  <h2 class="nft-title mdl-card__title-text"></h2>
+                </div>
+                <div class="mdl-card__supporting-text">
+                  <div class="nft-description"></div>
+                </div>
+                <div class="mdl-card__actions mdl-card--border">
+                  <a href="#" class="mdl-button _mdl-button--raised">See availability</a>
+                </div>
+              </div>
+            </section>
+          </template>
+          </div>
+        </div>
+        <div class="mdl-layout__tab-panel" id="browse-mints">
+          <div class="main-container no-records" id="browse-mint-container">
             <h2>Select DNFT MINT (Schema)</h2>
             <table width="100%" class="mdl-data-table">
               <thead>
@@ -160,44 +167,23 @@
                   <th></th>
                 </tr>
               </thead>
-              <tbody id="schema-list">
-                <!--tr class="schema-item">
-                  <td class="mdl-data-table__cell--non-numeric">DNFT 1</td>
-                  <td class="mdl-data-table__cell--wrap-text">
-                    <p>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                      Cras eu tincidunt magna. Donec molestie placerat augue.
-                      Aliquam lobortis nulla nibh, ultricies tincidunt felis
-                      pharetra nec. Sed vehicula at lectus sed gravida.
-                    </p>
-                  </td>
-                  <td>
-                    <button class="mdl-button mint-dnft">
-                      Mint it
-                    </button>
-                  </td>
-                </tr>
-                <tr class="schema-item">
-                  <td class="mdl-data-table__cell--non-numeric">DNFT 2</td>
-                  <td class="mdl-data-table__cell--wrap-text">
-                    <p>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                      Cras eu tincidunt magna. Donec molestie placerat augue.
-                      Aliquam lobortis nulla nibh, ultricies tincidunt felis
-                      pharetra nec. Sed vehicula at lectus sed gravida.
-                    </p>
-                  </td>
-                  <td>
-                    <button class="mdl-button mint-dnft">
-                      Mint it
-                    </button>
-                  </td>
-                </tr-->
-              </tbody>
+              <tbody id="schema-list"></tbody>
             </table>
+            <dialog id="mint-form-dialog" class="mdl-dialog mint-form-dialog">
+              <h4 class="mdl-dialog__title">Mint DNFT</h4>
+              <div class="mdl-dialog__content">
+                <div id="mint-form-fields" class="form-panel"></div>
+              </div>
+              <div class="mdl-dialog__actions">
+                <button id="mint-dnft-btn" class="mdl-button mdl-js-button mdl-button--big mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                  Mint DNFT
+                </button>
+                <button type="button" class="mdl-button mdl-button--big close-dialog">Close</button>
+              </div>
+            </dialog>
           </div>
         </div>
-        <div class="mdl-layout__tab-panel is-active" id="create-dnft">
+        <div class="mdl-layout__tab-panel" id="create-dnft">
           <div class="main-container no-fields" id="create-dnft-main-container">
             <h2>Create DNFT MINT</h2>
 
@@ -314,19 +300,6 @@
                 <button type="button" class="mdl-button close-dialog">Close</button>
               </div>
             </dialog>
-          </div>
-        </div>
-        <div class="mdl-layout__tab-panel" id="mint-dnft">
-          <div class="main-container" id="mint-dnft-main-container">
-              <div id="mint-form-panel">
-                <h2 id="mint-form-title">Mint DNFT</h2>
-                <div id="mint-form-fields" class="mdl-shadow--2dp form-panel"></div>
-                <div class="action-bar">
-                  <button id="mint-dnft-btn" class="mdl-button mdl-js-button mdl-button--big mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-                    Mint DNFT
-                  </button>
-                </div>
-              </div>
           </div>
         </div>
         <footer class="mdl-mega-footer">

@@ -91,8 +91,10 @@ console.log("field_info", field_info)
 
 class App{
 
-    constructor(dnft){
+    constructor(dnft, transport){
         this.dnft = dnft;
+        this.transport = transport;
+        this.programId = dnft.dnft_program_id();
         this.init();
 
         window._app = this;
@@ -127,7 +129,7 @@ class App{
             console.log("txObserver:", event, data);
             if (event == "transaction-success"){
                 if (data?.transaction.name.toLowerCase().includes("creating mint")){
-                    this.refreshBrowsePage();
+                    this.loadMints();
                 }
             }
         })
@@ -168,13 +170,22 @@ class App{
     }
 
     async initBrowsePage(){
-        this.schemaListEl = $("#schema-list");
-        this.refreshBrowsePage();
         let mainEl = $("main");
+        this.schemaListEl = $("#schema-list");
+        this.nftTemplateEl = $("#nft-panel-tpl");
+        this.nftListEl = $("#nft-list");
+        this.mainEl = mainEl;
+        this.loadMints();
+        this.loadNFTs();
+
+        
         let browseEl = $("#browse");
+        let browseMintsEl = $("#browse-mints");
         let footerEl = $(".mdl-mega-footer");
         mainEl.addEventListener("scroll", (event)=>{
-            if(!browseEl.classList.contains("is-active"))
+            let isBrowseActive = browseEl.classList.contains("is-active");
+            let isBrowseMintsActive = browseMintsEl.classList.contains("is-active");
+            if(!isBrowseActive && !isBrowseMintsActive)
                 return;
             
             let contentHeight = mainEl.scrollHeight - footerEl.offsetHeight;
@@ -192,37 +203,108 @@ class App{
             )
             */
             if (scrolled>contentHeight-margin){
-                this.refreshBrowsePage();
+                if (isBrowseActive){
+                    this.loadNFTs();
+                }else{
+                    this.loadMints();
+                }
             }
         })
     }
 
-    async refreshBrowsePage(){
-        if (this._browseLoading)
+    getProgramAccounts(config){
+        return this.transport.getProgramAccounts(this.programId, config);
+    }
+
+    async loadNFTs(){
+        if (this._nftsLoading)
             return
-        this._browseLoading = true;
+        this._nftsLoading = true;
         let count = 5n;
-        let mainEl = $("main");
-        let start = this._startIndex || 0n;
+        let start = this._nftStartIndex || 0n;
         let pubkeys = await this.dnft.getMintPubkeys(start, start+count);
-        let scrollTop = mainEl.scrollTop;
+        
+        console.log("getMintPubkeys: start:", start, "pubkeys:", pubkeys)
+        let index = start+1n;
+        let elements = [];
+        for (let mint of pubkeys){
+            let minData = await this.dnft.getMintData(mint);
+            console.log("mint data", mint, minData);
+
+            let accounts = await this.dnft.getTokens(mint);
+            console.log("getProgramAccounts:::: ", accounts);
+
+            let panels = this.createNFTPanels(index++, mint, minData, accounts);
+            elements.push(...panels);
+        }
+        let scrollTop = this.mainEl.scrollTop;
+        elements.map(el=>this.nftListEl.appendChild(el));
+        let length = pubkeys.length;
+        if (length){
+            this._nftStartIndex = start + BigInt(length);
+            if (this.getActiveTabName() == "browse"){
+                this.mainEl.scrollTop = scrollTop;
+            }
+        }
+        this._nftsLoading = false;
+    }
+
+    createNFTPanels(index, mint, minData, accounts){
+        return accounts.map(([pubkey, data, account])=>{
+            const clone = this.nftTemplateEl.content.cloneNode(true);
+            let title = clone.querySelector(".nft-title");
+            title.setAttribute("title", pubkey);
+            title.innerHTML = "&nbsp;";
+            let img = clone.querySelector(".nft-image");
+            let description = clone.querySelector(".nft-description");
+            minData.schema.forEach((field, index)=>{
+                let el = document.createElement("div");
+                let value = data[index];
+                console.log("index, type, value", index, field.type, value)
+                if (["ImageUrl", "PageUrl", "StorageProviderAccess"].includes(field.type)){
+                    if (field.type == "ImageUrl"){
+                        img.style.backgroundImage = `url(${value.image})`;
+                    }
+                    value = value.image||value.page||value.storageProviderAccess;
+                }
+                el.innerHTML = `<label>${field.name}: </label> <span>${value||""}</span>`;
+                description.appendChild(el);
+                if (field.name == "Name" && typeof value == "string"){
+                    title.textContent = value;
+                }
+            });
+
+            return clone;
+        })
+    }
+
+    async loadMints(){
+        if (this._mintAccountsLoading)
+            return
+        this._mintAccountsLoading = true;
+        let count = 5n;
+        let start = this._mintAccountsStartIndex || 0n;
+        let pubkeys = await this.dnft.getMintPubkeys(start, start+count);
+        let scrollTop = this.mainEl.scrollTop;
         console.log("getMintPubkeys: start:", start, "pubkeys:", pubkeys)
         let index = start+1n;
         for (let pubkey of pubkeys){
             let data = await this.dnft.getMintData(pubkey);
             //console.log("pubkey data", pubkey, data);
-            let el = this.createMinRow(index++, pubkey, data);
+            let el = this.createMintRow(index++, pubkey, data);
             this.schemaListEl.appendChild(el);
         }
         let length = pubkeys.length;
         if (length){
-            this._startIndex = start + BigInt(length);
-            mainEl.scrollTop = scrollTop;
+            this._mintAccountsStartIndex = start + BigInt(length);
+            if (this.getActiveTabName() == "browse-mints"){
+                this.mainEl.scrollTop = scrollTop;
+            }
         }
-        this._browseLoading = false;
+        this._mintAccountsLoading = false;
     }
 
-    createMinRow(index, pubkey, data){
+    createMintRow(index, pubkey, data){
         let td_name = document.createElement("td");
         td_name.innerHTML = "DNFT "+index;
         td_name.setAttribute("class", "mdl-data-table__cell--non-numeric");
@@ -262,7 +344,6 @@ class App{
         let fields = [];
         let dataTypes = Object.keys(DataType).filter(k => !isFinite(+k));
         for (let dataType of dataTypes) {
-            //let name = ("field-"+dataType).toLowerCase();
             let descr = `Descr for ${dataType}`;
 
             fields.push(new Field(DataType[dataType], dataType, descr));
@@ -270,10 +351,6 @@ class App{
 
         for(let field of fields){
             let type = field.dataType()
-            //let checkbox = createCheckbox(type, "", "checkbox-field-type-"+type, "field-type");
-            
-            //let td_checkbox = document.createElement("td");
-            //td_checkbox.appendChild(checkbox);
 
             let td_type = document.createElement("td");
             td_type.innerHTML = field.name();
@@ -285,7 +362,6 @@ class App{
 
             let tr = document.createElement("tr");
             tr.setAttribute("data-type", type);
-            //tr.appendChild(td_checkbox);
             tr.appendChild(td_type);
             tr.appendChild(td_descr);
             this.fieldTypeListEl.appendChild(tr);
@@ -311,17 +387,6 @@ class App{
             }
 
             this.appendToFieldList(fields);
-
-            /*
-            let checkbox = tr.querySelector("input.field-type");
-            if (!checkbox)
-                return
-            if (checkbox.checked){
-                checkbox.parentElement.MaterialCheckbox.uncheck()
-            }else{
-                checkbox.parentElement.MaterialCheckbox.check()
-            }
-            */
         });
 
 
@@ -387,17 +452,20 @@ class App{
 
     async loadSchema(pubkey){
         let mintData = await this.dnft.getMintData(pubkey);
-        console.log("mintData: result", mintData);
-
         this.buildMintForm(mintData.schema);
-        this.activateMintForm();
     }
 
     initMintDnftPage(){
         let schemaListEl = $("#schema-list");
-        this.schemaListPanel = $("#browse-main-container");
-        this.mintFormPanel = $("#mint-form-panel");
+        this.mintFormDialog = $("#mint-form-dialog");
         this.mintFormFieldsEl = $("#mint-form-fields");
+        if (!this.mintFormDialog.showModal) {
+            dialogPolyfill.registerDialog(this.mintFormDialog);
+        }
+
+        this.mintFormDialog.querySelector('.close-dialog').addEventListener('click', ()=>{
+            this.mintFormDialog.close();
+        });
 
         schemaListEl.addEventListener("click", event=>{
             let btn = event.target.closest("button.mint-dnft");
@@ -405,20 +473,12 @@ class App{
                 return
             
             this.loadSchema(btn.dataset.pubkey);
-        })
-    }
-
-    activateTab(tab){
-        let tabEl = $(`#top-tabs [href='#${tab}']`);
-        tabEl?.show();
-        $(`main`).scrollTo({
-            top: 0,
-            behavior: "smooth"
+            this.mintFormDialog.showModal();
         });
-    }
 
-    activateMintForm(){
-        this.activateTab("mint-dnft");
+        $("#mint-dnft-btn").addEventListener("click", ()=>{
+            
+        })
     }
 
     buildMintForm(fields){
@@ -449,7 +509,7 @@ class App{
                 input.type = "number";
                 input.min = field_info.min[type];
                 input.max = field_info.max[type];
-            }else if(type == "ImageUrl" || type == "PageUrl"){
+            }else if(type == "Url"){
                 input.type = "url";
             }
             
@@ -557,5 +617,24 @@ class App{
             tr.appendChild(td_action);
             this.fieldListEl.appendChild(tr);
         }
+    }
+
+    activateTab(tab){
+        let tabEl = $(`#top-tabs [href='#${tab}']`);
+        tabEl?.show();
+        $(`main`).scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    }
+
+    getActiveTab(){
+        return $(`#top-tabs .mdl-layout__tab.is-active`);
+    }
+    getActiveTabName(){
+        let tabEl = this.getActiveTab();
+        if(!tabEl)
+            return "";
+        return (tabEl.getAttribute("href")??"").replace("#", "");
     }
 }
