@@ -42,6 +42,7 @@ function createCheckbox(value, label="", id="", cls=""){
     let checkbox = document.createElement('label');
     checkbox.setAttribute("class", "mdl-checkbox mdl-js-checkbox");
     checkbox.appendChild(input);
+    checkbox.input = input;
     if (label){
         let span = document.createElement('span');
         span.setAttribute("class", "mdl-checkbox__label");
@@ -52,6 +53,14 @@ function createCheckbox(value, label="", id="", cls=""){
 
     return checkbox;
 }
+const UnsignedNumberFields = ["u8", "u16", "u32", "u64", "u128"];
+const SignedNumberFields = ["i8", "i16", "i32", "i64", "i128"];
+const FloatingNumberFields = ["f32", "f64"];
+const NumberFields = [
+    ...UnsignedNumberFields,
+    ...SignedNumberFields,
+    ...FloatingNumberFields
+]
 
 const field_info = {
     min:{
@@ -127,10 +136,14 @@ class App{
         this.txObserver = new this.dnft.TransactionObserver();
         this.txObserver.setHandler(({event, data})=>{
             console.log("txObserver:", event, data);
-            if (event == "transaction-success"){
-                if (data?.transaction.name.toLowerCase().includes("creating mint")){
-                    this.loadMints();
-                }
+            if (event != "transaction-success" || !data)
+                return 
+            let name = data.transaction.name.toLowerCase()||"";
+            let accounts = data.transaction.meta.accounts;
+            if (name.includes("creating mint")){
+                this.loadMints();
+            }else if (name.includes("creating token")){
+                this.loadNFT(accounts[1], accounts[0]);
             }
         })
 
@@ -216,6 +229,15 @@ class App{
         return this.transport.getProgramAccounts(this.programId, config);
     }
 
+    async loadNFT(mintPubkey, tokenPubkey){
+        let minData = await this.dnft.getMintData(mintPubkey);
+        let account = await this.dnft.getToken(tokenPubkey);
+        console.log("getToken::::", account);
+
+        let panel = this.createNFTPanel(mintPubkey, minData, ...account);
+        this.nftListEl.appendChild(panel);
+    }
+
     async loadNFTs(){
         if (this._nftsLoading)
             return
@@ -232,7 +254,7 @@ class App{
             console.log("mint data", mint, minData);
 
             let accounts = await this.dnft.getTokens(mint);
-            console.log("getProgramAccounts:::: ", accounts);
+            console.log("getProgramAccounts::::", accounts);
 
             let panels = this.createNFTPanels(index++, mint, minData, accounts);
             elements.push(...panels);
@@ -251,28 +273,35 @@ class App{
 
     createNFTPanels(index, mint, minData, accounts){
         return accounts.map(([pubkey, data, account])=>{
-            const clone = this.nftTemplateEl.content.cloneNode(true);
-            let title = clone.querySelector(".nft-title");
-            title.setAttribute("title", pubkey);
-            title.innerHTML = "&nbsp;";
-            let img = clone.querySelector(".nft-image");
-            let description = clone.querySelector(".nft-description");
-            minData.schema.forEach((field, index)=>{
-                let el = document.createElement("div");
-                let value = data[index];
-                console.log("index, type, value", index, field.type, value)
-                if (field.type == "ImageUrl"){
-                    img.style.backgroundImage = `url(${value})`;
-                }
-                el.innerHTML = `<label>${field.name}: </label> <span>${value||""}</span>`;
-                description.appendChild(el);
-                if (field.name == "Name" && typeof value == "string"){
-                    title.textContent = value;
-                }
-            });
-
-            return clone;
+            return this.createNFTPanel(mint, minData, pubkey, data, account);
         })
+    }
+    createNFTPanel(mint, minData, pubkey, data, account){
+        const clone = this.nftTemplateEl.content.cloneNode(true);
+        let el = clone.children[0];
+        el.dataset.pubkey = pubkey;
+        el.dataset.mint = mint;
+        let title = clone.querySelector(".nft-title");
+        title.setAttribute("title", pubkey);
+        title.innerHTML = "&nbsp;";
+        let img = clone.querySelector(".nft-image");
+        let description = clone.querySelector(".nft-description");
+        minData.schema.forEach((field, index)=>{
+            let el = document.createElement("div");
+            let value = data[index];
+            //console.log("index, type, value", index, field.type, value)
+            if (field.type == "ImageUrl"){
+                img.style.backgroundImage = `url(${value})`;
+            }
+            el.innerHTML = `<label>${field.name}: </label> <span>${value||""}</span>`;
+            description.appendChild(el);
+            if (field.name == "Name" && typeof value == "string"){
+                title.textContent = value;
+            }
+        });
+
+        return clone;
+        
     }
 
     async loadMints(){
@@ -450,6 +479,7 @@ class App{
     async loadSchema(pubkey){
         let mintData = await this.dnft.getMintData(pubkey);
         this.buildMintForm(mintData.schema);
+        this.mintFormDialog._mintPubkey = pubkey;
     }
 
     initMintDnftPage(){
@@ -473,8 +503,32 @@ class App{
             this.mintFormDialog.showModal();
         });
 
-        $("#mint-dnft-btn").addEventListener("click", ()=>{
-            
+        const createData = (field, value)=>{
+            let index = this.dnft.DataType[field.type];
+            //console.log("value:", field, index, value, Data)
+            if (NumberFields.includes(field.type)){
+                value = +value;
+            }
+            return new this.dnft.Data(index, value);
+        }
+
+        $("#mint-dnft-btn").addEventListener("click", async ()=>{
+            let inputs = this.mintFormFieldsEl.querySelectorAll(".mdl-textfield__input");
+            //const { Field, DataType, Data } = this.dnft;
+            let fieldsData = [];
+            inputs.forEach(input=>{
+                let data = createData(input._field, input.value);
+                console.log("data:", data);
+                fieldsData.push(data);
+            });
+
+            let result = await this.dnft.createToken(
+                this.mintFormDialog._mintPubkey,
+                1,
+                fieldsData
+            );
+
+            console.log("mint result:", result);
         })
     }
 
@@ -495,14 +549,16 @@ class App{
         let createField = ()=>{
             if (type == "Bool"){
                 let checkbox = createCheckbox("ON", field.name);
+                checkbox.input._field = field;
                 return checkbox
             }
         
             let input = document.createElement("input");
             input.setAttribute("class", "mdl-textfield__input");
+            input._field = field;
             input.type = "text";
             
-           if(["u8", "u16", "u32", "u64", "u128", "i8", "i16", "i32", "i64", "i128", "f32", "f64"].includes(type)){
+           if(NumberFields.includes(type)){
                 input.type = "number";
                 input.min = field_info.min[type];
                 input.max = field_info.max[type];

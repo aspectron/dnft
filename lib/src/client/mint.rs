@@ -67,7 +67,7 @@ impl Mint {
     pub async fn get_data(pubkey: Pubkey) -> Result<MintData> {
         let mint = load_container::<program::Mint>(&pubkey)
             .await?
-            .ok_or_else(|| "Unable to load root container".to_string())?;
+            .ok_or_else(|| "Unable to load mint container".to_string())?;
 
         let data_types = mint
             .data_types

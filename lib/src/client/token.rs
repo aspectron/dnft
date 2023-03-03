@@ -37,27 +37,42 @@ impl Token {
 
 mod wasm {
     use super::Token;
+    use crate::client::Data;
     use crate::prelude::*;
     use crate::program::TokenCreateFinalArgs;
     use kaizen::transport::api::*;
     use solana_program::account_info::IntoAccountInfo;
+    use solana_sdk::account::Account;
+    //use serde::de::Deserialize;
 
     /// create a token for a specific mint
     #[wasm_bindgen(js_name = "createToken")]
-    pub async fn create_token(mint: JsValue) -> Result<JsValue, JsValue> {
+    pub async fn create_token(
+        mint: JsValue,
+        available: u8,
+        values: js_sys::Array,
+    ) -> Result<JsValue, JsValue> {
         let mint = Pubkey::from_value(&mint)?;
         let authority = Transport::global()?.get_authority_pubkey()?;
-        let args = TokenCreateFinalArgs {
-            available: 1,
-            data: Default::default(),
-        };
+        let mut data = vec![];
+        for index in 0..values.length() {
+            let value = values.get(index);
+            if !value.is_undefined() {
+                let value: Data = value.as_ref().try_into().unwrap();
+                data.push(value.into());
+            }
+        }
+
+        log_trace!("create_token: data: {data:?}");
+
+        let args = TokenCreateFinalArgs { available, data };
         let tx = Token::create(&authority, &mint, &args).await?;
         let token_account_pubkey = tx.target_account()?;
         tx.post().await?;
         Ok(to_value(&token_account_pubkey.to_string()).unwrap())
     }
 
-    /// Returns a range of mint pubkeys for a specific mint
+    /// Returns a tokens for a specific mint
     #[wasm_bindgen(js_name = "getTokens")]
     pub async fn get_tokens(mint: JsValue) -> Result<JsValue, JsValue> {
         let mint = Pubkey::from_value(&mint)?;
@@ -74,25 +89,42 @@ mod wasm {
             .await?;
 
         let result = js_sys::Array::new();
-        for (key, account) in accounts {
-            let mut account_clone = account.clone();
-            let account_info = (&key, &mut account_clone).into_account_info();
-            let token = program::Token::try_load(&account_info)?;
-            let data = js_sys::Array::new();
-            if let Some(items) = token.data.load()? {
-                log_trace!("data: {items:?}");
-                for item in items.into_iter() {
-                    data.push(&item.into());
-                }
-            }
-            let item = js_sys::Array::new();
-            item.push(&key.to_string().into());
-            item.push(&data);
-            item.push(&to_value(&account).unwrap());
-
-            result.push(&item);
+        for (pubkey, account) in accounts {
+            result.push(&create_account_info(&pubkey, account)?.into());
         }
 
         Ok(result.into())
+    }
+
+    /// Returns a token for a specific pubkey
+    #[wasm_bindgen(js_name = "getToken")]
+    pub async fn get_token(pubkey: JsValue) -> Result<JsValue, JsValue> {
+        let pubkey = Pubkey::from_value(&pubkey)?;
+        let transport = Transport::global()?;
+
+        let account = transport
+            .lookup(&pubkey)
+            .await?
+            .ok_or(JsValue::from("Account not found"))?;
+        let account: Account = (&account.clone_for_program()?).into();
+        Ok(create_account_info(&pubkey, account)?.into())
+    }
+
+    fn create_account_info(pubkey: &Pubkey, account: Account) -> Result<js_sys::Array, JsValue> {
+        let mut account_clone = account.clone();
+        let account_info = (pubkey, &mut account_clone).into_account_info();
+        let token = program::Token::try_load(&account_info)?;
+        let data = js_sys::Array::new();
+        if let Some(items) = token.data.load()? {
+            //log_trace!("data: {items:?}");
+            for item in items.into_iter() {
+                data.push(&item.into());
+            }
+        }
+        let item = js_sys::Array::new();
+        item.push(&pubkey.to_string().into());
+        item.push(&data);
+        item.push(&to_value(&account).unwrap());
+        Ok(item)
     }
 }

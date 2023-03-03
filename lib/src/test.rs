@@ -73,9 +73,34 @@ pub mod tests {
             log_info!("root creation ok {}", root_container.pubkey());
         }
 
+        let images = vec![
+            "https://tinyurl.com/3nnzazpv",
+            "https://images.freeimages.com/365/images/previews/f7e/abstract-rounded-rectangles-vector-graphic-3664.jpg",
+            "https://images.freeimages.com/365/images/previews/953/ham-pattern-background-17545.jpg",
+            "https://images.freeimages.com/365/images/previews/c34/abstract-colorful-yarn-background-vector-free-34204.jpg",
+            "https://images.freeimages.com/365/images/previews/f84/tulip-vector-bouquet-illustration-free-33999.jpg",
+            "https://images.freeimages.com/vhq/images/previews/7ae/exploding-gift-box-with-colorful-star-for-celebration-74578.jpg",
+            "https://images.freeimages.com/365/images/previews/def/abstract-colorful-light-waves-vector-background-3259.jpg",
+            "https://images.freeimages.com/vhq/images/previews/a6e/abstract-blue-wave-background-vector-graphic-73825.jpg",
+            "https://images.freeimages.com/vhq/images/previews/9ea/bright-stars-gorgeous-special-effects-02-vector-6216.jpg",
+            "https://images.freeimages.com/vhq/images/previews/f3d/gorgeous-diploma-certificate-template-02-vector-6248.jpg",
+        ];
+        let names = vec![
+            "Token A",
+            "Token B",
+            "Token C",
+            "The Golden Cat - A",
+            "The Golden Cat - B",
+            "The Golden Cat - C",
+            "The Golden Cat - D",
+            "The Golden Cat - E",
+            "The Golden Cat - F",
+            "The Golden Cat - G",
+        ];
+
         // ----------------------------------------------------------------------------
         const MAX_MINTS: usize = 1;
-        const MAX_TOKENS: usize = 2;
+        const MAX_TOKENS: usize = 10;
         // ----------------------------------------------------------------------------
 
         let mut mint_pubkeys = vec![];
@@ -94,17 +119,17 @@ pub mod tests {
                 data_types: Some(data_types),
                 names: Some(vec![
                     "Name".to_string(),
-                    "Number".to_string(),
-                    "Age".to_string(),
+                    "Weight".to_string(),
+                    "Score".to_string(),
                     "Index".to_string(),
-                    "Avatar".to_string(),
+                    "Image".to_string(),
                 ]),
                 descriptions: Some(vec![
-                    "Your full name".to_string(),
+                    "Token name".to_string(),
                     "Any number".to_string(),
-                    "Age".to_string(),
+                    "Score".to_string(),
                     "".to_string(),
-                    "Avatar image url. Use any shorten url service".to_string(),
+                    "Image url. Use any Url shorten service".to_string(),
                 ]),
             };
 
@@ -133,15 +158,11 @@ pub mod tests {
                 let args = program::TokenCreateFinalArgs {
                     available: 1,
                     data: vec![
-                        program::Data::String("Hello".to_string()),
-                        program::Data::u32(20),
+                        program::Data::String(names.get(token_seq).unwrap().to_string()),
+                        program::Data::u32((token_seq * 15) as u32),
                         program::Data::u8((token_seq + 1) as u8),
-                        program::Data::u64(5),
-                        program::Data::Url(program::Url::image(if token_seq == 0 {
-                            "https://tinyurl.com/mzs8fxya"
-                        } else {
-                            "https://images.freeimages.com/images/large-previews/028/green-unicorn-1578145.jpg"
-                        })),
+                        program::Data::u64((token_seq * 11) as u64),
+                        program::Data::Url(program::Url::image(images.get(token_seq).unwrap())),
                     ],
                 };
                 let tx = client::Token::create(&authority, mint_container.pubkey(), &args).await?;
