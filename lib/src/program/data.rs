@@ -51,12 +51,10 @@ impl Data {
             Data::Flags32(_) => DataType::Flags32,
             Data::Flags64(_) => DataType::Flags64,
             Data::String(_) => DataType::String,
-            Data::Url(url) => {
-                match url{
-                    Url::Image(_, _)=>DataType::ImageUrl,
-                    Url::Page(_, _)=>DataType::PageUrl,
-                    Url::StorageProviderAccess(_)=>DataType::StorageProviderUrl
-                }
+            Data::Url(url) => match url {
+                Url::Image(_, _) => DataType::ImageUrl,
+                Url::Page(_, _) => DataType::PageUrl,
+                Url::StorageProviderAccess(_) => DataType::StorageProviderUrl,
             },
             Data::Date(_) => DataType::Date,
             Data::Time(_) => DataType::Time,
@@ -159,8 +157,8 @@ use wasm_bindgen::prelude::*;
 // }
 
 #[cfg(not(target_os = "solana"))]
-impl From<Data> for JsValue{
-    fn from(data: Data)->JsValue{
+impl From<Data> for JsValue {
+    fn from(data: Data) -> JsValue {
         match data {
             Data::Bool(v) => v.into(),
             Data::u8(v) => v.into(),
@@ -177,18 +175,10 @@ impl From<Data> for JsValue{
             Data::Flags32(v) => v.into(),
             Data::Flags64(v) => v.into(),
             Data::String(v) => v.into(),
-            Data::Url(v) => {
-                match v{
-                    Url::Image(base, url)=>{
-                        Url::build_url(base, &url).into()
-                    },
-                    Url::Page(base, url)=>{
-                        Url::build_url(base, &url).into()
-                    },
-                    Url::StorageProviderAccess(url)=>{
-                        url.into()
-                    },
-                }
+            Data::Url(v) => match v {
+                Url::Image(base, url) => Url::build_url(base, &url).into(),
+                Url::Page(base, url) => Url::build_url(base, &url).into(),
+                Url::StorageProviderAccess(url) => url.into(),
             },
             Data::Date(v) => v.into(),
             Data::Time(v) => v.into(),
@@ -300,34 +290,34 @@ pub enum Url {
 }
 
 #[cfg(not(target_os = "solana"))]
-impl Url{
-    pub fn parse_url(url: &str) ->(u16, String){
-        let mut parts = url.split("/");
+impl Url {
+    pub fn parse_url(url: &str) -> (u16, String) {
+        let mut parts = url.split('/');
         parts.next();
         parts.next();
-        if let Some(domain) = parts.next(){
+        if let Some(domain) = parts.next() {
             let url_path = url.replace(&format!("https://{domain}/"), "");
-            match domain{
-                "tinyurl.com"=>(1, url_path),
-                _=>(0, url.to_string())
+            match domain {
+                "tinyurl.com" => (1, url_path),
+                _ => (0, url.to_string()),
             }
-        }else{
-            return (0, url.to_string())
+        } else {
+            (0, url.to_string())
         }
     }
 
-    pub fn build_url(base: u16, url: &str)->String{
-        match base{
-            1=>format!("https://tinyurl.com/{url}"),
-            _=>url.to_string()
+    pub fn build_url(base: u16, url: &str) -> String {
+        match base {
+            1 => format!("https://tinyurl.com/{url}"),
+            _ => url.to_string(),
         }
     }
 
-    pub fn image(url:&str)->Self{
+    pub fn image(url: &str) -> Self {
         let (base, url) = Self::parse_url(url);
         Self::Image(base, url)
     }
-    pub fn page(url:&str)->Self{
+    pub fn page(url: &str) -> Self {
         let (base, url) = Self::parse_url(url);
         Self::Page(base, url)
     }
@@ -353,11 +343,11 @@ impl From<(UrlType, &str)> for Url {
             UrlType::Page => {
                 let (base, url) = Self::parse_url(url);
                 Url::Page(base, url)
-            },
-            UrlType::Image =>{
+            }
+            UrlType::Image => {
                 let (base, url) = Self::parse_url(url);
                 Url::Image(base, url)
-            },
+            }
         }
     }
 }

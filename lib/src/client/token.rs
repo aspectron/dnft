@@ -74,14 +74,14 @@ mod wasm {
             .await?;
 
         let result = js_sys::Array::new();
-        for (key, account) in accounts{
+        for (key, account) in accounts {
             let mut account_clone = account.clone();
             let account_info = (&key, &mut account_clone).into_account_info();
             let token = program::Token::try_load(&account_info)?;
             let data = js_sys::Array::new();
-            if let Some(items) = token.data.load()?{
+            if let Some(items) = token.data.load()? {
                 log_trace!("data: {items:?}");
-                for item in items.into_iter(){
+                for item in items.into_iter() {
                     data.push(&item.into());
                 }
             }

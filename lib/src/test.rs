@@ -105,7 +105,7 @@ pub mod tests {
                     "Age".to_string(),
                     "".to_string(),
                     "Avatar image url. Use any shorten url service".to_string(),
-                ])
+                ]),
             };
 
             let tx = client::Mint::create(&authority, &args).await?;
@@ -135,15 +135,13 @@ pub mod tests {
                     data: vec![
                         program::Data::String("Hello".to_string()),
                         program::Data::u32(20),
-                        program::Data::u8((token_seq+1) as u8),
+                        program::Data::u8((token_seq + 1) as u8),
                         program::Data::u64(5),
-                        program::Data::Url(program::Url::image(
-                            if token_seq==0 {
-                                "https://tinyurl.com/mzs8fxya"
-                            }else{
-                                "https://images.freeimages.com/images/large-previews/028/green-unicorn-1578145.jpg"
-                            },
-                        )),
+                        program::Data::Url(program::Url::image(if token_seq == 0 {
+                            "https://tinyurl.com/mzs8fxya"
+                        } else {
+                            "https://images.freeimages.com/images/large-previews/028/green-unicorn-1578145.jpg"
+                        })),
                     ],
                 };
                 let tx = client::Token::create(&authority, mint_container.pubkey(), &args).await?;
@@ -202,11 +200,7 @@ pub mod tests {
         log_trace!("mint pubkeys: {:?}", pubkeys);
         for pubkey in pubkeys {
             let data = crate::client::mint::Mint::get_data(pubkey).await?;
-            log_trace!(
-                "mint {} => data: {:?}",
-                pubkey.to_string(),
-                data
-            );
+            log_trace!("mint {} => data: {:?}", pubkey.to_string(), data);
 
             let config = GetProgramAccountsConfig::new()
                 .add_filters(vec![
