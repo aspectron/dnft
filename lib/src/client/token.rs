@@ -37,9 +37,9 @@ impl Token {
 
 mod wasm {
     use super::Token;
-    use crate::client::Data;
+    use crate::client::{Data, SaleType};
     use crate::prelude::*;
-    use crate::program::TokenCreateFinalArgs;
+    use crate::program::{ForSale, TokenCreateFinalArgs};
     use kaizen::transport::api::*;
     use solana_program::account_info::IntoAccountInfo;
     use solana_sdk::account::Account;
@@ -49,7 +49,8 @@ mod wasm {
     #[wasm_bindgen(js_name = "createToken")]
     pub async fn create_token(
         mint: JsValue,
-        available: u8,
+        for_sale: bool,
+        sale_type: SaleType,
         values: js_sys::Array,
     ) -> Result<JsValue, JsValue> {
         let mint = Pubkey::from_value(&mint)?;
@@ -63,9 +64,14 @@ mod wasm {
             }
         }
 
-        log_trace!("create_token: data: {data:?}");
-
-        let args = TokenCreateFinalArgs { available, data };
+        log_trace!("create_token: data: {data:?}, sale_type:{sale_type:?}");
+        let for_sale = if for_sale { ForSale::Yes } else { ForSale::No };
+        let sale_type = program::SaleType::Rent;
+        let args = TokenCreateFinalArgs {
+            for_sale,
+            sale_type,
+            data,
+        };
         let tx = Token::create(&authority, &mint, &args).await?;
         let token_account_pubkey = tx.target_account()?;
         tx.post().await?;
@@ -74,15 +80,22 @@ mod wasm {
 
     /// Returns a tokens for a specific mint
     #[wasm_bindgen(js_name = "getTokens")]
-    pub async fn get_tokens(mint: JsValue) -> Result<JsValue, JsValue> {
+    pub async fn get_tokens(mint: JsValue, page:u32) -> Result<JsValue, JsValue> {
         let mint = Pubkey::from_value(&mint)?;
         let transport = Transport::global()?;
+        //log_trace!("get_tokens: page: {:02X?}", page.to_le_bytes().to_vec());
+        //log_trace!("get_tokens: mint: {:02X?}", mint.to_bytes());
         let config = GetProgramAccountsConfig::new()
             .add_filters(vec![
-                AccountFilter::MemcmpEncodedBase58(8, mint.to_string()),
-                AccountFilter::MemcmpEncodeBase58(40, vec![1]),
+                AccountFilter::MemcmpEncodeBase58(8, page.to_le_bytes().to_vec()),
+                AccountFilter::MemcmpEncodedBase58(12, mint.to_string()),
+                //AccountFilter::MemcmpEncodeBase58(40, vec![1]),
             ])?
-            .encoding(AccountEncoding::Base64)?;
+            .encoding(AccountEncoding::Base64)?
+            .data_slice(AccountDataSliceConfig {
+                offset: 0,
+                length: 200,
+            })?;
 
         let accounts = transport
             .get_program_accounts_with_config(&crate::program_id(), config)
@@ -90,7 +103,8 @@ mod wasm {
 
         let result = js_sys::Array::new();
         for (pubkey, account) in accounts {
-            result.push(&create_account_info(&pubkey, account)?.into());
+            log_trace!("get_tokens: pubkey:{pubkey}, account:{account:?}");
+            //result.push(&create_account_info(&pubkey, account)?.into());
         }
 
         Ok(result.into())

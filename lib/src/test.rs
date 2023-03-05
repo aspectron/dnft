@@ -2,6 +2,7 @@
 pub mod tests {
     use crate::api::*;
     use crate::prelude::*;
+    use crate::program::{/*ForSale,*/ MarketState, SaleType};
     use kaizen::result::Result;
     use program::MintCreationArgs;
     use std::str::FromStr;
@@ -29,7 +30,7 @@ pub mod tests {
         println!("run test...");
 
         run_test().await?;
-        run_mint_test().await?;
+        //run_mint_test().await?;
 
         log_info!("");
         if transport.mode().is_emulator() {
@@ -144,9 +145,18 @@ pub mod tests {
             log_info!("mint {mint_seq} creation ok - {}", mint_container.pubkey());
         }
 
-        // ----------------------------------------------------------------------------
+        //let mint_pubkeys = vec![Pubkey::from_str("8bmnuP1HuDMmM2Yz8gZ5KLRJA8pYXboFVd3uZtLnF3nx").unwrap()];
 
+        // ----------------------------------------------------------------------------
+        let sale_types = [
+            SaleType::Auction,
+            SaleType::Barter,
+            SaleType::None,
+            SaleType::Raffle,
+            SaleType::Rent,
+        ];
         for mint_seq in 0..MAX_MINTS {
+            let mut sale_type_index = 0;
             for token_seq in 0..MAX_TOKENS {
                 log_info!("creating token {mint_seq}:{token_seq}");
 
@@ -155,8 +165,14 @@ pub mod tests {
                     .await?
                     .expect("¯\\_(ツ)_/¯");
 
+                let sale_type = sale_types[sale_type_index];
+                sale_type_index += 1;
+                if sale_type_index == sale_types.len() {
+                    sale_type_index = 0;
+                }
                 let args = program::TokenCreateFinalArgs {
-                    available: 1,
+                    for_sale: program::ForSale::Yes,
+                    sale_type,
                     data: vec![
                         program::Data::String(names.get(token_seq).unwrap().to_string()),
                         program::Data::u32((token_seq * 15) as u32),
@@ -216,6 +232,7 @@ pub mod tests {
 
     #[wasm_bindgen]
     pub async fn run_mint_test() -> Result<()> {
+        //return Ok(());
         let transport = Transport::global()?;
         let pubkeys = crate::client::root::Root::get_mint_pubkeys(0, 100).await?;
         log_trace!("mint pubkeys: {:?}", pubkeys);
@@ -225,8 +242,9 @@ pub mod tests {
 
             let config = GetProgramAccountsConfig::new()
                 .add_filters(vec![
-                    AccountFilter::MemcmpEncodedBase58(8, pubkey.to_string()),
-                    AccountFilter::MemcmpEncodeBase58(40, vec![1]),
+                    AccountFilter::MemcmpEncodedBase58(12, pubkey.to_string()),
+                    AccountFilter::MemcmpEncodeBase58(44, MarketState::Listed.into()),
+                    //AccountFilter::MemcmpEncodeBase58(44, ForSale::Yes.try_into()?),
                 ])?
                 .encoding(AccountEncoding::Base64)?;
 

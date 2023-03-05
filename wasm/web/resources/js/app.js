@@ -253,7 +253,7 @@ class App{
             let minData = await this.dnft.getMintData(mint);
             console.log("mint data", mint, minData);
 
-            let accounts = await this.dnft.getTokens(mint);
+            let accounts = await this.dnft.getTokens(mint, 0);
             console.log("getProgramAccounts::::", accounts);
 
             let panels = this.createNFTPanels(index++, mint, minData, accounts);
@@ -521,10 +521,11 @@ class App{
                 console.log("data:", data);
                 fieldsData.push(data);
             });
-
+            let mintPubkey = this.mintFormDialog._mintPubkey;
             let result = await this.dnft.createToken(
-                this.mintFormDialog._mintPubkey,
-                1,
+                mintPubkey,
+                true,
+                this.dnft.SaleType.rent(),
                 fieldsData
             );
 

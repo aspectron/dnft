@@ -4,37 +4,85 @@
 
 use crate::prelude::*;
 use kaizen::program_error_code;
-use program::{Data, Mint};
+use program::{Data, Mint, SaleType};
 
 pub type DataVec = Vec<program::Data>;
 
 #[derive(Default, Clone, Debug, BorshSerialize, BorshDeserialize)]
 pub struct TokenCreateFinalArgs {
-    pub available: u8,
+    pub for_sale: ForSale,
+    pub sale_type: SaleType,
     pub data: Vec<Data>,
 }
 
 #[derive(Default, Clone, Debug, BorshSerialize, BorshDeserialize)]
 pub struct TokenUpdateArgs {
-    pub available: Option<u8>,
+    pub for_sale: Option<ForSale>,
+    pub sale_type: Option<SaleType>,
     pub data: Vec<(u16, program::Data)>,
     // pub data: TokenDataArgs,
 }
 
-// #[derive(Default, Clone, Debug, BorshSerialize, BorshDeserialize)]
-// pub struct TokenDataArgs {
-//     pub data: Vec<(u16, program::Data)>,
-// }
+#[derive(Copy, Clone)]
+pub enum MarketState {
+    Unlisted = 0x0,
+    Listed = 0x1,
+}
+
+impl From<MarketState> for Vec<u8>{
+    fn from(value: MarketState) -> Self {
+        match value{
+            MarketState::Unlisted => vec![0x0],
+            MarketState::Listed => vec![0x1]
+        }
+    }
+}
+
+#[derive(Copy, Clone)]
+pub struct Sale {
+    pub market_state: MarketState,
+    pub for_sale: ForSale,
+    pub sale_type: program::SaleType,
+}
+
+impl Sale {
+    fn new(for_sale: ForSale, sale_type: SaleType) -> Self {
+        let mut market_state = MarketState::Unlisted;
+        if for_sale == ForSale::Yes || sale_type != SaleType::None {
+            market_state = MarketState::Listed;
+        }
+
+        Self {
+            market_state,
+            for_sale,
+            sale_type,
+        }
+    }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Default, BorshSerialize, BorshDeserialize)]
+pub enum ForSale {
+    #[default]
+    No = 0x0,
+    Yes = 0x1,
+}
+impl From<ForSale> for Vec<u8>{
+    fn from(value: ForSale) -> Self {
+        match value{
+            ForSale::No => vec![0x0],
+            ForSale::Yes => vec![0x1]
+        }
+    }
+}
 
 #[derive(Meta, Copy, Clone)]
 #[repr(packed)]
 pub struct TokenMeta {
     version: u32,
-    // identity: Pubkey,
-    page : u32, // TODO - derive from sequence
+    page: u32, // TODO - derive from sequence
     mint: Pubkey,
-    available: u8, // TODO - remov this
-    sale_type : program::SaleType,
+    sale: Sale,
+    reserved: u8,
 }
 
 #[container(Containers::Token)]
@@ -53,7 +101,9 @@ impl<'info, 'refs> Token<'info, 'refs> {
 
     pub fn create_final(ctx: &ContextReference) -> ProgramResult {
         let mut mint = Mint::try_load(&ctx.handler_accounts[0])?;
+        let page = (mint.tokens.len() / 5) as u32;
 
+        log_trace!("create_final#### page:{}", page);
         let args = Box::new(TokenCreateFinalArgs::try_from_slice(ctx.instruction_data)?);
 
         let data_types = mint
@@ -82,7 +132,9 @@ impl<'info, 'refs> Token<'info, 'refs> {
         let mut meta = token.meta.borrow_mut();
         meta.set_version(1);
         meta.set_mint(*mint.pubkey());
-        meta.set_available(args.available);
+        meta.set_page(page);
+        meta.set_sale(Sale::new(args.for_sale, args.sale_type));
+        meta.set_reserved(0);
         drop(meta);
 
         token.data.store(&args.data)?;

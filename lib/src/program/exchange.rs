@@ -1,14 +1,15 @@
 use crate::prelude::*;
 
-#[derive(Clone, Copy, BorshSerialize, BorshDeserialize)]
-#[repr(u16)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default, BorshSerialize, BorshDeserialize)]
+#[repr(u8)]
 pub enum SaleType {
-    NoSale = 0,
-    Sale = 0x0101,
-    Rent = 0x0102,
-    Auction = 0x0103,
-    Barter = 0x0104,
-    Raffle = 0x0105,
+    #[default]
+    None = 0x0,
+    //Sale    = 0x1,
+    Rent = 0x2,
+    Auction = 0x4,
+    Barter = 0x8,
+    Raffle = 0x10,
 }
 
 #[derive(Clone, BorshSerialize, BorshDeserialize)]
