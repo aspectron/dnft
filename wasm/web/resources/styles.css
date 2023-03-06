@@ -518,19 +518,15 @@ td.actions .material-icons{
   }
 }
 
-/*
-@media (min-width: 1000px){
-  .mdl-dnft .nft-panel{
-    width: 400px;
-  }
-}
-*/
-
 .mdl-dnft form.search-form{
   margin-top:0px;
   padding:15px;
 }
-.search-form>h1{
+.mdl-dnft form.search-form .actions{
+  padding:20px 0px 0px;
+}
+.search-form>h1,
+.search-form-title{
   font-size:2rem;
   margin-top:0px;
 }

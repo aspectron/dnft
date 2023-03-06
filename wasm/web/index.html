@@ -128,19 +128,91 @@
           </div>
         </div>
         <div id="top-tabs" class="mdl-layout__tab-bar mdl-js-ripple-effect mdl-color--primary-dark">
-            <a href="#browse" class="mdl-layout__tab is-active">Browse NFTs</a>
+            <a href="#browse" class="mdl-layout__tab">Browse NFTs</a>
+            <a href="#marketplace" class="mdl-layout__tab is-active">Marketplace</a>
             <a href="#browse-mints" class="mdl-layout__tab">Browse Mints</a>
             <a href="#create-dnft" class="mdl-layout__tab">Create  Mint</a>
         </div>
       </header>
       <main class="mdl-layout__content">
-        <div class="mdl-layout__tab-panel is-active" id="browse">
+        <div class="mdl-layout__tab-panel" id="browse">
           <div class="main-container no-records" id="browse-nft-container">
             <h2>NFTs</h2>
             <div class="mdl-grid" id="nft-list">
 
             </div>
             <template id="nft-panel-tpl">
+              <div class="nft-panel mdl-cell mdl-card mdl-shadow--2dp">
+                <div class="nft-image mdl-card__title">
+                  <span class="nft-pubkey"></span>
+                  <h2 class="nft-title mdl-card__title-text"></h2>
+                </div>
+                <div class="mdl-card__supporting-text">
+                  <div class="nft-description"></div>
+                </div>
+                <div class="mdl-card__actions mdl-card--border">
+                  <a href="#" class="mdl-button _mdl-button--raised">See availability</a>
+                </div>
+              </div>
+            </section>
+          </template>
+          </div>
+        </div>
+        <div class="mdl-layout__tab-panel is-active" id="marketplace">
+          <div class="main-container no-records" id="marketplace-nft-container">
+            <h2>Marketplace</h2>
+            <div class="marketplace-filter  mdl-shadow--2dp">
+              <form action="#" class="search-form">
+                <h4 class="search-form-title">Filter Search</h4>
+                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                    <input class="mdl-textfield__input" pattern="[A-Z,a-z, ]*" type="text" id="Name">
+                    <label class="mdl-textfield__label" for="Name">Seach...</label>
+                    <span class="mdl-textfield__error">Letters and spaces only</span>
+                </div>
+                <div class="_mdl-grid">
+                  <div class="_mdl-cell _mdl-cell--6-col">
+                    <label for="for-sale" class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect">
+                      <input checked type="checkbox" id="for-sale" class="mdl-checkbox__input">
+                      <span class="mdl-checkbox__label">For Sale</span>
+                    </label>
+                  </div>
+                  <div class="_mdl-cell _mdl-cell--6-col">
+                    <h5>Sale Type</h5>
+                    <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="sale-type-1">
+                      <input checked class="mdl-radio__button" id="sale-type-1" name="sale-type" type="radio" value="sale">
+                      <span class="mdl-radio__label">Sale</span>
+                    </label>
+                    <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="sale-type-2">
+                      <input class="mdl-radio__button" id="sale-type-2" name="sale-type" type="radio"
+                      value="rent">
+                      <span class="mdl-radio__label">Rent</span>
+                    </label>
+                    <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="sale-type-3">
+                      <input class="mdl-radio__button" id="sale-type-3" name="sale-type" type="radio" value="auction">
+                      <span class="mdl-radio__label">Auction</span>
+                    </label>
+                    <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="sale-type-4">
+                      <input class="mdl-radio__button" id="sale-type-4" name="sale-type" type="radio" value="barter">
+                      <span class="mdl-radio__label">Barter</span>
+                    </label>
+                    <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="sale-type-5">
+                      <input class="mdl-radio__button" id="sale-type-5" name="sale-type" type="radio" value="raffle">
+                      <span class="mdl-radio__label">Raffle</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="actions">
+                  <button class="filter-marketplace mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" type="submit">
+                    Search
+                  </button>
+                </div>
+              </form>
+            </div>
+            <div class="mdl-grid" id="marketplace-list">
+
+            </div>
+            <template id="market-panel-tpl">
               <div class="nft-panel mdl-cell mdl-card mdl-shadow--2dp">
                 <div class="nft-image mdl-card__title">
                   <span class="nft-pubkey"></span>
