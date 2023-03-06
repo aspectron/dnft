@@ -12,6 +12,19 @@ pub enum SaleType {
     Raffle = 0x10,
 }
 
+impl From<SaleType> for Vec<u8> {
+    fn from(value: SaleType) -> Self {
+        match value {
+            SaleType::None => vec![0x0],
+            //SaleType::Sale => vec![0x1],
+            SaleType::Rent => vec![0x2],
+            SaleType::Auction => vec![0x4],
+            SaleType::Barter => vec![0x8],
+            SaleType::Raffle => vec![0x10],
+        }
+    }
+}
+
 #[derive(Clone, BorshSerialize, BorshDeserialize)]
 pub enum Sale {
     Sol { price: u64 },

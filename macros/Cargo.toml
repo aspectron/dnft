@@ -8,7 +8,7 @@ keywords = ["dnft"]
 categories = []
 # exclude = ["/.*", "/test"]
 description = """
-Macros for the Dynamic NFT project
+Macros for the Delta NFT project
 """
 
 [lib]

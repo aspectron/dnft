@@ -39,7 +39,7 @@ mod wasm {
     use super::Token;
     use crate::client::{Data, SaleType};
     use crate::prelude::*;
-    use crate::program::{ForSale, TokenCreateFinalArgs};
+    use crate::program::{MarketState, TokenCreateFinalArgs};
     use kaizen::transport::api::*;
     use solana_program::account_info::IntoAccountInfo;
     use solana_sdk::account::Account;
@@ -65,11 +65,10 @@ mod wasm {
         }
 
         log_trace!("create_token: data: {data:?}, sale_type:{sale_type:?}");
-        let for_sale = if for_sale { ForSale::Yes } else { ForSale::No };
-        let sale_type = program::SaleType::Rent;
+        let for_sale = for_sale.into();
         let args = TokenCreateFinalArgs {
             for_sale,
-            sale_type,
+            sale_type: sale_type.into(),
             data,
         };
         let tx = Token::create(&authority, &mint, &args).await?;
@@ -80,21 +79,61 @@ mod wasm {
 
     /// Returns a tokens for a specific mint
     #[wasm_bindgen(js_name = "getTokens")]
-    pub async fn get_tokens(mint: JsValue, page:u32) -> Result<JsValue, JsValue> {
+    pub async fn get_tokens(
+        mint: JsValue,
+        page: u32,
+        market_state: Option<bool>,
+        for_sale: Option<bool>,
+        sale_type: JsValue,
+    ) -> Result<JsValue, JsValue> {
         let mint = Pubkey::from_value(&mint)?;
+        let mut filters = vec![
+            AccountFilter::MemcmpEncodeBase58(8, page.to_le_bytes().to_vec()),
+            AccountFilter::MemcmpEncodedBase58(12, mint.to_string()),
+            //AccountFilter::MemcmpEncodeBase58(40, vec![1]),
+        ];
+        
+        
+        log_trace!("market_state: {:?}", market_state);
+        log_trace!("for_sale: {:?}", for_sale);
+        log_trace!("sale_type: {:?}", sale_type);
+        let sale_type:Option<SaleType> = None;
+        if let Some(state) = market_state {
+            let mut state_bytes: Vec<u8> = MarketState::from(state).into();
+            if let Some(for_sale) = for_sale {
+                let mut bytes = vec![];
+                bytes.append(&mut state_bytes);
+                bytes.append(&mut program::ForSale::from(for_sale).into());
+                if let Some(sale_type) = sale_type {
+                    bytes.append(&mut sale_type.into());
+                }
+                filters.push(AccountFilter::MemcmpEncodeBase58(44, bytes));
+            } else {
+                filters.push(AccountFilter::MemcmpEncodeBase58(44, state_bytes));
+                if let Some(sale_type) = sale_type {
+                    filters.push(AccountFilter::MemcmpEncodeBase58(46, sale_type.into()));
+                }
+            }
+        } else if let Some(for_sale) = for_sale {
+            let mut bytes: Vec<u8> = vec![];
+            bytes.append(&mut program::ForSale::from(for_sale).into());
+            if let Some(sale_type) = sale_type {
+                bytes.append(&mut sale_type.into());
+            }
+            filters.push(AccountFilter::MemcmpEncodeBase58(45, bytes));
+        } else if let Some(sale_type) = sale_type {
+            filters.push(AccountFilter::MemcmpEncodeBase58(46, sale_type.into()));
+        }
+
+        log_trace!("filters: {filters:#?}");
+
         let transport = Transport::global()?;
-        //log_trace!("get_tokens: page: {:02X?}", page.to_le_bytes().to_vec());
-        //log_trace!("get_tokens: mint: {:02X?}", mint.to_bytes());
         let config = GetProgramAccountsConfig::new()
-            .add_filters(vec![
-                AccountFilter::MemcmpEncodeBase58(8, page.to_le_bytes().to_vec()),
-                AccountFilter::MemcmpEncodedBase58(12, mint.to_string()),
-                //AccountFilter::MemcmpEncodeBase58(40, vec![1]),
-            ])?
+            .add_filters(filters)?
             .encoding(AccountEncoding::Base64)?
             .data_slice(AccountDataSliceConfig {
                 offset: 0,
-                length: 200,
+                length: 0,
             })?;
 
         let accounts = transport
@@ -102,9 +141,11 @@ mod wasm {
             .await?;
 
         let result = js_sys::Array::new();
-        for (pubkey, account) in accounts {
-            log_trace!("get_tokens: pubkey:{pubkey}, account:{account:?}");
-            //result.push(&create_account_info(&pubkey, account)?.into());
+        for (pubkey, _) in accounts {
+            //log_trace!("get_tokens: pubkey:{pubkey}");
+            if let Some(account) = transport.lookup(&pubkey).await? {
+                result.push(&create_account_info(&pubkey, account)?.into());
+            }
         }
 
         Ok(result.into())
@@ -120,11 +161,14 @@ mod wasm {
             .lookup(&pubkey)
             .await?
             .ok_or(JsValue::from("Account not found"))?;
-        let account: Account = (&account.clone_for_program()?).into();
         Ok(create_account_info(&pubkey, account)?.into())
     }
 
-    fn create_account_info(pubkey: &Pubkey, account: Account) -> Result<js_sys::Array, JsValue> {
+    fn create_account_info(
+        pubkey: &Pubkey,
+        account: Arc<AccountDataReference>,
+    ) -> Result<js_sys::Array, JsValue> {
+        let account: Account = (&account.clone_for_program()?).into();
         let mut account_clone = account.clone();
         let account_info = (pubkey, &mut account_clone).into_account_info();
         let token = program::Token::try_load(&account_info)?;

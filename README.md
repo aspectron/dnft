@@ -1,4 +1,4 @@
-# dnft
+# delta-nft
 
 Delta NFT project - created for [Solana Grizzlython](https://solana.com/grizzlython) Hackathon
 
