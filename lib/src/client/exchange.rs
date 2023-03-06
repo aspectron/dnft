@@ -31,8 +31,20 @@ impl SaleType {
     }
 }
 
+impl SaleType {
+    pub fn inner(&self) -> Inner {
+        self.inner
+    }
+}
+
 impl From<SaleType> for Inner {
     fn from(value: SaleType) -> Self {
         value.inner
+    }
+}
+
+impl From<SaleType> for Vec<u8> {
+    fn from(value: SaleType) -> Self {
+        value.inner().into()
     }
 }

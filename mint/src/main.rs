@@ -15,7 +15,7 @@ cfg_if::cfg_if! {
 
         #[derive(Subcommand, Debug)]
         enum Action {
-            /// Mint Dynamic NFT
+            /// Mint Delta NFT
             Mint {
 
             },

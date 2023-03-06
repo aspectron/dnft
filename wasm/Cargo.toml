@@ -1,6 +1,6 @@
 [package]
 name = "dnft-wasm"
-description = "Dynamic NFT - WASM Bindings"
+description = "Delta NFT - WASM Bindings"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/aspectron/dnft"
 version.workspace = true

@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description" content="A front-end template that helps you build fast, modern mobile web apps.">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-    <title>Dynamic NFT</title>
+    <title>Delta NFT</title>
 
     <!-- Add to homescreen for Chrome on Android -->
     <meta name="mobile-web-app-capable" content="yes">
@@ -114,7 +114,7 @@
     <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
       <header class="mdl-layout__header mdl-layout__header--fixed1 mdl-color--primary">
         <div class="mdl-layout--large-screen-only mdl-layout__header-row">
-          <h3>Dynamic NFT</h3>
+          <h3>Delta NFT</h3>
           <div class="mdl-layout-spacer"></div>
           <div class="wallet-connect-container">
             <div class="connect-btn">
@@ -128,21 +128,22 @@
           </div>
         </div>
         <div id="top-tabs" class="mdl-layout__tab-bar mdl-js-ripple-effect mdl-color--primary-dark">
-            <a href="#browse" class="mdl-layout__tab is-active">Browse DNFT</a>
-            <a href="#browse-mints" class="mdl-layout__tab">Browse Mints(schema)</a>
-            <a href="#create-dnft" class="mdl-layout__tab">Create DNFT Mint</a>
+            <a href="#browse" class="mdl-layout__tab is-active">Browse NFTs</a>
+            <a href="#browse-mints" class="mdl-layout__tab">Browse Mints</a>
+            <a href="#create-dnft" class="mdl-layout__tab">Create  Mint</a>
         </div>
       </header>
       <main class="mdl-layout__content">
         <div class="mdl-layout__tab-panel is-active" id="browse">
           <div class="main-container no-records" id="browse-nft-container">
-            <h2>DNFTs</h2>
+            <h2>NFTs</h2>
             <div class="mdl-grid" id="nft-list">
 
             </div>
             <template id="nft-panel-tpl">
               <div class="nft-panel mdl-cell mdl-card mdl-shadow--2dp">
                 <div class="nft-image mdl-card__title">
+                  <span class="nft-pubkey"></span>
                   <h2 class="nft-title mdl-card__title-text"></h2>
                 </div>
                 <div class="mdl-card__supporting-text">
@@ -158,7 +159,7 @@
         </div>
         <div class="mdl-layout__tab-panel" id="browse-mints">
           <div class="main-container no-records" id="browse-mint-container">
-            <h2>Select DNFT MINT (Schema)</h2>
+            <h2>Select Mint</h2>
             <table width="100%" class="mdl-data-table">
               <thead>
                 <tr>

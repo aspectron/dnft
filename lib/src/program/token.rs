@@ -29,11 +29,20 @@ pub enum MarketState {
     Listed = 0x1,
 }
 
-impl From<MarketState> for Vec<u8>{
+impl From<MarketState> for Vec<u8> {
     fn from(value: MarketState) -> Self {
-        match value{
+        match value {
             MarketState::Unlisted => vec![0x0],
-            MarketState::Listed => vec![0x1]
+            MarketState::Listed => vec![0x1],
+        }
+    }
+}
+impl From<bool> for MarketState {
+    fn from(value: bool) -> Self {
+        if value {
+            MarketState::Listed
+        } else {
+            MarketState::Unlisted
         }
     }
 }
@@ -66,11 +75,20 @@ pub enum ForSale {
     No = 0x0,
     Yes = 0x1,
 }
-impl From<ForSale> for Vec<u8>{
+impl From<ForSale> for Vec<u8> {
     fn from(value: ForSale) -> Self {
-        match value{
+        match value {
             ForSale::No => vec![0x0],
-            ForSale::Yes => vec![0x1]
+            ForSale::Yes => vec![0x1],
+        }
+    }
+}
+impl From<bool> for ForSale {
+    fn from(value: bool) -> Self {
+        if value {
+            ForSale::Yes
+        } else {
+            ForSale::No
         }
     }
 }

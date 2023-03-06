@@ -253,7 +253,13 @@ class App{
             let minData = await this.dnft.getMintData(mint);
             console.log("mint data", mint, minData);
 
-            let accounts = await this.dnft.getTokens(mint, 0);
+            let accounts = await this.dnft.getTokens(
+                mint,
+                0,//page
+                true,// listed in market
+                true,//for sale
+                this.dnft.SaleType.auction() //sale type
+            );
             console.log("getProgramAccounts::::", accounts);
 
             let panels = this.createNFTPanels(index++, mint, minData, accounts);
@@ -281,6 +287,8 @@ class App{
         let el = clone.children[0];
         el.dataset.pubkey = pubkey;
         el.dataset.mint = mint;
+        let pubkeyEl = clone.querySelector(".nft-pubkey");
+        pubkeyEl.innerHTML = this.dnft.shortenPubkey(pubkey);
         let title = clone.querySelector(".nft-title");
         title.setAttribute("title", pubkey);
         title.innerHTML = "&nbsp;";
@@ -332,8 +340,14 @@ class App{
 
     createMintRow(index, pubkey, data){
         let td_name = document.createElement("td");
-        td_name.innerHTML = "DNFT "+index;
-        td_name.setAttribute("class", "mdl-data-table__cell--non-numeric");
+        let pubkey_text = document.createElement("div");
+        pubkey_text.setAttribute("class", "mint-pubkey");
+        pubkey_text.innerHTML = this.dnft.shortenPubkey(pubkey);
+        let td_name_text = document.createElement("div");
+        td_name_text.innerHTML = "DNFT "+index;
+        td_name.appendChild(pubkey_text);
+        td_name.appendChild(td_name_text);
+        td_name.setAttribute("class", "mint-name-cell mdl-data-table__cell--non-numeric");
 
         let td_description = document.createElement("td");
         let description = ["<bold>Fields</bold>"];
@@ -483,7 +497,6 @@ class App{
     }
 
     initMintDnftPage(){
-        let schemaListEl = $("#schema-list");
         this.mintFormDialog = $("#mint-form-dialog");
         this.mintFormFieldsEl = $("#mint-form-fields");
         if (!this.mintFormDialog.showModal) {
@@ -494,7 +507,7 @@ class App{
             this.mintFormDialog.close();
         });
 
-        schemaListEl.addEventListener("click", event=>{
+        this.schemaListEl.addEventListener("click", event=>{
             let btn = event.target.closest("button.mint-dnft");
             if(!btn)
                 return

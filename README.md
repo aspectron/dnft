@@ -1,6 +1,6 @@
-# dynamic-nft
+# delta-nft
 
-Dynamic NFT project - created for [Solana Grizzlython](https://solana.com/grizzlython) Hackathon
+Delta NFT project - created for [Solana Grizzlython](https://solana.com/grizzlython) Hackathon
 
 The goal of this project is to create a new NFT standard that provides users with an ability to create NFTs with custom data schema. The data schema that can be created is meant to represent different real or virtual assets, while carrying detailed information about them within each token issued.
 
