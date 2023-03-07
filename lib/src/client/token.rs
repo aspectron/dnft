@@ -43,7 +43,6 @@ mod wasm {
     use kaizen::transport::api::*;
     use solana_program::account_info::IntoAccountInfo;
     use solana_sdk::account::Account;
-    //use serde::de::Deserialize;
 
     /// create a token for a specific mint
     #[wasm_bindgen(js_name = "createToken")]
@@ -84,7 +83,7 @@ mod wasm {
         page: u32,
         market_state: Option<bool>,
         for_sale: Option<bool>,
-        sale_type: JsValue,
+        sale_type: &JsValue,
     ) -> Result<JsValue, JsValue> {
         let mint = Pubkey::from_value(&mint)?;
         let mut filters = vec![
@@ -93,11 +92,11 @@ mod wasm {
             //AccountFilter::MemcmpEncodeBase58(40, vec![1]),
         ];
         
-        
         log_trace!("market_state: {:?}", market_state);
         log_trace!("for_sale: {:?}", for_sale);
         log_trace!("sale_type: {:?}", sale_type);
-        let sale_type:Option<SaleType> = None;
+        let sale_type = workflow_wasm::abi::ref_from_abi_option!(SaleType, sale_type);
+        log_trace!("sale_type: {sale_type:?}");
         if let Some(state) = market_state {
             let mut state_bytes: Vec<u8> = MarketState::from(state).into();
             if let Some(for_sale) = for_sale {
