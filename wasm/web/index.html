@@ -159,9 +159,9 @@
           </div>
         </div>
         <div class="mdl-layout__tab-panel is-active" id="marketplace">
-          <div class="main-container no-records" id="marketplace-nft-container">
-            <h2>Marketplace</h2>
-            <header class="mdl-layout__header">
+          <div class="marketplace-head"><h2>Marketplace</h2></div>
+          <div class="marketplace-header">
+            <header class="mdl-layout__header sticky" id="marketplace-header">
               <div class="mdl-layout__header-row">
                 <span>Sale Type: </span>
                 <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="sale-type-0">
@@ -193,16 +193,18 @@
                 <div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable
                             mdl-textfield--floating-label mdl-textfield--align-right">
                   <label class="mdl-button mdl-js-button mdl-button--icon"
-                         for="fixed-header-drawer-exp">
+                        for="fixed-header-drawer-exp">
                     <i class="material-icons">search</i>
                   </label>
                   <div class="mdl-textfield__expandable-holder">
                     <input class="mdl-textfield__input" type="text" name="sample"
-                           id="fixed-header-drawer-exp">
+                          id="fixed-header-drawer-exp">
                   </div>
                 </div>
               </div>
             </header>
+          </div>
+          <div class="main-container no-records" id="marketplace-nft-container">
             
             <!-- <div class="marketplace-filter  mdl-shadow--2dp">
               <form action="#" class="search-form">

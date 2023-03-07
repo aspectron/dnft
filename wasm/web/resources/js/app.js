@@ -161,6 +161,35 @@ class App{
         if (this._layoutReady)
             return
         this._layoutReady = true;
+        let timeoutId = null;
+        const observer = new IntersectionObserver( 
+            ([e]) => {
+                //console.log("e.intersectionRatio", e.intersectionRatio)
+                if (timeoutId){
+                    clearTimeout(timeoutId);
+                }
+                timeoutId = setTimeout(()=>{
+                    //console.log("Ratio###", e.intersectionRatio)
+                    e.target.toggleAttribute('stuck', e.intersectionRatio < 1)
+                }, 1)
+                
+            },
+            {
+                //root: $("main"),
+                threshold: [1]
+            }
+        );
+        observer.observe($('#marketplace-header'));
+
+        // const mainObserver = new IntersectionObserver( 
+        //     ([e]) => {
+        //         console.log("e.intersectionRatio", e.intersectionRatio)
+        //     },
+        //     {
+        //         threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+        //     }
+        // );
+        // mainObserver.observe($('#marketplace'));
         
         let connected = await this.dnftApp.checkWalletState();
         if (!connected){
@@ -193,7 +222,6 @@ class App{
         this.loadMints();
         this.loadNFTs();
         this.loadMarketplace();
-
         
         let browseEl = $("#browse");
         let browseMintsEl = $("#browse-mints");
@@ -253,8 +281,8 @@ class App{
         if (this._marketLoading)
             return
         this._marketLoading = true;
-        const LOAD_COUNT = 1000;
-        let count = 5n;
+        const LOAD_COUNT = 8;
+        let count = 1000n;
         let filter = this.marketFilter;
         if (!this._marketLoadState){
             this._marketLoadState = {start: 0n, saleType:1};
@@ -274,6 +302,9 @@ class App{
             let panels = this.createNFTPanels("", {schema:[]}, [
                 [],[],[],[],[],[],[],[],[],[]
             ]);
+            if (this.mainEl.scrollTop >=150){
+                this.mainEl.scrollTop = 150;
+            }
             this.marketplaceListEl.innerHTML = "";
             panels.forEach(panel=>{
                 this.marketplaceListEl.appendChild(panel);
@@ -292,7 +323,7 @@ class App{
                 break;
             }
             let minData = await this.dnft.getMintData(mint);
-            console.log("mint data", mint, minData);
+            //console.log("mint data", mint, minData);
             let page = loadState[mint] || 0;
             let accounts = [];
             do{
@@ -302,9 +333,8 @@ class App{
                     );
                 }else{
                     accounts = await this.dnft.getMarketTokens(mint, page);
-                }
-                
-                console.log("getTokens::::", accounts);
+                }                
+                console.log("getTokens::::", "page:"+page, accounts);
 
                 let panels = this.createNFTPanels(mint, minData, accounts);
                 elements.push(...panels);
@@ -344,11 +374,11 @@ class App{
         let start = this._nftStartIndex || 0n;
         let pubkeys = await this.dnft.getMintPubkeys(start, start+count);
         
-        console.log("getMintPubkeys: start:", start, "pubkeys:", pubkeys)
+        //console.log("getMintPubkeys: start:", start, "pubkeys:", pubkeys)
         let elements = [];
         for (let mint of pubkeys){
             let minData = await this.dnft.getMintData(mint);
-            console.log("mint data", mint, minData);
+            //console.log("mint data", mint, minData);
 
             let accounts = await this.dnft.getTokens(
                 mint,
@@ -357,7 +387,7 @@ class App{
                 true,//for sale
                 this.dnft.SaleType.auction() //sale type
             );
-            console.log("getProgramAccounts::::", accounts);
+            //console.log("getProgramAccounts::::", accounts);
 
             let panels = this.createNFTPanels(mint, minData, accounts);
             elements.push(...panels);
@@ -386,13 +416,13 @@ class App{
         if (!pubkey){
             el.classList.add("placeholder-panel");
         }
-        if (account){
-            console.log("account:" , account, account.key().toString(), account.lamports())
-        }
+        // if (account){
+        //     console.log("account:" , account, account.key().toString(), account.lamports())
+        // }
         el.dataset.pubkey = pubkey;
         el.dataset.mint = mint;
         let pubkeyEl = clone.querySelector(".nft-pubkey");
-        pubkeyEl.innerHTML = pubkey?this.dnft.shortenPubkey(pubkey):"ABC....XYZ";
+        pubkeyEl.innerHTML = pubkey?this.dnft.shortenPubkey(pubkey):"ABCD....WXYZ";
         let title = clone.querySelector(".nft-title");
         title.setAttribute("title", pubkey);
         title.innerHTML = "&nbsp;";
@@ -424,7 +454,7 @@ class App{
         let start = this._mintAccountsStartIndex || 0n;
         let pubkeys = await this.dnft.getMintPubkeys(start, start+count);
         let scrollTop = this.mainEl.scrollTop;
-        console.log("getMintPubkeys: start:", start, "pubkeys:", pubkeys)
+        //console.log("getMintPubkeys: start:", start, "pubkeys:", pubkeys)
         let index = start+1n;
         for (let pubkey of pubkeys){
             let data = await this.dnft.getMintData(pubkey);

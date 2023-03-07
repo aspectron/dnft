@@ -121,7 +121,7 @@ impl<'info, 'refs> Token<'info, 'refs> {
         let mut mint = Mint::try_load(&ctx.handler_accounts[0])?;
         let page = (mint.tokens.len() / 5) as u32;
 
-        log_trace!("create_final#### page:{}", page);
+        //log_trace!("create_final#### page:{}", page);
         let args = Box::new(TokenCreateFinalArgs::try_from_slice(ctx.instruction_data)?);
 
         let data_types = mint
