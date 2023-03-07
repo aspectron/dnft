@@ -95,7 +95,7 @@ mod wasm {
         log_trace!("market_state: {:?}", market_state);
         log_trace!("for_sale: {:?}", for_sale);
         log_trace!("sale_type: {:?}", sale_type);
-        let sale_type = workflow_wasm::abi::ref_from_abi_option!(SaleType, sale_type);
+        let sale_type = workflow_wasm::abi::ref_from_abi_as_option!(SaleType, sale_type)?;
         log_trace!("sale_type: {sale_type:?}");
         if let Some(state) = market_state {
             let mut state_bytes: Vec<u8> = MarketState::from(state).into();
