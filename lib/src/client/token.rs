@@ -77,6 +77,22 @@ mod wasm {
     }
 
     /// Returns a tokens for a specific mint
+    #[wasm_bindgen(js_name = "getMarketTokens")]
+    pub async fn get_market_tokens(mint: JsValue, page: u32) -> Result<JsValue, JsValue> {
+        get_tokens(mint, page, Some(true), Some(true), &JsValue::UNDEFINED).await
+    }
+
+    /// Returns a tokens for a specific mint
+    #[wasm_bindgen(js_name = "getMarketTokensByType")]
+    pub async fn get_market_tokens_with_type(
+        mint: JsValue,
+        page: u32,
+        sale_type: &JsValue,
+    ) -> Result<JsValue, JsValue> {
+        get_tokens(mint, page, Some(true), Some(true), sale_type).await
+    }
+
+    /// Returns a tokens for a specific mint
     #[wasm_bindgen(js_name = "getTokens")]
     pub async fn get_tokens(
         mint: JsValue,
@@ -91,7 +107,7 @@ mod wasm {
             AccountFilter::MemcmpEncodedBase58(12, mint.to_string()),
             //AccountFilter::MemcmpEncodeBase58(40, vec![1]),
         ];
-        
+
         log_trace!("market_state: {:?}", market_state);
         log_trace!("for_sale: {:?}", for_sale);
         log_trace!("sale_type: {:?}", sale_type);

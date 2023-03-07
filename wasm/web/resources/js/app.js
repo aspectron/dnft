@@ -188,10 +188,7 @@ class App{
         this.nftTemplateEl = $("#nft-panel-tpl");
         this.nftListEl = $("#nft-list");
         this.marketplaceListEl = $("#marketplace-list");
-        this.marketFilter = {
-            forSale: true,
-            saleType: this.dnft.SaleType.none()
-        };
+        this.marketFilter = {};
         this.mainEl = mainEl;
         this.loadMints();
         this.loadNFTs();
@@ -232,17 +229,15 @@ class App{
 
         $(".filter-marketplace").addEventListener("click", (e)=>{
             e.preventDefault();
-            let forSale = !!$("#for-sale").checked;
-            let saleType = "sale";
+            let saleType = "any";
             $$(`input[name="sale-type"]`).forEach(input=>{
                 if(input.checked){
                     saleType = input.value;
                 }
             });
 
-            console.log("forSale:"+forSale, "saleType:"+saleType)
-            this.marketFilter.forSale = forSale;
-            this.marketFilter.saleType = this.dnft.SaleType.fromStr(saleType) || this.dnft.SaleType.none();
+            console.log("saleType:"+saleType)
+            this.marketFilter.saleType = saleType!="any"? this.dnft.SaleType.fromStr(saleType) : undefined;
             console.log("this.marketFilter", this.marketFilter)
             this.loadMarketplace();
         })
@@ -264,7 +259,6 @@ class App{
         }
 
         let loadState = this._marketLoadState;
-        console.log("filter.saleType.ptr", filter.saleType?.ptr)
         if (filter.forSale != loadState.forSale || filter.saleType != loadState.saleType){
             this._marketLoadState = {
                 forSale: filter.forSale,
@@ -292,15 +286,15 @@ class App{
             console.log("mint data", mint, minData);
             let page = loadState[mint] || 0;
             let accounts = [];
-            console.log("filter.saleType.ptr###", filter.saleType?.ptr)
             do{
-                accounts = await this.dnft.getTokens(
-                    mint,
-                    page,//page
-                    true,// listed in market
-                    filter.forSale,//for sale
-                    filter.saleType //sale type
-                );
+                if (filter.saleType) {
+                    accounts = await this.dnft.getMarketTokensByType(
+                        mint, page, filter.saleType
+                    );
+                }else{
+                    accounts = await this.dnft.getMarketTokens(mint, page);
+                }
+                
                 console.log("getTokens::::", accounts);
 
                 let panels = this.createNFTPanels(mint, minData, accounts);
