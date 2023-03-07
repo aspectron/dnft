@@ -227,19 +227,21 @@ class App{
             }
         });
 
-        $(".filter-marketplace").addEventListener("click", (e)=>{
-            e.preventDefault();
-            let saleType = "any";
-            $$(`input[name="sale-type"]`).forEach(input=>{
-                if(input.checked){
-                    saleType = input.value;
-                }
-            });
+        $$(`input[name="sale-type"]`).forEach(input=>{
+            input.addEventListener("change", (e)=>{
+                //e.preventDefault();
+                let saleType = "any";
+                $$(`input[name="sale-type"]`).forEach(input=>{
+                    if(input.checked){
+                        saleType = input.value;
+                    }
+                });
 
-            console.log("saleType:"+saleType)
-            this.marketFilter.saleType = saleType!="any"? this.dnft.SaleType.fromStr(saleType) : undefined;
-            console.log("this.marketFilter", this.marketFilter)
-            this.loadMarketplace();
+                console.log("saleType:"+saleType)
+                this.marketFilter.saleType = saleType!="any"? this.dnft.SaleType.fromStr(saleType) : undefined;
+                console.log("this.marketFilter", this.marketFilter)
+                this.loadMarketplace();
+            })
         })
     }
 
@@ -255,11 +257,13 @@ class App{
         let count = 5n;
         let filter = this.marketFilter;
         if (!this._marketLoadState){
-            this._marketLoadState = {start: 0n};
+            this._marketLoadState = {start: 0n, saleType:1};
         }
 
         let loadState = this._marketLoadState;
-        if (filter.forSale != loadState.forSale || filter.saleType != loadState.saleType){
+        let havePlaceholder = false;
+        if (filter.saleType != loadState.saleType){
+            havePlaceholder = true;
             this._marketLoadState = {
                 forSale: filter.forSale,
                 saleType: filter.saleType,
@@ -267,8 +271,13 @@ class App{
             }
             loadState = this._marketLoadState;
             //TODO: add placeholders
-
+            let panels = this.createNFTPanels("", {schema:[]}, [
+                [""],[""],[""],[""],[""],[""],[""],[""],[""],[""]
+            ]);
             this.marketplaceListEl.innerHTML = "";
+            panels.forEach(panel=>{
+                this.marketplaceListEl.appendChild(panel);
+            })
         }
         
         
@@ -304,6 +313,9 @@ class App{
             } while (accounts.length && elements.length < LOAD_COUNT);
         }
         let scrollTop = this.mainEl.scrollTop;
+        if (havePlaceholder){
+            this.marketplaceListEl.innerHTML = "";
+        }
         elements.map(el=>this.marketplaceListEl.appendChild(el));
         let length = pubkeys.length;
         if (length){
@@ -370,10 +382,13 @@ class App{
     createNFTPanel(mint, minData, pubkey, data, account){
         const clone = this.nftTemplateEl.content.cloneNode(true);
         let el = clone.children[0];
+        if (!pubkey){
+            el.classList.add("placeholder-panel");
+        }
         el.dataset.pubkey = pubkey;
         el.dataset.mint = mint;
         let pubkeyEl = clone.querySelector(".nft-pubkey");
-        pubkeyEl.innerHTML = this.dnft.shortenPubkey(pubkey);
+        pubkeyEl.innerHTML = pubkey?this.dnft.shortenPubkey(pubkey):"ABC....XYZ";
         let title = clone.querySelector(".nft-title");
         title.setAttribute("title", pubkey);
         title.innerHTML = "&nbsp;";

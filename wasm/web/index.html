@@ -161,7 +161,50 @@
         <div class="mdl-layout__tab-panel is-active" id="marketplace">
           <div class="main-container no-records" id="marketplace-nft-container">
             <h2>Marketplace</h2>
-            <div class="marketplace-filter  mdl-shadow--2dp">
+            <header class="mdl-layout__header">
+              <div class="mdl-layout__header-row">
+                <span>Sale Type: </span>
+                <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="sale-type-0">
+                  <input checked class="mdl-radio__button" id="sale-type-0" name="sale-type" type="radio" value="any">
+                  <span class="mdl-radio__label">Any</span>
+                </label>
+                <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="sale-type-1">
+                  <input class="mdl-radio__button" id="sale-type-1" name="sale-type" type="radio" value="none">
+                  <span class="mdl-radio__label">Sale</span>
+                </label>
+                <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="sale-type-2">
+                  <input class="mdl-radio__button" id="sale-type-2" name="sale-type" type="radio"
+                  value="rent">
+                  <span class="mdl-radio__label">Rent</span>
+                </label>
+                <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="sale-type-3">
+                  <input class="mdl-radio__button" id="sale-type-3" name="sale-type" type="radio" value="auction">
+                  <span class="mdl-radio__label">Auction</span>
+                </label>
+                <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="sale-type-4">
+                  <input class="mdl-radio__button" id="sale-type-4" name="sale-type" type="radio" value="barter">
+                  <span class="mdl-radio__label">Barter</span>
+                </label>
+                <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="sale-type-5">
+                  <input class="mdl-radio__button" id="sale-type-5" name="sale-type" type="radio" value="raffle">
+                  <span class="mdl-radio__label">Raffle</span>
+                </label>
+                <div class="mdl-layout-spacer"></div>
+                <div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable
+                            mdl-textfield--floating-label mdl-textfield--align-right">
+                  <label class="mdl-button mdl-js-button mdl-button--icon"
+                         for="fixed-header-drawer-exp">
+                    <i class="material-icons">search</i>
+                  </label>
+                  <div class="mdl-textfield__expandable-holder">
+                    <input class="mdl-textfield__input" type="text" name="sample"
+                           id="fixed-header-drawer-exp">
+                  </div>
+                </div>
+              </div>
+            </header>
+            
+            <!-- <div class="marketplace-filter  mdl-shadow--2dp">
               <form action="#" class="search-form">
                 <h4 class="search-form-title">Filter Search</h4>
                 <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
@@ -169,34 +212,7 @@
                     <label class="mdl-textfield__label" for="Name">Seach...</label>
                     <span class="mdl-textfield__error">Letters and spaces only</span>
                 </div>
-                <div>
-                  <h5>Sale Type</h5>
-                  <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="sale-type-0">
-                    <input checked class="mdl-radio__button" id="sale-type-0" name="sale-type" type="radio" value="any">
-                    <span class="mdl-radio__label">Any</span>
-                  </label>
-                  <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="sale-type-1">
-                    <input class="mdl-radio__button" id="sale-type-1" name="sale-type" type="radio" value="none">
-                    <span class="mdl-radio__label">Sale</span>
-                  </label>
-                  <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="sale-type-2">
-                    <input class="mdl-radio__button" id="sale-type-2" name="sale-type" type="radio"
-                    value="rent">
-                    <span class="mdl-radio__label">Rent</span>
-                  </label>
-                  <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="sale-type-3">
-                    <input class="mdl-radio__button" id="sale-type-3" name="sale-type" type="radio" value="auction">
-                    <span class="mdl-radio__label">Auction</span>
-                  </label>
-                  <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="sale-type-4">
-                    <input class="mdl-radio__button" id="sale-type-4" name="sale-type" type="radio" value="barter">
-                    <span class="mdl-radio__label">Barter</span>
-                  </label>
-                  <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="sale-type-5">
-                    <input class="mdl-radio__button" id="sale-type-5" name="sale-type" type="radio" value="raffle">
-                    <span class="mdl-radio__label">Raffle</span>
-                  </label>
-                </div>
+                
 
                 <div class="actions">
                   <button class="filter-marketplace mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" type="submit">
@@ -204,7 +220,7 @@
                   </button>
                 </div>
               </form>
-            </div>
+            </div> -->
             <div class="mdl-grid" id="marketplace-list">
 
             </div>

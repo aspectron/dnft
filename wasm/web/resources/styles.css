@@ -218,9 +218,14 @@ td.actions .material-icons{
   width:90%;
   margin: 0px auto 100px;
 }
-.main-container#browse-nft-container{
+.main-container#browse-nft-container,
+.main-container#marketplace-nft-container{
   max-width:1110px;
   width:90%;
+}
+#marketplace-nft-container>.mdl-layout__header{
+  position: sticky;
+  top:0px;
 }
 .mdl-textfield.block{
   display:block;
@@ -529,4 +534,36 @@ td.actions .material-icons{
 .search-form-title{
   font-size:2rem;
   margin-top:0px;
+}
+.mdl-layout__header-row .mdl-radio{
+  margin-left:10px;
+}
+.mdl-layout__header-row .mdl-radio__outer-circle,
+.mdl-layout__header-row .mdl-radio.is-checked .mdl-radio__outer-circle{
+  border-color:#FFF;
+}
+.mdl-radio__inner-circle{
+  background-color: #FFF;
+}
+.placeholder-panel{
+  opacity:0.3;
+}
+.placeholder-panel .nft-image{
+  background: linear-gradient(-90deg, #673ab7, #FFFFFF, #673ab7);
+	background-size: 400% 400%;
+	animation: placeholder-gradient 2s ease infinite;
+}
+@keyframes placeholder-gradient {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
+}
+.placeholder-panel .nft-description{
+  min-height:80px;
 }
