@@ -188,7 +188,10 @@ class App{
         this.nftTemplateEl = $("#nft-panel-tpl");
         this.nftListEl = $("#nft-list");
         this.marketplaceListEl = $("#marketplace-list");
-        this.marketFilter = {};
+        this.marketFilter = {
+            forSale: true,
+            saleType: this.dnft.SaleType.none()
+        };
         this.mainEl = mainEl;
         this.loadMints();
         this.loadNFTs();
@@ -269,6 +272,9 @@ class App{
                 start: 0n
             }
             loadState = this._marketLoadState;
+            //TODO: add placeholders
+
+            this.marketplaceListEl.innerHTML = "";
         }
         
         
