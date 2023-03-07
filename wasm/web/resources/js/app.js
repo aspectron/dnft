@@ -272,7 +272,7 @@ class App{
             loadState = this._marketLoadState;
             //TODO: add placeholders
             let panels = this.createNFTPanels("", {schema:[]}, [
-                [""],[""],[""],[""],[""],[""],[""],[""],[""],[""]
+                [],[],[],[],[],[],[],[],[],[]
             ]);
             this.marketplaceListEl.innerHTML = "";
             panels.forEach(panel=>{
@@ -380,10 +380,14 @@ class App{
         })
     }
     createNFTPanel(mint, minData, pubkey, data, account){
+        
         const clone = this.nftTemplateEl.content.cloneNode(true);
         let el = clone.children[0];
         if (!pubkey){
             el.classList.add("placeholder-panel");
+        }
+        if (account){
+            console.log("account:" , account, account.key().toString(), account.lamports())
         }
         el.dataset.pubkey = pubkey;
         el.dataset.mint = mint;

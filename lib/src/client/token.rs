@@ -41,6 +41,7 @@ mod wasm {
     use crate::prelude::*;
     use crate::program::{MarketState, TokenCreateFinalArgs};
     use kaizen::transport::api::*;
+    use kaizen::accounts::AccountReference;
     use solana_program::account_info::IntoAccountInfo;
     use solana_sdk::account::Account;
 
@@ -183,7 +184,8 @@ mod wasm {
         pubkey: &Pubkey,
         account: Arc<AccountDataReference>,
     ) -> Result<js_sys::Array, JsValue> {
-        let account: Account = (&account.clone_for_program()?).into();
+        let account_data = account.clone_for_program()?;
+        let account: Account = (&account_data).into();
         let mut account_clone = account.clone();
         let account_info = (pubkey, &mut account_clone).into_account_info();
         let token = program::Token::try_load(&account_info)?;
@@ -194,10 +196,11 @@ mod wasm {
                 data.push(&item.into());
             }
         }
+
         let item = js_sys::Array::new();
         item.push(&pubkey.to_string().into());
         item.push(&data);
-        item.push(&to_value(&account).unwrap());
+        item.push(&AccountReference::from(&account_data).into());
         Ok(item)
     }
 }
