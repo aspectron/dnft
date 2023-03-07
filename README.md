@@ -2,7 +2,11 @@
 
 Delta NFT project - created for [Solana Grizzlython](https://solana.com/grizzlython) Hackathon
 
-The goal of this project is to create a new NFT standard that provides users with an ability to create NFTs with custom data schema. The data schema that can be created is meant to represent different real or virtual assets, while carrying detailed information about them within each token issued.
+[https://deltanft.xyz](https://deltanft.xyz)
+
+The goal of this project is to create a new NFT standard that provides users with an ability to create NFTs that contain custom data schemas. Data schemas that can be created are meant to represent different real or virtual assets, while carrying detailed information about them within each token issued.
+
+DNFT mints are more akin to database tables, where groups of fields can have different authorities managing them.
 
 Key features:
 
