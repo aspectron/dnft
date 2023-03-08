@@ -10,3 +10,7 @@ workflow-http.workspace = true
 tide.workspace = true
 async-std.workspace = true
 rand.workspace = true
+serde.workspace = true
+http-types.workspace = true
+multipart.workspace = true
+mime.workspace = true

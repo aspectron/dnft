@@ -110,12 +110,70 @@ class App{
     }
 
     async init(){
+        this.initMsgDialog();
         await this.initApp();
         this.initBrowsePage();
         this.initCreateDnftForm();
         this.initMintDnftPage();
 
         this.setLoading(false);
+        this.initUpload();
+    }
+
+    initUpload(){
+        this.fileInput = document.createElement("input");
+        this.fileInput.setAttribute("type", "file");
+        this.fileInput.classList.add("hidden-file-input");
+        document.body.appendChild(this.fileInput);
+        this.fileInput.addEventListener("change", async ()=>{
+            let file = this.fileInput.files[0];
+            if (!file){
+                return
+            }
+            this.fileInput.value = "";
+            let formData = new FormData();
+            //formData.append("name", file.name);
+            formData.append("file", file);
+            fetch('/upload/file', {method: "POST", body: formData})
+            .then(res=>res.json())
+            .then(data=>{
+                console.log("result", data);
+                this.fileUploadCallback?.(data);
+                this.fileUploadCallback = null;
+            })
+            .catch(err=>{
+                this.fileUploadCallback?.(err);
+                this.fileUploadCallback = null;
+            })
+            
+        })
+    }
+
+    uploadFile(callback){
+        this.fileUploadCallback = callback;
+        this.fileInput.click();
+    }
+
+    initMsgDialog(){
+        let dialog = $('#msg-dialog');
+        if (!dialog.showModal) {
+            dialogPolyfill.registerDialog(dialog);
+        }
+
+        dialog.querySelector('.close-dialog').addEventListener('click', ()=>{
+            dialog.close();
+        });
+
+        this.msgEl = $('#msg-dialog .msg');
+        this.msgTitleEl = $('#msg-dialog .title');
+        this.msgDialog = dialog;
+    }
+
+    showError(msg){
+        this.msgDialog.classList.add("error");
+        this.msgTitleEl.innerHTML = "Error";
+        this.msgEl.innerHTML = msg;
+        this.msgDialog.showModal();
     }
 
     async initApp(){
@@ -136,8 +194,14 @@ class App{
         this.txObserver = new this.dnft.TransactionObserver();
         this.txObserver.setHandler(({event, data})=>{
             console.log("txObserver:", event, data);
-            if (event != "transaction-success" || !data)
+            if (event == "transaction-failure"){
+                if (data?.error?.includes("Attempt to debit an account but")){
+                    this.showError("Attempt to debit an account but found no record of a prior credit.")
+                }
+            }
+            if (event != "transaction-success" || !data){
                 return 
+            }
             let name = data.transaction.name.toLowerCase()||"";
             let accounts = data.transaction.meta.accounts;
             if (name.includes("creating mint")){
@@ -676,6 +740,10 @@ class App{
                 fieldsData
             );
 
+            if (result){
+                this.mintFormDialog.close();
+            }
+
             console.log("mint result:", result);
         })
     }
@@ -710,7 +778,7 @@ class App{
                 input.type = "number";
                 input.min = field_info.min[type];
                 input.max = field_info.max[type];
-            }else if(type == "Url"){
+            }else if(["ImageUrl", "PageUrl", "StorageProviderUrl"].includes(type)){
                 input.type = "url";
             }
             
@@ -731,6 +799,20 @@ class App{
             fieldEl.appendChild(input);
             fieldEl.appendChild(label);
             fieldEl.appendChild(error);
+            if (type == "ImageUrl"){
+                let uploadBtn = document.createElement("a");
+                uploadBtn.innerHTML = "Or upload image";
+                uploadBtn.setAttribute("class", "mdl-textfield__upload-link");
+                uploadBtn.setAttribute("href", "javascript: void 0");
+                uploadBtn.addEventListener("click", ()=>{
+                    this.uploadFile((result)=>{
+                        if (result.success && result.file){
+                            input.value = location.origin+"/"+result.file;
+                        }
+                    })
+                });
+                fieldEl.appendChild(uploadBtn);
+            }
             
             componentHandler.upgradeElement(fieldEl, "MaterialTextfield");
 
