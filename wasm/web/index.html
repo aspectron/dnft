@@ -56,57 +56,25 @@
     <link rel="stylesheet" href="resources/fonts/blender-pro/stylesheet.css">
     <link rel="stylesheet" href="resources/styles.css">
     <script src="resources/js/app.js"></script>
-    <script src="/static/node_modules/@solana/web3.js/lib/index.iife.js"></script>
+    <script src="/static/esm/web3.js/index.iife.js"></script>
     <script type="module">
       import * as dnft from './dnft/dnft.js';
       (async () => {
-          let {PhantomWalletAdapter, WalletReadyState} = await import("/static/solana.js");
+          let {
+            PhantomWalletAdapter,
+            WalletReadyState
+          } = await import("/static/solana.js");
+
           const wasm = await dnft.default('./dnft/dnft_bg.wasm');
-          
+
           dnft.init_console_panic_hook();
           console.log("init kaizen");
-          //dnft.init_kaizen(dnft,{},{});
           dnft.init_kaizen(dnft, solanaWeb3, {PhantomWalletAdapter, WalletReadyState});
-          let program_id = dnft.dnft_program_id();
-          let authority = new dnft.Pubkey("42bML5qB3WkMwfa2cosypjUrN7F2PLQm4qhxBdRDyW7f");
-          console.log("program_id: ",program_id, "authority: ",authority);
-          console.dir(dnft)
+          console.log("program_id: ", dnft.dnft_program_id());
+          console.dir(dnft);
           //let transport = await dnft.Transport.InProcUnitTests(program_id,authority);
           let transport = await new dnft.Transport("http://localhost:8899");
-          console.log("transport", transport)
-          console.log("init kaizen done");
-
-          /*
-          let mint = new dnft.Pubkey("6QJ6DFusKuQMdZLrQixdGFmC8WLnzMSuq9KJPpavbhrS");
-          let accounts = await transport.getProgramAccounts(program_id, {
-            filters: [
-                {
-                    memcmp: {
-                        offset: 8, // number of bytes
-                        bytes: mint.toString(), // base58 encoded string
-                    },
-                },
-                {
-                    memcmp: {
-                        offset: 40, // number of bytes
-                        bytes: "1" //base58.encode([0]), // base58 encoded string
-                    },
-                },
-            ]
-          });
-
-          console.log("getProgramAccounts:::: ", accounts);
-          */
-
-          //await dnft.run_mint_test();
-
-          //await dnft.createRoot();
-          //let a = dnft.check_f64_number("-1.7976931348623158e+308");
-          //console.log("check_f64_number:" , a)
-          
           let app = new App(dnft, transport);
-          //dnft.run_test();
-          //window.app = app
       })();
   </script>
   </head>
@@ -205,27 +173,7 @@
             </header>
           </div>
           <div class="main-container no-records" id="marketplace-nft-container">
-            
-            <!-- <div class="marketplace-filter  mdl-shadow--2dp">
-              <form action="#" class="search-form">
-                <h4 class="search-form-title">Filter Search</h4>
-                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                    <input class="mdl-textfield__input" pattern="[A-Z,a-z, ]*" type="text" id="Name">
-                    <label class="mdl-textfield__label" for="Name">Seach...</label>
-                    <span class="mdl-textfield__error">Letters and spaces only</span>
-                </div>
-                
-
-                <div class="actions">
-                  <button class="filter-marketplace mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" type="submit">
-                    Search
-                  </button>
-                </div>
-              </form>
-            </div> -->
-            <div class="mdl-grid" id="marketplace-list">
-
-            </div>
+            <div class="mdl-grid" id="marketplace-list"></div>
             <template id="market-panel-tpl">
               <div class="nft-panel mdl-cell mdl-card mdl-shadow--2dp">
                 <div class="nft-image mdl-card__title">
@@ -371,19 +319,14 @@
                 <table width="100%" class="mdl-data-table">
                   <thead>
                     <tr>
-                      <!--th> </th-->
                       <th class="mdl-data-table__cell--non-numeric" width="30%">Data Type</th>
                       <th class="mdl-data-table__cell--non-numeric" width="70%">Description</th>
                     </tr>
                   </thead>
-                  <tbody id="field-type-list">
-                  </tbody>
+                  <tbody id="field-type-list"></tbody>
                 </table>
               </div>
               <div class="mdl-dialog__actions">
-                <!--button class="mdl-button mdl-js-button add-fields mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-                  Add
-                </button-->
                 <button type="button" class="mdl-button close-dialog">Close</button>
               </div>
             </dialog>
@@ -444,7 +387,6 @@
         </footer>
     </main>
 </div>
-<!--a href="https://github.com/google/material-design-lite/blob/mdl-1.x/templates/text-only/" target="_blank" id="view-source" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-color--accent mdl-color-text--accent-contrast">View Source</a-->
 <script src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 </body>
 </html>

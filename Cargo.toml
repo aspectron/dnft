@@ -5,6 +5,7 @@ members = [
     "wasm",
     "program",
     "mint",
+    "init",
 ]
 
 [workspace.package]
