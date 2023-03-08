@@ -153,6 +153,10 @@ class App{
         this.fileUploadCallback = callback;
         this.fileInput.click();
     }
+    uploadImage(callback){
+        this.fileInput.setAttribute("accept", "image/png, image/jpeg, image/svg, image/bmp")
+        this.uploadFile(callback);
+    }
 
     initMsgDialog(){
         let dialog = $('#msg-dialog');
@@ -805,7 +809,7 @@ class App{
                 uploadBtn.setAttribute("class", "mdl-textfield__upload-link");
                 uploadBtn.setAttribute("href", "javascript: void 0");
                 uploadBtn.addEventListener("click", ()=>{
-                    this.uploadFile((result)=>{
+                    this.uploadImage((result)=>{
                         if (result.success && result.file){
                             input.value = location.origin+"/"+result.file;
                         }
