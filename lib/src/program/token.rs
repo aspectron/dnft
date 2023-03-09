@@ -4,7 +4,7 @@
 
 use crate::prelude::*;
 use kaizen::program_error_code;
-use program::{Data, Mint, SaleType};
+use program::{Data, ExchangeMechanics, Mint, SaleType};
 
 pub type DataVec = Vec<program::Data>;
 
@@ -12,13 +12,15 @@ pub type DataVec = Vec<program::Data>;
 pub struct TokenCreateFinalArgs {
     pub for_sale: ForSale,
     pub sale_type: SaleType,
+    pub exchange_mechanics: ExchangeMechanics,
     pub data: Vec<Data>,
 }
 
 #[derive(Default, Clone, Debug, BorshSerialize, BorshDeserialize)]
 pub struct TokenSaleSettingArgs {
     pub for_sale: Option<ForSale>,
-    pub price: Option<u32>,
+    pub sale_type: Option<SaleType>,
+    pub exchange_mechanics: Option<ExchangeMechanics>,
 }
 
 #[derive(Default, Clone, Debug, BorshSerialize, BorshDeserialize)]
@@ -54,14 +56,16 @@ impl From<bool> for MarketState {
 }
 
 #[derive(Copy, Clone)]
+#[repr(packed)]
 pub struct Sale {
     pub market_state: MarketState,
     pub for_sale: ForSale,
     pub sale_type: program::SaleType,
+    pub exchange_mechanics: ExchangeMechanics,
 }
 
 impl Sale {
-    fn new(for_sale: ForSale, sale_type: SaleType) -> Self {
+    fn new(for_sale: ForSale, sale_type: SaleType, exchange_mechanics: ExchangeMechanics) -> Self {
         let market_state = if for_sale == ForSale::Yes || sale_type != SaleType::None {
             MarketState::Listed
         } else {
@@ -72,6 +76,7 @@ impl Sale {
             market_state,
             for_sale,
             sale_type,
+            exchange_mechanics,
         }
     }
 
@@ -83,6 +88,10 @@ impl Sale {
         };
         self.market_state = market_state;
         self.for_sale = for_sale;
+    }
+
+    pub fn set_exchange_mechanics(&mut self, exchange_mechanics: ExchangeMechanics) {
+        self.exchange_mechanics = exchange_mechanics;
     }
 }
 
@@ -117,8 +126,8 @@ pub struct TokenMeta {
     page: u32, // TODO - derive from sequence
     mint: Pubkey,
     sale: Sale,
-    reserved: u8,
     authority: Pubkey,
+    reserved: u8,
 }
 
 #[container(Containers::Token)]
@@ -169,7 +178,11 @@ impl<'info, 'refs> Token<'info, 'refs> {
         meta.set_version(1);
         meta.set_mint(*mint.pubkey());
         meta.set_page(page);
-        meta.set_sale(Sale::new(args.for_sale, args.sale_type));
+        meta.set_sale(Sale::new(
+            args.for_sale,
+            args.sale_type,
+            args.exchange_mechanics,
+        ));
         meta.set_reserved(0);
         meta.set_authority(*ctx.authority.key);
         drop(meta);
@@ -193,15 +206,17 @@ impl<'info, 'refs> Token<'info, 'refs> {
             return Err(ProgramError::IllegalOwner);
         }
         let args = TokenSaleSettingArgs::try_from_slice(ctx.instruction_data)?;
-        log_info!(
-            "update_sale_setting: ###args.for_sale.is_some(): {:?}",
-            args.for_sale.is_some()
-        );
+
+        let mut meta = token.meta.borrow_mut();
+        let mut sale = meta.sale;
         if let Some(for_sale) = args.for_sale {
-            let mut meta = token.meta.borrow_mut();
-            meta.sale.set_for_sale(for_sale);
-            log_info!("update_sale_setting: updated");
+            //meta.sale.set_for_sale(for_sale);<=== create error
+            sale.set_for_sale(for_sale);
         }
+        if let Some(exchange_mechanics) = args.exchange_mechanics {
+            sale.set_exchange_mechanics(exchange_mechanics);
+        }
+        meta.set_sale(sale);
 
         Ok(())
     }

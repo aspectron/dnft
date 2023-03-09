@@ -1,6 +1,6 @@
 use crate::{
     prelude::*,
-    program::{ForSale, MarketState, TokenCreateFinalArgs, TokenSaleSettingArgs},
+    program::{MarketState, TokenCreateFinalArgs, TokenSaleSettingArgs},
 };
 use kaizen::result::Result;
 
@@ -38,10 +38,28 @@ impl From<program::TokenMeta> for TokenMetaReference {
     }
 }
 
+#[wasm_bindgen(getter_with_clone)]
+pub struct ExchangeMechanicsReference {
+    pub sale_type: String,
+    pub coin: String,
+    pub price: js_sys::BigInt,
+}
+
+impl ExchangeMechanicsReference {
+    fn new(sale_type: &str, coin: &str, price: u64) -> Self {
+        Self {
+            sale_type: sale_type.to_string(),
+            coin: coin.to_string(),
+            price: js_sys::BigInt::from(price),
+        }
+    }
+}
+
 #[wasm_bindgen]
 pub struct SaleReference {
     inner: program::token::Sale,
 }
+
 #[wasm_bindgen]
 impl SaleReference {
     pub fn listed(&self) -> bool {
@@ -49,7 +67,36 @@ impl SaleReference {
     }
 
     pub fn sale_type(&self) -> String {
+        // let mut writer = vec![];
+        // let a = self.inner.sale_type.serialize(&mut writer);
+        // log_trace!("SaleReference:writer: {:?}, a:{:?}", writer, a);
+        // //let v:Vec<u8> = self.inner.sale_type.into();
+        // //log_trace!("SaleReference:sale_type: {:?}", v);
+        // //self.inner.sale_type.into()
+        // "xxxxx".to_string()
         self.inner.sale_type.into()
+    }
+
+    pub fn exchange_mechanics(&self) -> Option<ExchangeMechanicsReference> {
+        self.exchange_mechanics_impl()
+    }
+}
+
+impl SaleReference {
+    pub fn exchange_mechanics_impl(&self) -> Option<ExchangeMechanicsReference> {
+        let sale = match self.inner.exchange_mechanics {
+            program::ExchangeMechanics::Sale(sale) => sale,
+            _ => return None,
+        };
+
+        Some(match sale {
+            program::exchange::Sale::Sol { price } => {
+                ExchangeMechanicsReference::new("sale", "sol", price)
+            }
+            program::exchange::Sale::Spl { price, token } => {
+                ExchangeMechanicsReference::new("sale-spl", &token.to_string(), price)
+            }
+        })
     }
 }
 
@@ -85,10 +132,12 @@ impl Token {
     pub async fn update_sale_setting(
         authority_pubkey: &Pubkey,
         token_pubkey: &Pubkey,
-        for_sale: Option<ForSale>,
-        price: Option<u32>,
+        args: &TokenSaleSettingArgs,
     ) -> Result<TransactionList> {
-        let args = TokenSaleSettingArgs { for_sale, price };
+        if args.for_sale.is_none() && args.exchange_mechanics.is_none() && args.sale_type.is_none()
+        {
+            return Err("Nothing to update.".into());
+        }
         let builder = client::Token::execution_context_for(program::Token::update_sale_setting)
             .with_authority(authority_pubkey)
             .with_handler_accounts(&[AccountMeta::new(*token_pubkey, false)])
@@ -110,9 +159,12 @@ mod wasm {
     use super::{Token, TokenMetaReference};
     use crate::client::{Data, SaleType};
     use crate::prelude::*;
-    use crate::program::{ForSale, MarketState, TokenCreateFinalArgs};
+    use crate::program::{
+        ExchangeMechanics, ForSale, MarketState, TokenCreateFinalArgs, TokenSaleSettingArgs,
+    };
     use kaizen::accounts::AccountReference;
     use kaizen::transport::api::*;
+    use kaizen::utils::sol_to_lamports;
     use solana_program::account_info::IntoAccountInfo;
     use solana_sdk::account::Account;
 
@@ -140,6 +192,7 @@ mod wasm {
         let args = TokenCreateFinalArgs {
             for_sale,
             sale_type: sale_type.into(),
+            exchange_mechanics: ExchangeMechanics::None, //TODO
             data,
         };
         let tx = Token::create(&authority, &mint, &args).await?;
@@ -170,9 +223,9 @@ mod wasm {
         get_tokens(mint, page, None, None, &JsValue::UNDEFINED).await
     }
 
-    /// Returns a tokens for a specific mint
-    #[wasm_bindgen(js_name = "getTokens")]
-    pub async fn get_tokens(
+    // Returns a tokens for a specific mint
+    //#[wasm_bindgen(js_name = "getTokens")]
+    async fn get_tokens(
         mint: JsValue,
         page: u32,
         market_state: Option<bool>,
@@ -233,6 +286,8 @@ mod wasm {
             .get_program_accounts_with_config(&crate::program_id(), config)
             .await?;
 
+        //log_trace!("accounts: {accounts:?}");
+
         let result = js_sys::Array::new();
         for (pubkey, _) in accounts {
             //log_trace!("get_tokens: pubkey:{pubkey}");
@@ -287,12 +342,19 @@ mod wasm {
     pub async fn update_token_sale_setting(
         pubkey: JsValue,
         for_sale: Option<bool>,
-        price: Option<u32>,
+        price: Option<f64>,
     ) -> Result<JsValue, JsValue> {
         let pubkey = Pubkey::from_value(&pubkey)?;
         let authority = Transport::global()?.get_authority_pubkey()?;
         let for_sale: Option<ForSale> = for_sale.map(|v| v.into());
-        let tx = Token::update_sale_setting(&authority, &pubkey, for_sale, price).await?;
+
+        let args = TokenSaleSettingArgs {
+            for_sale,
+            sale_type: None,
+            exchange_mechanics: price
+                .map(|price| ExchangeMechanics::sale(sol_to_lamports(price), None)),
+        };
+        let tx = Token::update_sale_setting(&authority, &pubkey, &args).await?;
         let ids = tx.ids()?;
         tx.post().await?;
         Ok(to_value(&ids)?)

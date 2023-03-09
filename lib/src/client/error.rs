@@ -4,6 +4,7 @@ use std::io::Error as IOError;
 use std::sync::PoisonError;
 use thiserror::Error;
 use wasm_bindgen::prelude::*;
+use workflow_core::id::Error as IDError;
 use workflow_store::error::Error as StoreError;
 use workflow_wasm::callback::CallbackError;
 
@@ -35,6 +36,9 @@ pub enum Error {
 
     #[error("ParsePubkeyError: {0}")]
     ParsePubkeyError(#[from] ParsePubkeyError),
+
+    #[error("IDError: {0}")]
+    IDError(#[from] IDError),
 }
 
 impl From<KaizenError> for Error {

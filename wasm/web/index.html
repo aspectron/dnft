@@ -119,8 +119,9 @@
                   <div class="nft-description"></div>
                 </div>
                 <div class="mdl-card__actions mdl-card--border">
-                  <button type="button" data-action="buy" class="mdl-button availability-btn _mdl-button--raised">See availability</button>
+                  <button type="button" data-action="buy" disabled class="mdl-button availability-btn _mdl-button--raised">See availability</button>
                   <button type="button" data-action="setting" class="mdl-button setting-btn _mdl-button--raised">Sale options</button>
+                  <div class="sale-price"></div>
                 </div>
               </div>
             </template>
@@ -133,28 +134,28 @@
               <div class="mdl-layout__header-row">
                 <span>Sale Type: </span>
                 <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="sale-type-0">
-                  <input checked class="mdl-radio__button" id="sale-type-0" name="sale-type" type="radio" value="any">
+                  <input class="mdl-radio__button" id="sale-type-0" disabled name="sale-type" type="radio" value="any">
                   <span class="mdl-radio__label">Any</span>
                 </label>
                 <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="sale-type-1">
-                  <input class="mdl-radio__button" id="sale-type-1" name="sale-type" type="radio" value="none">
+                  <input checked class="mdl-radio__button" id="sale-type-1" name="sale-type" type="radio" value="none">
                   <span class="mdl-radio__label">Sale</span>
                 </label>
                 <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="sale-type-2">
-                  <input class="mdl-radio__button" id="sale-type-2" name="sale-type" type="radio"
+                  <input class="mdl-radio__button" id="sale-type-2" disabled name="sale-type" type="radio"
                   value="rent">
                   <span class="mdl-radio__label">Rent</span>
                 </label>
                 <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="sale-type-3">
-                  <input class="mdl-radio__button" id="sale-type-3" name="sale-type" type="radio" value="auction">
+                  <input class="mdl-radio__button" id="sale-type-3" disabled name="sale-type" type="radio" value="auction">
                   <span class="mdl-radio__label">Auction</span>
                 </label>
                 <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="sale-type-4">
-                  <input class="mdl-radio__button" id="sale-type-4" name="sale-type" type="radio" value="barter">
+                  <input class="mdl-radio__button" id="sale-type-4" disabled name="sale-type" type="radio" value="barter">
                   <span class="mdl-radio__label">Barter</span>
                 </label>
                 <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="sale-type-5">
-                  <input class="mdl-radio__button" id="sale-type-5" name="sale-type" type="radio" value="raffle">
+                  <input class="mdl-radio__button" id="sale-type-5" disabled name="sale-type" type="radio" value="raffle">
                   <span class="mdl-radio__label">Raffle</span>
                 </label>
                 <div class="mdl-layout-spacer"></div>
@@ -186,6 +187,7 @@
                 <div class="mdl-card__actions mdl-card--border">
                   <button type="button" data-action="buy" class="mdl-button buy-btn _mdl-button--raised">Buy</button>
                   <button type="button" data-action="setting" class="mdl-button setting-btn _mdl-button--raised">Sale options</button>
+                  <div class="sale-price"></div>
                 </div>
               </div>
             </template>
@@ -346,10 +348,44 @@
               <input type="checkbox" id="setting-for-sale-input" class="mdl-checkbox__input" checked>
               <span class="mdl-checkbox__label">List for Sale</span>
             </label>
-            <label class="mdl-textfield mdl-js-textfield" for="setting-sale-price">
-              <input type="number" id="setting-sale-price" class="mdl-textfield__input">
-              <span class="mdl-textfield__label">Price</span>
-            </label>
+            <div class="setting-sale-type-inputs">
+              <label class="heading">Sale Type: </label>
+              <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="setting-sale-type-1">
+                <input checked class="mdl-radio__button" id="setting-sale-type-1" name="setting-sale-type" type="radio" value="none">
+                <span class="mdl-radio__label">Sale</span>
+              </label>
+              <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="setting-sale-type-2">
+                <input class="mdl-radio__button" id="setting-sale-type-2" disabled name="setting-sale-type" type="radio"
+                value="rent">
+                <span class="mdl-radio__label">Rent</span>
+              </label>
+              <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="setting-sale-type-3">
+                <input class="mdl-radio__button" id="setting-sale-type-3" disabled name="setting-sale-type" type="radio" value="auction">
+                <span class="mdl-radio__label">Auction</span>
+              </label>
+              <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="setting-sale-type-4">
+                <input class="mdl-radio__button" id="setting-sale-type-4" disabled name="setting-sale-type" type="radio" value="barter">
+                <span class="mdl-radio__label">Barter</span>
+              </label>
+              <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="setting-sale-type-5">
+                <input class="mdl-radio__button" id="setting-sale-type-5" disabled name="setting-sale-type" type="radio" value="raffle">
+                <span class="mdl-radio__label">Raffle</span>
+              </label>
+            </div>
+            <div class="price-input">
+              <img src="https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png">
+              <label class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label has-placeholder" for="setting-sale-price">
+                <input type="number" id="setting-sale-price" step="0.0000000001" class="mdl-textfield__input">
+                <span class="mdl-textfield__label">Price in SOL</span>
+              </label>
+            </div>
+            <div class="price-input disabled">
+              <img src="https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB/logo.svg">
+              <label class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label has-placeholder" for="setting-sale-price-spl">
+                <input type="number" id="setting-sale-price-spl" disabled step="0.0000000001" class="mdl-textfield__input">
+                <span class="mdl-textfield__label">Price in USDT</span>
+              </label>
+            </div>
           </div>
           <div class="mdl-dialog__actions">
             <button type="button" 

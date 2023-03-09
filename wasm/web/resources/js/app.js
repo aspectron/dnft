@@ -167,7 +167,7 @@ class App{
         this.fileInput.setAttribute("accept", "image/png, image/jpeg, image/svg, image/bmp")
         this.uploadFile(callback);
     }
-    showToast(message, actionText=null, actionHandler=null, timeout=2000){
+    showToast(message, actionText=null, actionHandler=null, timeout=10000){
         let data = {
             message,
             timeout,
@@ -210,20 +210,23 @@ class App{
         this.txObserver = new this.dnft.TransactionObserver();
         this.txObserver.setHandler(({event, data})=>{
             console.log("txObserver:", event, data);
-            if (event == "transaction-success"){
+            if (event == "transaction-created"){
                 if (data?.transaction?.name){
-                    this.showToast(data?.transaction?.name)
+                    this.showToast(data.transaction.name)
                 }
+                return
             }
             if (event == "transaction-failure"){
                 if (data?.error?.includes("Attempt to debit an account but")){
                     this.showError("Attempt to debit an account but found no record of a prior credit.")
                 }
+                this.dnft.discardTxChain(data.txChain.id)
                 return
             }
             if (event != "transaction-success" || !data){
                 return 
             }
+            this.dnft.discardTxChain(data.txChain.id)
             let name = data.transaction.name.toLowerCase()||"";
             let accounts = data.transaction.meta.accounts;
             if (name.includes("creating mint")){
@@ -344,7 +347,7 @@ class App{
             }
         });
 
-        $$(`input[name="sale-type"]`).forEach(input=>{
+        $$(`.marketplace-header input[name="sale-type"]`).forEach(input=>{
             input.addEventListener("change", (e)=>{
                 //e.preventDefault();
                 let saleType = "any";
@@ -364,8 +367,8 @@ class App{
         [this.marketplaceListEl, this.nftListEl].forEach(list=>{
             list.addEventListener("click", (e)=>{
                 let el = e.target.closest("[data-action]");
-                let nftEl = el.closest(".nft-panel");
-                if(!el)
+                let nftEl = el?.closest(".nft-panel");
+                if(!nftEl)
                     return
                 let action = el.dataset.action;
                 let {pubkey, mint} = nftEl.dataset;
@@ -385,33 +388,54 @@ class App{
         this.saleSettingDialog.querySelector(".update-btn").addEventListener("click", ()=>{
             this.updateSaleSettingBtnCallback?.();
         })
+        this.saleSettingDialog.querySelector("#setting-for-sale-input").addEventListener("change", (e)=>{
+            this.updateSettingListed(e.target.checked)
+        })
+    }
+
+    updateSettingListed(listed){
+        let checkbox = $("#setting-for-sale").MaterialCheckbox;
+        if (listed){
+            checkbox.check();
+        }else{
+            checkbox.uncheck();
+        }
+        $$(`[name="setting-sale-type"]`).forEach(input=>{
+            //console.log("input.value", checked, input.value, input.parentElement.MaterialRadio)
+            if (listed && input.value == "none"){
+                input.parentElement.MaterialRadio.enable();
+            }else{
+                input.parentElement.MaterialRadio.disable();
+            }
+        })
     }
 
     openSaleSetting(pubkey, mint, coinMeta){
         this.saleSettingDialog.querySelector(".pubkey").innerHTML = pubkey;//this.dnft.shortenPubkey(pubkey)
         let checkbox = $("#setting-for-sale").MaterialCheckbox;
-        let lastForSale = false;
-        if (coinMeta.sale().listed()){
-            lastForSale = true;
-            checkbox.check();
-        }else{
-            checkbox.uncheck();
-        }
+        let sale = coinMeta.sale();
+        console.log("sale.listed()", sale.listed());
+        console.log("sale.sale_type()", sale.sale_type());
+        let em = sale.exchange_mechanics();
+        let lastSalePrice = em?this.dnft.lamportsToSol(em.price):"";
+        $("#setting-sale-price").value = lastSalePrice;
+        let lastListed = coinMeta.sale().listed();
+        this.updateSettingListed(lastListed)
 
         this.updateSaleSettingBtnCallback = ()=>{
             this.saleSettingDialog.close();
-            let saleValue = undefined;
-            let newForSale = !!checkbox.inputElement_.checked;
-            if (lastForSale != newForSale){
-                saleValue = newForSale
+            let listed = undefined;
+            let newListed = !!checkbox.inputElement_.checked;
+            if (lastListed != newListed){
+                listed = newListed
             }
             let salePrice = $("#setting-sale-price").value;
-            if (salePrice !== "")
+            if (salePrice != lastSalePrice)
                 salePrice = +salePrice
             else{
                 salePrice = undefined
             }
-            this.dnft.updateTokenSaleSetting(pubkey, saleValue, salePrice);
+            this.dnft.updateTokenSaleSetting(pubkey, listed, salePrice);
         }
         
         this.saleSettingDialog.showModal();
@@ -425,7 +449,7 @@ class App{
         if (this._marketLoading)
             return
         this._marketLoading = true;
-        const LOAD_COUNT = 8;
+        const LOAD_COUNT = 1000;
         let count = 1000n;
         let filter = this.marketFilter;
         if (!this._marketLoadState){
@@ -473,7 +497,9 @@ class App{
             do{
                 if (filter.saleType) {
                     accounts = await this.dnft.getMarketTokensByType(
-                        mint, page, filter.saleType
+                        mint,
+                        page,
+                        filter.saleType
                     );
                 }else{
                     accounts = await this.dnft.getMarketTokens(mint, page);
@@ -540,7 +566,7 @@ class App{
                     mint,
                     page
                 );
-                //console.log("getProgramAccounts::::", accounts);
+                //console.log("getAllTokens::::", accounts);
 
                 let panels = this.createNFTPanels(mint, minData, accounts);
                 elements.push(...panels);
@@ -572,13 +598,26 @@ class App{
         if (!pubkey){
             el.classList.add("placeholder-panel");
         }
-        // if (account){
+        //if (account){
         //     console.log("account:" , account, account.key().toString(), account.lamports())
         // }
         //console.log("meta:", meta);
         el.dataset.pubkey = pubkey;
         if (meta){
             //let authority = meta.authority().toString();
+            let sale = meta.sale();
+            if (sale.listed()){
+                let em = sale.exchange_mechanics()
+                // console.log("sale.listed", sale.listed());
+                // console.log("sale.sale_type", sale.sale_type());
+                // console.log("sale.exchange_mechanics", sale.exchange_mechanics());
+                if (em?.sale_type == "sale"){
+                    let salePriceEl = clone.querySelector(".sale-price");
+                    let price = this.dnft.lamportsToSol(em.price).toFixed(5);
+                    salePriceEl.innerHTML = `${price} ${em.coin}`
+                }
+
+            }
             el.coinMeta = meta;
             if (this.walletPubkey.toString() == meta.authority().toString()){
                 el.classList.add("mycoin")
@@ -822,8 +861,8 @@ class App{
             let mintPubkey = this.mintFormDialog._mintPubkey;
             let result = await this.dnft.createToken(
                 mintPubkey,
-                true,
-                this.dnft.SaleType.rent(),
+                false,
+                this.dnft.SaleType.none(),
                 fieldsData
             );
 

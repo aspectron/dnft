@@ -491,7 +491,17 @@ td.actions .material-icons{
 }
 .nft-panel .mdl-card__actions{
   text-align: right;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  justify-content: space-between;
+  padding:5px 20px;
 }
+.nft-panel .sale-price{
+  font-size:1.3rem;
+  text-transform: uppercase;
+}
+
 .nft-panel .mdl-card__title{
   color: #fff;
   height:300px;
@@ -560,7 +570,7 @@ td.actions .material-icons{
 .mdl-layout__header-row .mdl-radio.is-checked .mdl-radio__outer-circle{
   border-color:#FFF;
 }
-.mdl-radio__inner-circle{
+.mdl-layout__header-row .mdl-radio .mdl-radio__inner-circle{
   background-color: #FFF;
 }
 .placeholder-panel{
@@ -615,6 +625,31 @@ td.actions .material-icons{
 }
 .sale-setting-dialog .mdl-dialog__title .pubkey{
   font-size:1rem;
+}
+.setting-sale-type-inputs{
+  margin:10px 0px;
+}
+.setting-sale-type-inputs .heading{
+  display:block;
+}
+.price-input{
+  display:flex;
+  align-items:center;
+}
+.price-input.disabled{
+  opacity:0.5;
+}
+.price-input.disabled, .price-input.disabled *{
+  cursor:not-allowed;
+}
+.price-input>img{
+  width: 24px;
+  height: 24px;
+  margin: 0px 10px 0px 0px;
+  border-radius: 50%;
+}
+.price-input .mdl-textfield{
+  flex:1;
 }
 .mdl-snackbar{
   left:initial;

@@ -2,6 +2,7 @@
 pub mod tests {
     use crate::api::*;
     use crate::prelude::*;
+    use crate::program::ExchangeMechanics;
     use crate::program::{/*ForSale,*/ MarketState, SaleType};
     use kaizen::result::Result;
     use program::MintCreationArgs;
@@ -172,6 +173,7 @@ pub mod tests {
                 }
                 let args = program::TokenCreateFinalArgs {
                     for_sale: program::ForSale::Yes,
+                    exchange_mechanics: ExchangeMechanics::sale(1, None),
                     sale_type,
                     data: vec![
                         program::Data::String(names.get(token_seq).unwrap().to_string()),

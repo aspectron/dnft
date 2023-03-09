@@ -1,10 +1,13 @@
 use crate::client::result::Result;
 use borsh::{BorshDeserialize, BorshSerialize};
 use kaizen::prelude::Pubkey;
+use kaizen::transport::{Interface, Transport};
+use kaizen::utils::lamports_to_sol as lamports_to_sol_impl;
 use kaizen::utils::shorten_pubkey_str as shorten_pubkey_str_impl;
 use kaizen::wallet::foreign::*;
 use std::sync::{Arc, Mutex};
 use wasm_bindgen::prelude::*;
+use workflow_core::id::Id;
 use workflow_log::log_trace;
 use workflow_store::Store;
 use workflow_wasm::prelude::*;
@@ -168,4 +171,17 @@ impl StoreData {
 #[wasm_bindgen(js_name = "shortenPubkey")]
 pub fn shorten_pubkey(pubkey: &str) -> String {
     shorten_pubkey_str_impl(pubkey)
+}
+
+#[wasm_bindgen(js_name = "lamportsToSol")]
+pub fn lamports_to_sol(value: u64) -> f64 {
+    lamports_to_sol_impl(value)
+}
+
+#[wasm_bindgen(js_name = "discardTxChain")]
+pub async fn discard_tx_chain(id: JsValue) -> Result<()> {
+    let transport = Transport::global()?;
+    let id: Id = id.try_into()?;
+    transport.discard_chain(&id).await?;
+    Ok(())
 }

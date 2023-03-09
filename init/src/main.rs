@@ -1,10 +1,10 @@
 use dnft::{
     client::{Mint, Root, Token},
     program,
-    program::SaleType,
+    program::{ExchangeMechanics, SaleType},
     program_id,
 };
-use kaizen::{prelude::*, result::Result};
+use kaizen::{prelude::*, result::Result, utils::sol_to_lamports};
 use std::str::FromStr;
 
 pub async fn async_main(with_sample_data: bool) -> Result<()> {
@@ -140,16 +140,17 @@ async fn create_sample_data() -> Result<()> {
     //let mint_pubkeys = vec![Pubkey::from_str("8bmnuP1HuDMmM2Yz8gZ5KLRJA8pYXboFVd3uZtLnF3nx").unwrap()];
 
     // ----------------------------------------------------------------------------
-    let sale_types = [
-        SaleType::Auction,
-        SaleType::Barter,
-        SaleType::None,
-        SaleType::Raffle,
-        SaleType::Rent,
-    ];
+    // let sale_types = [
+    //     SaleType::Sale,
+    //     SaleType::Auction,
+    //     SaleType::Barter,
+    //     SaleType::None,
+    //     SaleType::Raffle,
+    //     SaleType::Rent,
+    // ];
 
     for mint_seq in 0..MAX_MINTS {
-        let mut sale_type_index = 0;
+        //let mut sale_type_index = 0;
         for token_seq in 0..MAX_TOKENS {
             log_info!("creating token {mint_seq}:{token_seq}");
 
@@ -158,14 +159,16 @@ async fn create_sample_data() -> Result<()> {
                 .await?
                 .expect("¯\\_(ツ)_/¯");
 
-            let sale_type = sale_types[sale_type_index];
-            sale_type_index += 1;
-            if sale_type_index == sale_types.len() {
-                sale_type_index = 0;
-            }
+            //let sale_type = sale_types[sale_type_index];
+            // sale_type_index += 1;
+            // if sale_type_index == sale_types.len() {
+            //     sale_type_index = 0;
+            // }
+            let sol = (token_seq as f64) + 1.0 / 100.0;
             let args = program::TokenCreateFinalArgs {
                 for_sale: program::ForSale::Yes,
-                sale_type,
+                exchange_mechanics: ExchangeMechanics::sale(sol_to_lamports(sol), None),
+                sale_type: SaleType::Sale,
                 data: vec![
                     program::Data::String(names.get(token_seq).unwrap().to_string()),
                     program::Data::u32((token_seq * 15) as u32),
