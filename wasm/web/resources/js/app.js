@@ -1,6 +1,16 @@
 function $(selector){
     return document.querySelector(selector)
 }
+function $dialog(selector){
+    let dialog = $(selector)
+    if (!dialog.showModal) {
+        dialogPolyfill.registerDialog(dialog);
+    }
+    dialog.querySelector('.close-dialog').addEventListener('click', ()=>{
+        dialog.close();
+    });
+    return dialog
+}
 
 function $$(selector){
     return document.querySelectorAll(selector)
@@ -169,15 +179,7 @@ class App{
     }
 
     initMsgDialog(){
-        let dialog = $('#msg-dialog');
-        if (!dialog.showModal) {
-            dialogPolyfill.registerDialog(dialog);
-        }
-
-        dialog.querySelector('.close-dialog').addEventListener('click', ()=>{
-            dialog.close();
-        });
-
+        let dialog = $dialog('#msg-dialog');
         this.msgEl = $('#msg-dialog .msg');
         this.msgTitleEl = $('#msg-dialog .title');
         this.msgDialog = dialog;
@@ -282,6 +284,7 @@ class App{
     }
 
     onWalletConnect(key){
+        this.walletPubkey = key;
         console.log("wallet-connected ::: pubkey: ", key.toString());
         $("#wallet-pubkey").innerHTML = this.dnft.shortenPubkey(key.toString());
         $(".wallet-connect-container").classList.add("connected");
@@ -299,8 +302,10 @@ class App{
         let mainEl = $("main");
         this.schemaListEl = $("#schema-list");
         this.nftTemplateEl = $("#nft-panel-tpl");
+        this.marketNFTTemplateEl = $("#market-panel-tpl");
         this.nftListEl = $("#nft-list");
         this.marketplaceListEl = $("#marketplace-list");
+        this.saleSettingDialog = $dialog("#sale-setting");
         this.marketFilter = {};
         this.mainEl = mainEl;
         this.loadMints();
@@ -354,7 +359,62 @@ class App{
                 console.log("this.marketFilter", this.marketFilter)
                 this.loadMarketplace();
             })
+        });
+
+        [this.marketplaceListEl, this.nftListEl].forEach(list=>{
+            list.addEventListener("click", (e)=>{
+                let el = e.target.closest("[data-action]");
+                let nftEl = el.closest(".nft-panel");
+                if(!el)
+                    return
+                let action = el.dataset.action;
+                let {pubkey, mint} = nftEl.dataset;
+                if (!pubkey || !mint)
+                    return
+                if(action=="buy"){
+                    return
+                }
+
+                if(action=="setting"){
+                    this.openSaleSetting(pubkey, mint, nftEl.coinMeta);
+                    return
+                }
+            })
         })
+
+        this.saleSettingDialog.querySelector(".update-btn").addEventListener("click", ()=>{
+            this.updateSaleSettingBtnCallback?.();
+        })
+    }
+
+    openSaleSetting(pubkey, mint, coinMeta){
+        this.saleSettingDialog.querySelector(".pubkey").innerHTML = pubkey;//this.dnft.shortenPubkey(pubkey)
+        let checkbox = $("#setting-for-sale").MaterialCheckbox;
+        let lastForSale = false;
+        if (coinMeta.sale().listed()){
+            lastForSale = true;
+            checkbox.check();
+        }else{
+            checkbox.uncheck();
+        }
+
+        this.updateSaleSettingBtnCallback = ()=>{
+            this.saleSettingDialog.close();
+            let saleValue = undefined;
+            let newForSale = !!checkbox.inputElement_.checked;
+            if (lastForSale != newForSale){
+                saleValue = newForSale
+            }
+            let salePrice = $("#setting-sale-price").value;
+            if (salePrice !== "")
+                salePrice = +salePrice
+            else{
+                salePrice = undefined
+            }
+            this.dnft.updateTokenSaleSetting(pubkey, saleValue, salePrice);
+        }
+        
+        this.saleSettingDialog.showModal();
     }
 
     getProgramAccounts(config){
@@ -386,7 +446,7 @@ class App{
             let panels = this.createNFTPanels("", {schema:[]}, [
                 [],[],[],[],[],[],[],[],[],[]
             ]);
-            if (this.mainEl.scrollTop >=150){
+            if (this.mainEl.scrollTop >=150 && this.getActiveTabName() == "marketplace"){
                 this.mainEl.scrollTop = 150;
             }
             this.marketplaceListEl.innerHTML = "";
@@ -420,7 +480,7 @@ class App{
                 }                
                 console.log("getTokens::::", "page:"+page, accounts);
 
-                let panels = this.createNFTPanels(mint, minData, accounts);
+                let panels = this.createNFTPanels(mint, minData, accounts, this.marketNFTTemplateEl);
                 elements.push(...panels);
                 loadState[mint] = page
                 page++;
@@ -441,12 +501,21 @@ class App{
         this._marketLoading = false;
     }
 
-    async loadNFT(mintPubkey, tokenPubkey){
+    async loadNFT(mintPubkey, tokenPubkey, loadCount=0){
         let minData = await this.dnft.getMintData(mintPubkey);
-        let account = await this.dnft.getToken(tokenPubkey);
-        console.log("getToken::::", account);
+        let account = await this.dnft.getToken(tokenPubkey)
+        .catch(err=>{
+            if (loadCount < 60){
+                setTimeout(()=>{
+                    this.loadNFT(mintPubkey, tokenPubkey, loadCount++)
+                }, 1000)
+            }
+        })
+        if (!account)
+            return
+        console.log("loadNFT::::", account);
 
-        let panel = this.createNFTPanel(mintPubkey, minData, ...account);
+        let panel = this.createNFTPanel(mintPubkey, minData, ...account, this.marketNFTTemplateEl);
         this.nftListEl.appendChild(panel);
     }
 
@@ -454,27 +523,30 @@ class App{
         if (this._nftsLoading)
             return
         this._nftsLoading = true;
-        let count = 5n;
+        const LOAD_COUNT = 1000;
+        let count = 1000n;
         let start = this._nftStartIndex || 0n;
         let pubkeys = await this.dnft.getMintPubkeys(start, start+count);
-        
+        let loadState = {};
         //console.log("getMintPubkeys: start:", start, "pubkeys:", pubkeys)
         let elements = [];
         for (let mint of pubkeys){
             let minData = await this.dnft.getMintData(mint);
             //console.log("mint data", mint, minData);
+            let page = loadState[mint] || 0;
+            let accounts;
+            do{
+                accounts = await this.dnft.getAllTokens(
+                    mint,
+                    page
+                );
+                //console.log("getProgramAccounts::::", accounts);
 
-            let accounts = await this.dnft.getTokens(
-                mint,
-                0,//page
-                true,// listed in market
-                true,//for sale
-                this.dnft.SaleType.auction() //sale type
-            );
-            //console.log("getProgramAccounts::::", accounts);
-
-            let panels = this.createNFTPanels(mint, minData, accounts);
-            elements.push(...panels);
+                let panels = this.createNFTPanels(mint, minData, accounts);
+                elements.push(...panels);
+                loadState[mint] = page
+                page++;
+            } while (accounts.length && elements.length < LOAD_COUNT);
         }
         let scrollTop = this.mainEl.scrollTop;
         elements.map(el=>this.nftListEl.appendChild(el));
@@ -488,14 +560,14 @@ class App{
         this._nftsLoading = false;
     }
 
-    createNFTPanels(mint, minData, accounts){
-        return accounts.map(([pubkey, data, account])=>{
-            return this.createNFTPanel(mint, minData, pubkey, data, account);
+    createNFTPanels(mint, minData, accounts, tpl){
+        return accounts.map(([pubkey, meta, data, account])=>{
+            return this.createNFTPanel(mint, minData, pubkey, meta, data, account, tpl);
         })
     }
-    createNFTPanel(mint, minData, pubkey, data, account){
+    createNFTPanel(mint, minData, pubkey, meta, data, account, tpl){
         
-        const clone = this.nftTemplateEl.content.cloneNode(true);
+        const clone = (tpl || this.nftTemplateEl).content.cloneNode(true);
         let el = clone.children[0];
         if (!pubkey){
             el.classList.add("placeholder-panel");
@@ -503,7 +575,16 @@ class App{
         // if (account){
         //     console.log("account:" , account, account.key().toString(), account.lamports())
         // }
+        //console.log("meta:", meta);
         el.dataset.pubkey = pubkey;
+        if (meta){
+            //let authority = meta.authority().toString();
+            el.coinMeta = meta;
+            if (this.walletPubkey.toString() == meta.authority().toString()){
+                el.classList.add("mycoin")
+            }
+            //el.dataset.authority = authority;
+        }
         el.dataset.mint = mint;
         let pubkeyEl = clone.querySelector(".nft-pubkey");
         pubkeyEl.innerHTML = pubkey?this.dnft.shortenPubkey(pubkey):"ABCD....WXYZ";
@@ -534,7 +615,7 @@ class App{
         if (this._mintAccountsLoading)
             return
         this._mintAccountsLoading = true;
-        let count = 5n;
+        let count = 1000n;
         let start = this._mintAccountsStartIndex || 0n;
         let pubkeys = await this.dnft.getMintPubkeys(start, start+count);
         let scrollTop = this.mainEl.scrollTop;
@@ -648,20 +729,13 @@ class App{
         });
 
 
-        let dialog = $('#add-field-dialog');
+        let dialog = $dialog('#add-field-dialog');
         let addFieldButtons = $$('.add-field-btn');
-        if (!dialog.showModal) {
-            dialogPolyfill.registerDialog(dialog);
-        }
 
         addFieldButtons.forEach(btn=>btn.addEventListener('click', ()=>{
             //clearSelected();
             dialog.showModal();
         }));
-
-        dialog.querySelector('.close-dialog').addEventListener('click', ()=>{
-            dialog.close();
-        });
 
         this.fieldListEl.addEventListener("click", event=>{
             let tr = event.target.closest("tr");
@@ -715,15 +789,8 @@ class App{
     }
 
     initMintDnftPage(){
-        this.mintFormDialog = $("#mint-form-dialog");
+        this.mintFormDialog = $dialog("#mint-form-dialog");
         this.mintFormFieldsEl = $("#mint-form-fields");
-        if (!this.mintFormDialog.showModal) {
-            dialogPolyfill.registerDialog(this.mintFormDialog);
-        }
-
-        this.mintFormDialog.querySelector('.close-dialog').addEventListener('click', ()=>{
-            this.mintFormDialog.close();
-        });
 
         this.schemaListEl.addEventListener("click", event=>{
             let btn = event.target.closest("button.mint-dnft");

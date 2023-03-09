@@ -119,7 +119,8 @@
                   <div class="nft-description"></div>
                 </div>
                 <div class="mdl-card__actions mdl-card--border">
-                  <a href="#" class="mdl-button _mdl-button--raised">See availability</a>
+                  <button type="button" data-action="buy" class="mdl-button availability-btn _mdl-button--raised">See availability</button>
+                  <button type="button" data-action="setting" class="mdl-button setting-btn _mdl-button--raised">Sale options</button>
                 </div>
               </div>
             </template>
@@ -183,7 +184,8 @@
                   <div class="nft-description"></div>
                 </div>
                 <div class="mdl-card__actions mdl-card--border">
-                  <a href="#" class="mdl-button _mdl-button--raised">See availability</a>
+                  <button type="button" data-action="buy" class="mdl-button buy-btn _mdl-button--raised">Buy</button>
+                  <button type="button" data-action="setting" class="mdl-button setting-btn _mdl-button--raised">Sale options</button>
                 </div>
               </div>
             </template>
@@ -334,6 +336,24 @@
           <h4 class="mdl-dialog__title title"></h4>
           <div class="mdl-dialog__content msg"></div>
           <div class="mdl-dialog__actions">
+            <button type="button" class="mdl-button mdl-button--big close-dialog">Close</button>
+          </div>
+        </dialog>
+        <dialog id="sale-setting" class="mdl-dialog sale-setting-dialog">
+          <h4 class="mdl-dialog__title">Sale Setting <span class="pubkey"></span></h4>
+          <div class="mdl-dialog__content">
+            <label id="setting-for-sale" class="mdl-checkbox mdl-js-checkbox" for="setting-for-sale-input">
+              <input type="checkbox" id="setting-for-sale-input" class="mdl-checkbox__input" checked>
+              <span class="mdl-checkbox__label">List for Sale</span>
+            </label>
+            <label class="mdl-textfield mdl-js-textfield" for="setting-sale-price">
+              <input type="number" id="setting-sale-price" class="mdl-textfield__input">
+              <span class="mdl-textfield__label">Price</span>
+            </label>
+          </div>
+          <div class="mdl-dialog__actions">
+            <button type="button" 
+              class="update-btn mdl-button mdl-button--big mdl-button--raised mdl-button--accent">Update</button>
             <button type="button" class="mdl-button mdl-button--big close-dialog">Close</button>
           </div>
         </dialog>

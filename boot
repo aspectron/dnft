@@ -27,10 +27,10 @@ msg "Deploy solana app"
 check_error "Deploy solana app"
 
 # initialize dnft root and sample data
-msg "Intilaizing data"
+msg "Initializing data"
 cd ../init
 cargo run
-check_error "Intilaizing data"
+check_error "Initializing data"
 
 # build wasm
 msg "Building wasm"

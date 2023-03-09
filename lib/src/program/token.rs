@@ -16,6 +16,14 @@ pub struct TokenCreateFinalArgs {
 }
 
 #[derive(Default, Clone, Debug, BorshSerialize, BorshDeserialize)]
+pub struct TokenSaleSettingArgs {
+    pub for_sale: Option<ForSale>,
+    pub price: Option<u32>,
+}
+
+
+
+#[derive(Default, Clone, Debug, BorshSerialize, BorshDeserialize)]
 pub struct TokenUpdateArgs {
     pub for_sale: Option<ForSale>,
     pub sale_type: Option<SaleType>,
@@ -23,7 +31,7 @@ pub struct TokenUpdateArgs {
     // pub data: TokenDataArgs,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Eq, PartialEq)]
 pub enum MarketState {
     Unlisted = 0x0,
     Listed = 0x1,
@@ -56,16 +64,27 @@ pub struct Sale {
 
 impl Sale {
     fn new(for_sale: ForSale, sale_type: SaleType) -> Self {
-        let mut market_state = MarketState::Unlisted;
-        if for_sale == ForSale::Yes || sale_type != SaleType::None {
-            market_state = MarketState::Listed;
-        }
+        let market_state = if for_sale == ForSale::Yes || sale_type != SaleType::None {
+            MarketState::Listed
+        }else{
+            MarketState::Unlisted
+        };
 
         Self {
             market_state,
             for_sale,
             sale_type,
         }
+    }
+
+    pub fn set_for_sale(&mut self, for_sale:ForSale){
+        let market_state = if for_sale == ForSale::Yes || self.sale_type != SaleType::None {
+            MarketState::Listed
+        }else{
+            MarketState::Unlisted
+        };
+        self.market_state = market_state;
+        self.for_sale = for_sale;
     }
 }
 
@@ -101,6 +120,7 @@ pub struct TokenMeta {
     mint: Pubkey,
     sale: Sale,
     reserved: u8,
+    authority: Pubkey,
 }
 
 #[container(Containers::Token)]
@@ -153,6 +173,7 @@ impl<'info, 'refs> Token<'info, 'refs> {
         meta.set_page(page);
         meta.set_sale(Sale::new(args.for_sale, args.sale_type));
         meta.set_reserved(0);
+        meta.set_authority(*ctx.authority.key);
         drop(meta);
 
         token.data.store(&args.data)?;
@@ -168,13 +189,21 @@ impl<'info, 'refs> Token<'info, 'refs> {
 
     // }
 
-    // pub fn update(ctx: &ContextReference) -> ProgramResult {
-    //     let mint = Mint::try_load(&ctx.handler_accounts[0])?;
-    //     let mut token = Token::try_load(&ctx.handler_accounts[1])?;
-    //     let args = TokenUpdateArgs::try_from_slice(ctx.instruction_data)?;
-    //     token.update_data(&mint, &args.data)?;
-    //     Ok(())
-    // }
+    pub fn update_sale_setting(ctx: &ContextReference) -> ProgramResult {
+        let token = Token::try_load(&ctx.handler_accounts[0])?;
+        if &token.meta.borrow().get_authority() != ctx.authority.key{
+            return Err(ProgramError::IllegalOwner)
+        }
+        let args = TokenSaleSettingArgs::try_from_slice(ctx.instruction_data)?;
+        log_info!("update_sale_setting: ###args.for_sale.is_some(): {:?}", args.for_sale.is_some());
+        if let Some(for_sale) = args.for_sale{
+            let mut meta = token.meta.borrow_mut();
+            meta.sale.set_for_sale(for_sale);
+            log_info!("update_sale_setting: updated");
+        }
+        
+        Ok(())
+    }
 
     // pub fn update_data(&mut self, mint: &Mint, args: &TokenUpdateArgs) -> ProgramResult {
     //     // let data_types = mint.data_types.load()?.ok_or(ProgramError::Custom(ErrorCode::MintData.into()))?;
@@ -219,5 +248,5 @@ impl<'info, 'refs> Token<'info, 'refs> {
 
 declare_handlers!(
     Token::<'info, 'refs>,
-    [Token::create_final, Token::create_with_template]
+    [Token::create_final, Token::update_sale_setting, Token::create_with_template]
 );

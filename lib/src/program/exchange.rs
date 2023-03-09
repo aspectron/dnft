@@ -24,6 +24,18 @@ impl From<SaleType> for Vec<u8> {
         }
     }
 }
+impl From<SaleType> for String {
+    fn from(value: SaleType) -> Self {
+        match value {
+            SaleType::None => "None",
+            //SaleType::Sale => "Sale",
+            SaleType::Rent => "Rent",
+            SaleType::Auction => "Auction",
+            SaleType::Barter => "Barter",
+            SaleType::Raffle => "Raffle",
+        }.to_string()
+    }
+}
 
 #[derive(Clone, BorshSerialize, BorshDeserialize)]
 pub enum Sale {

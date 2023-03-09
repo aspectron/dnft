@@ -519,6 +519,11 @@ td.actions .material-icons{
   text-transform: uppercase;
   font-size:1rem;
 }
+.mdl-dnft .nft-panel.mycoin .buy-btn,
+.mdl-dnft .nft-panel.mycoin .availability-btn,
+.mdl-dnft .nft-panel:not(.mycoin) .setting-btn{
+  display:none;
+}
 .mint-name-cell{
   position: relative;
 }
@@ -604,6 +609,12 @@ td.actions .material-icons{
 }
 .msg-dialog.error .mdl-dialog__title{
   color:#d50000
+}
+.sale-setting-dialog{
+  width:350px
+}
+.sale-setting-dialog .mdl-dialog__title .pubkey{
+  font-size:1rem;
 }
 .mdl-snackbar{
   left:initial;
