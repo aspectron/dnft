@@ -33,7 +33,8 @@ impl From<SaleType> for String {
             SaleType::Auction => "Auction",
             SaleType::Barter => "Barter",
             SaleType::Raffle => "Raffle",
-        }.to_string()
+        }
+        .to_string()
     }
 }
 

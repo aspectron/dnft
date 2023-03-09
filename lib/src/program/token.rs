@@ -21,8 +21,6 @@ pub struct TokenSaleSettingArgs {
     pub price: Option<u32>,
 }
 
-
-
 #[derive(Default, Clone, Debug, BorshSerialize, BorshDeserialize)]
 pub struct TokenUpdateArgs {
     pub for_sale: Option<ForSale>,
@@ -66,7 +64,7 @@ impl Sale {
     fn new(for_sale: ForSale, sale_type: SaleType) -> Self {
         let market_state = if for_sale == ForSale::Yes || sale_type != SaleType::None {
             MarketState::Listed
-        }else{
+        } else {
             MarketState::Unlisted
         };
 
@@ -77,10 +75,10 @@ impl Sale {
         }
     }
 
-    pub fn set_for_sale(&mut self, for_sale:ForSale){
+    pub fn set_for_sale(&mut self, for_sale: ForSale) {
         let market_state = if for_sale == ForSale::Yes || self.sale_type != SaleType::None {
             MarketState::Listed
-        }else{
+        } else {
             MarketState::Unlisted
         };
         self.market_state = market_state;
@@ -191,17 +189,20 @@ impl<'info, 'refs> Token<'info, 'refs> {
 
     pub fn update_sale_setting(ctx: &ContextReference) -> ProgramResult {
         let token = Token::try_load(&ctx.handler_accounts[0])?;
-        if &token.meta.borrow().get_authority() != ctx.authority.key{
-            return Err(ProgramError::IllegalOwner)
+        if &token.meta.borrow().get_authority() != ctx.authority.key {
+            return Err(ProgramError::IllegalOwner);
         }
         let args = TokenSaleSettingArgs::try_from_slice(ctx.instruction_data)?;
-        log_info!("update_sale_setting: ###args.for_sale.is_some(): {:?}", args.for_sale.is_some());
-        if let Some(for_sale) = args.for_sale{
+        log_info!(
+            "update_sale_setting: ###args.for_sale.is_some(): {:?}",
+            args.for_sale.is_some()
+        );
+        if let Some(for_sale) = args.for_sale {
             let mut meta = token.meta.borrow_mut();
             meta.sale.set_for_sale(for_sale);
             log_info!("update_sale_setting: updated");
         }
-        
+
         Ok(())
     }
 
@@ -248,5 +249,9 @@ impl<'info, 'refs> Token<'info, 'refs> {
 
 declare_handlers!(
     Token::<'info, 'refs>,
-    [Token::create_final, Token::update_sale_setting, Token::create_with_template]
+    [
+        Token::create_final,
+        Token::update_sale_setting,
+        Token::create_with_template
+    ]
 );

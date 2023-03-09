@@ -1,6 +1,6 @@
 use crate::{
     prelude::*,
-    program::{TokenCreateFinalArgs,  TokenSaleSettingArgs, MarketState, ForSale}
+    program::{ForSale, MarketState, TokenCreateFinalArgs, TokenSaleSettingArgs},
 };
 use kaizen::result::Result;
 
@@ -8,45 +8,47 @@ pub struct Token;
 declare_client!(program::Token, Token);
 
 #[wasm_bindgen]
-pub struct TokenMetaReference{
-    inner: program::TokenMeta
+pub struct TokenMetaReference {
+    inner: program::TokenMeta,
 }
 
 #[wasm_bindgen]
-impl TokenMetaReference{
-    pub fn version(&self)->u32{
+impl TokenMetaReference {
+    pub fn version(&self) -> u32 {
         self.inner.get_version()
     }
-    pub fn page(&self)->u32{
+    pub fn page(&self) -> u32 {
         self.inner.get_page()
     }
-    pub fn mint(&self)->Pubkey{
+    pub fn mint(&self) -> Pubkey {
         self.inner.get_mint()
     }
-    pub fn sale(&self)->SaleReference{
-        SaleReference{inner: self.inner.get_sale()}
+    pub fn sale(&self) -> SaleReference {
+        SaleReference {
+            inner: self.inner.get_sale(),
+        }
     }
-    pub fn authority(&self)->Pubkey{
+    pub fn authority(&self) -> Pubkey {
         self.inner.get_authority()
     }
 }
-impl From<program::TokenMeta> for TokenMetaReference{
+impl From<program::TokenMeta> for TokenMetaReference {
     fn from(inner: program::TokenMeta) -> Self {
-        Self{inner}
+        Self { inner }
     }
 }
 
 #[wasm_bindgen]
-pub struct SaleReference{
-    inner: program::token::Sale
+pub struct SaleReference {
+    inner: program::token::Sale,
 }
 #[wasm_bindgen]
-impl SaleReference{
-    pub fn listed(&self)->bool{
+impl SaleReference {
+    pub fn listed(&self) -> bool {
         self.inner.market_state == MarketState::Listed
     }
 
-    pub fn sale_type(&self)->String{
+    pub fn sale_type(&self) -> String {
         self.inner.sale_type.into()
     }
 }
@@ -86,10 +88,7 @@ impl Token {
         for_sale: Option<ForSale>,
         price: Option<u32>,
     ) -> Result<TransactionList> {
-        let args = TokenSaleSettingArgs{
-            for_sale,
-            price
-        };
+        let args = TokenSaleSettingArgs { for_sale, price };
         let builder = client::Token::execution_context_for(program::Token::update_sale_setting)
             .with_authority(authority_pubkey)
             .with_handler_accounts(&[AccountMeta::new(*token_pubkey, false)])
@@ -111,7 +110,7 @@ mod wasm {
     use super::{Token, TokenMetaReference};
     use crate::client::{Data, SaleType};
     use crate::prelude::*;
-    use crate::program::{MarketState, TokenCreateFinalArgs, ForSale};
+    use crate::program::{ForSale, MarketState, TokenCreateFinalArgs};
     use kaizen::accounts::AccountReference;
     use kaizen::transport::api::*;
     use solana_program::account_info::IntoAccountInfo;
@@ -167,10 +166,7 @@ mod wasm {
 
     /// Returns all tokens for a specific mint
     #[wasm_bindgen(js_name = "getAllTokens")]
-    pub async fn get_all_tokens(
-        mint: JsValue,
-        page: u32,
-    ) -> Result<JsValue, JsValue> {
+    pub async fn get_all_tokens(mint: JsValue, page: u32) -> Result<JsValue, JsValue> {
         get_tokens(mint, page, None, None, &JsValue::UNDEFINED).await
     }
 
@@ -266,11 +262,11 @@ mod wasm {
         account: Arc<AccountDataReference>,
     ) -> Result<js_sys::Array, JsValue> {
         let account_data = account.clone_for_program()?;
-        let account: Account = (&account_data).into();
-        let mut account_clone = account.clone();
-        let account_info = (pubkey, &mut account_clone).into_account_info();
+        let mut account: Account = (&account_data).into();
+        //let mut account_clone = account;
+        let account_info = (pubkey, &mut account).into_account_info();
         let token = program::Token::try_load(&account_info)?;
-        let meta = TokenMetaReference::from(token.meta.borrow().clone()).into();
+        let meta = TokenMetaReference::from(**token.meta.borrow()).into();
         let data = js_sys::Array::new();
         if let Some(items) = token.data.load()? {
             //log_trace!("data: {items:?}");
@@ -288,10 +284,14 @@ mod wasm {
     }
 
     #[wasm_bindgen(js_name = "updateTokenSaleSetting")]
-    pub async fn update_token_sale_setting(pubkey: JsValue, for_sale: Option<bool>, price: Option<u32>)-> Result<JsValue, JsValue>{
+    pub async fn update_token_sale_setting(
+        pubkey: JsValue,
+        for_sale: Option<bool>,
+        price: Option<u32>,
+    ) -> Result<JsValue, JsValue> {
         let pubkey = Pubkey::from_value(&pubkey)?;
         let authority = Transport::global()?.get_authority_pubkey()?;
-        let for_sale:Option<ForSale> = for_sale.map(|v|v.into());
+        let for_sale: Option<ForSale> = for_sale.map(|v| v.into());
         let tx = Token::update_sale_setting(&authority, &pubkey, for_sale, price).await?;
         let ids = tx.ids()?;
         tx.post().await?;

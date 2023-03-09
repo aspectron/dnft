@@ -2,7 +2,7 @@ use dnft::{
     client::{Mint, Root, Token},
     program,
     program::SaleType,
-    program_id
+    program_id,
 };
 use kaizen::{prelude::*, result::Result};
 use std::str::FromStr;
@@ -225,16 +225,18 @@ async fn create_sample_data() -> Result<()> {
     Ok(())
 }
 
-
-
 #[tokio::main]
 async fn main() {
     log_info!("DNFT initializing.....");
-    async_main(true).await.map_err(|err|{
-        log_error!("DNFT initialize: Error: {}", err);
-        println!();
-    }).and_then(|data|{
-        log_info!("DNFT initialize: Success");
-        Ok(data)
-    }).ok();
+    async_main(true)
+        .await
+        .map_err(|err| {
+            log_error!("DNFT initialize: Error: {}", err);
+            println!();
+        })
+        .and_then(|data| {
+            log_info!("DNFT initialize: Success");
+            Ok(data)
+        })
+        .ok();
 }
