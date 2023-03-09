@@ -605,3 +605,14 @@ td.actions .material-icons{
 .msg-dialog.error .mdl-dialog__title{
   color:#d50000
 }
+.mdl-snackbar{
+  left:initial;
+  right:5px;
+  bottom:5px;
+  transform:translate(0,80px);
+}
+@media (min-width: 480px){
+  .mdl-snackbar--active{
+    transform:translate(0,0px)
+  }
+}

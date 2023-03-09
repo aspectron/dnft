@@ -157,6 +157,16 @@ class App{
         this.fileInput.setAttribute("accept", "image/png, image/jpeg, image/svg, image/bmp")
         this.uploadFile(callback);
     }
+    showToast(message, actionText=null, actionHandler=null, timeout=2000){
+        let data = {
+            message,
+            timeout,
+            actionHandler,
+            actionText
+        };
+        this._toastBar = this._toastBar || $("#toast-bar");
+        this._toastBar.MaterialSnackbar.showSnackbar(data);
+    }
 
     initMsgDialog(){
         let dialog = $('#msg-dialog');
@@ -198,10 +208,16 @@ class App{
         this.txObserver = new this.dnft.TransactionObserver();
         this.txObserver.setHandler(({event, data})=>{
             console.log("txObserver:", event, data);
+            if (event == "transaction-success"){
+                if (data?.transaction?.name){
+                    this.showToast(data?.transaction?.name)
+                }
+            }
             if (event == "transaction-failure"){
                 if (data?.error?.includes("Attempt to debit an account but")){
                     this.showError("Attempt to debit an account but found no record of a prior credit.")
                 }
+                return
             }
             if (event != "transaction-success" || !data){
                 return 

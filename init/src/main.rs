@@ -122,7 +122,7 @@ async fn create_sample_data() -> Result<()> {
                 "Any number".to_string(),
                 "Score".to_string(),
                 "".to_string(),
-                "Image url. Use any Url shorten service".to_string(),
+                "Use any url shortening service".to_string(),
             ]),
         };
 
