@@ -232,7 +232,11 @@ class App{
             if (name.includes("creating mint")){
                 this.loadMints();
             }else if (name.includes("creating token")){
-                this.loadNFT(accounts[1], accounts[0]);
+                this.loadNFT(accounts[0]);
+            }else if (name.includes("updating token")){
+                setTimeout(()=>{
+                    this.loadNFT(accounts[0]);
+                }, 1000)
             }
         })
 
@@ -527,22 +531,46 @@ class App{
         this._marketLoading = false;
     }
 
-    async loadNFT(mintPubkey, tokenPubkey, loadCount=0){
-        let minData = await this.dnft.getMintData(mintPubkey);
+    async loadNFT(tokenPubkey, loadCount=0){
         let account = await this.dnft.getToken(tokenPubkey)
         .catch(err=>{
             if (loadCount < 60){
                 setTimeout(()=>{
-                    this.loadNFT(mintPubkey, tokenPubkey, loadCount++)
+                    this.loadNFT(tokenPubkey, loadCount++)
                 }, 1000)
             }
         })
         if (!account)
             return
+        let mintPubkey = account[1].mint();
+        let minData = this.mintData[mintPubkey];
+        if (!minData){
+            console.error("minData data not found for : "+mintPubkey, this.mintData)
+            return
+        }
         console.log("loadNFT::::", account);
-
-        let panel = this.createNFTPanel(mintPubkey, minData, ...account, this.marketNFTTemplateEl);
-        this.nftListEl.appendChild(panel);
+        const addPanel = (list, tpl)=>{
+            let panel = this.createNFTPanel(mintPubkey, minData, ...account, tpl);
+            let oldPanel = list.querySelector(`.nft-panel[data-pubkey="${panel.dataset.pubkey}"]`)
+            //console.log("panel.dataset", panel, oldPanel)
+            if (oldPanel){
+                list.insertBefore(panel, oldPanel);
+                oldPanel.remove();
+            }else{
+                list.appendChild(panel);
+            }
+        }
+        //console.log("account[1]?.sale?.()", account[1]?.sale?.().listed())
+        if (account[1]?.sale?.().listed()){
+            //console.log("adding to marketplace");
+            addPanel(this.marketplaceListEl, this.marketNFTTemplateEl)
+        }else{
+            let oldPanel = this.marketplaceListEl.querySelector(`.nft-panel[data-pubkey="${account[0]}"]`)
+            if (oldPanel){
+                oldPanel.remove();
+            }
+        }
+        addPanel(this.nftListEl)
     }
 
     async loadNFTs(){
@@ -553,11 +581,13 @@ class App{
         let count = 1000n;
         let start = this._nftStartIndex || 0n;
         let pubkeys = await this.dnft.getMintPubkeys(start, start+count);
+        this.mintData = this.mintData || {};
         let loadState = {};
         //console.log("getMintPubkeys: start:", start, "pubkeys:", pubkeys)
         let elements = [];
         for (let mint of pubkeys){
             let minData = await this.dnft.getMintData(mint);
+            this.mintData[mint] = minData;
             //console.log("mint data", mint, minData);
             let page = loadState[mint] || 0;
             let accounts;
@@ -607,6 +637,7 @@ class App{
             //let authority = meta.authority().toString();
             let sale = meta.sale();
             if (sale.listed()){
+                el.listed = true;
                 let em = sale.exchange_mechanics()
                 // console.log("sale.listed", sale.listed());
                 // console.log("sale.sale_type", sale.sale_type());
@@ -646,7 +677,7 @@ class App{
             }
         });
 
-        return clone;
+        return el;
         
     }
 
