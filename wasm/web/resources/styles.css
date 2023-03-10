@@ -490,12 +490,20 @@ td.actions .material-icons{
   background:center/cover no-repeat rgb(103,59,183, 0.65);
 }
 .nft-panel .mdl-card__actions{
+  position: relative;
   text-align: right;
   display: flex;
   flex-direction: row-reverse;
   align-items: center;
   justify-content: space-between;
   padding:5px 20px;
+}
+.nft-panel .mdl-card__actions .mdl-progress{
+  position:absolute;
+  top:-1px;left:0px;right:0px; 
+}
+.nft-panel:not(.updating) .mdl-card__actions .mdl-progress{
+  display:none;
 }
 .nft-panel .sale-price{
   font-size:1.3rem;

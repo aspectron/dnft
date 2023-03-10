@@ -122,12 +122,13 @@ class App{
     async init(){
         this.initMsgDialog();
         await this.initApp();
+        this.initUpload();
+    }
+    afterWalletInit(){
         this.initBrowsePage();
         this.initCreateDnftForm();
         this.initMintDnftPage();
-
         this.setLoading(false);
-        this.initUpload();
     }
 
     initUpload(){
@@ -234,6 +235,7 @@ class App{
             }else if (name.includes("creating token")){
                 this.loadNFT(accounts[0]);
             }else if (name.includes("updating token") || name.includes("buy token")){
+                this.activateNFTProgress(accounts[0]);
                 setTimeout(()=>{
                     this.loadNFT(accounts[0]);
                 }, 3000)
@@ -284,10 +286,12 @@ class App{
         // );
         // mainObserver.observe($('#marketplace'));
         
-        let connected = await this.dnftApp.checkWalletState();
-        if (!connected){
-            //$(".wallet-connect-container").classList.remove("connected");
-        }
+        await this.dnftApp.checkWalletState()
+        .catch(err=>{
+
+        });
+        this.afterWalletInit();
+        this.reloadOnConnect = true;
     }
 
     onWalletConnect(key){
@@ -295,6 +299,17 @@ class App{
         console.log("wallet-connected ::: pubkey: ", key.toString());
         $("#wallet-pubkey").innerHTML = this.dnft.shortenPubkey(key.toString());
         $(".wallet-connect-container").classList.add("connected");
+        if (this.reloadOnConnect){
+            //window.location.reload();
+            let authority = this.walletPubkey.toString();
+            $$(".nft-panel").forEach(panel=>{
+                panel.classList.toggle("mycoin", authority == panel.authority)
+            })
+            
+            $$(".user-btn[disabled]").forEach(el=>{
+                el.disabled = false;
+            })
+        }
     }
 
     setLoading(loading){
@@ -541,6 +556,18 @@ class App{
         this._marketLoading = false;
     }
 
+    activateNFTProgress(tokenPubkey){
+        let pubkey = (new this.dnft.Pubkey(tokenPubkey)).toString();
+        console.log("activateNFTProgress", pubkey)
+        $$(`.nft-panel[data-pubkey="${pubkey}"]`).forEach(panel=>{
+            //console.log("activateNFTProgress:panel", panel)
+            panel.classList.add("updating");
+            panel.querySelectorAll(".user-btn").forEach(btn=>{
+                btn.disabled = true;
+            })
+        })
+    }
+
     async loadNFT(tokenPubkey, loadCount=0){
         let account = await this.dnft.getToken(tokenPubkey)
         .catch(err=>{
@@ -645,6 +672,7 @@ class App{
         el.dataset.pubkey = pubkey;
         if (meta){
             //let authority = meta.authority().toString();
+            el.authority = meta.authority();
             let sale = meta.sale();
             if (sale.listed()){
                 el.listed = true;
@@ -664,6 +692,11 @@ class App{
                 el.classList.add("mycoin")
             }
             //el.dataset.authority = authority;
+        }
+        if (!this.walletPubkey){
+            clone.querySelectorAll(".user-btn").forEach(el=>{
+                el.disabled = true;
+            })
         }
         el.dataset.mint = mint;
         let pubkeyEl = clone.querySelector(".nft-pubkey");

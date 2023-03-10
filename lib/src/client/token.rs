@@ -1,6 +1,6 @@
 use crate::{
     prelude::*,
-    program::{MarketState, TokenCreateFinalArgs, TokenSaleSettingArgs},
+    program::{MarketState, TokenCreateFinalArgs, TokenSaleSettingArgs}
 };
 use kaizen::result::Result;
 
@@ -190,6 +190,7 @@ mod wasm {
     use crate::program::{
         ExchangeMechanics, ForSale, MarketState, TokenCreateFinalArgs, TokenSaleSettingArgs,
     };
+    use crate::wallet::Application;
     use kaizen::accounts::AccountReference;
     use kaizen::transport::api::*;
     use kaizen::utils::sol_to_lamports;
@@ -369,6 +370,7 @@ mod wasm {
     /// Returns a token for a specific pubkey
     #[wasm_bindgen(js_name = "buyToken")]
     pub async fn buy_token(pubkey: JsValue) -> Result<(), JsValue> {
+        Application::ensure_wallet().await?;
         let pubkey = Pubkey::from_value(&pubkey)?;
         let authority = Transport::global()?.get_authority_pubkey()?;
 
@@ -383,6 +385,7 @@ mod wasm {
         for_sale: Option<bool>,
         price: Option<f64>,
     ) -> Result<JsValue, JsValue> {
+        Application::ensure_wallet().await?;
         let pubkey = Pubkey::from_value(&pubkey)?;
         let authority = Transport::global()?.get_authority_pubkey()?;
         let for_sale: Option<ForSale> = for_sale.map(|v| v.into());

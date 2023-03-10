@@ -20,7 +20,7 @@ static mut APPLICATION: Option<Application> = None;
 pub struct Application {
     store_name: String,
     data: Arc<Mutex<StoreData>>,
-
+    wallet: Wallet,
     /// holds references to [Callback](workflow_wasm::callback::Callback)
     connect_callbacks: CallbackMap,
 }
@@ -40,10 +40,27 @@ impl Application {
             store_name: store_name.to_string(),
             data: Arc::new(Mutex::new(data)),
             connect_callbacks: CallbackMap::new(),
+            wallet: Wallet::try_new().unwrap()
         };
 
         unsafe { APPLICATION = Some(app.clone()) };
         app
+    }
+
+    pub async fn ensure_wallet()->Result<()>{
+        let app = if let Some(app) = application(){
+            app
+        } else {
+            return Err("Aplication not intilized".into())
+        };
+
+        if app.wallet.is_connected(){
+            return Ok(())
+        }
+
+        app.connect_wallet().await?;
+
+        Ok(())
     }
 
     #[wasm_bindgen(js_name = "onWalletConnect")]
@@ -106,13 +123,12 @@ impl Application {
     }
 
     async fn connect(&self, adapter: Adapter) -> Result<()> {
-        let wallet = Wallet::try_new()?;
-        wallet.connect(Some(adapter)).await?;
+        self.wallet.connect(Some(adapter)).await?;
 
         self.set_wallet_auto_connect(true).await?;
         //let transport = Transport::global()?;
         //let pubkey = transport.wallet();
-        let pubkey = wallet.pubkey()?;
+        let pubkey = self.wallet.pubkey()?;
 
         for (_id, callback) in self.connect_callbacks.inner().iter() {
             let _ = callback.get_fn().call1(&JsValue::null(), &pubkey.into());
@@ -132,6 +148,10 @@ impl Application {
 
         Ok(wallet.get_adapter_list().await?.unwrap_or(vec![]))
     }
+}
+
+pub fn application()->Option<Application>{
+    unsafe { APPLICATION.clone() }
 }
 
 #[derive(Debug, BorshDeserialize, BorshSerialize)]
