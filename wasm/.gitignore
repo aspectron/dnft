@@ -5,3 +5,4 @@ web/package.json
 nodejs/dnft
 nodejs/node_modules
 nodejs/package-lock.json
+web/static
