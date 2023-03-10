@@ -660,7 +660,7 @@ class App{
 
             }
             el.coinMeta = meta;
-            if (this.walletPubkey.toString() == meta.authority().toString()){
+            if (this.walletPubkey?.toString() == meta.authority().toString()){
                 el.classList.add("mycoin")
             }
             //el.dataset.authority = authority;
