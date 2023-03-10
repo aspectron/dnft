@@ -1,6 +1,3 @@
-//#[cfg(not(target_arch = "wasm32"))]
-//use workflow_http::error::Error;
-
 #[cfg(not(target_arch = "wasm32"))]
 #[async_std::main]
 async fn main() -> Result<(), dnft::client::error::Error> {
@@ -44,14 +41,6 @@ async fn main() -> Result<(), dnft::client::error::Error> {
 
     let mut app = tide::with_state(DataDirState::try_new()?);
     app.with(tide::log::LogMiddleware::new());
-
-    // let cwd = std::env::current_dir().unwrap();
-    // let file = cwd.as_path().join(".auth");
-    // if file.exists() {
-    //     let memory_store = stores::from_hjson_file(file.as_path())?;
-    //     let authenticator = BasicAuthenticator::new(memory_store);
-    //     authenticator.init(&mut app);
-    // }
 
     app.with(tide::sessions::SessionMiddleware::new(
         tide::sessions::MemoryStore::new(),

@@ -1,10 +1,40 @@
 use crate::program::DataType;
-use crate::{prelude::*, program::MintCreationArgs};
+use crate::{
+    prelude::*,
+    program::{ImageUrl, MintCreationArgs},
+};
 use client::Field;
 use kaizen::result::Result;
 
+impl ImageUrl {
+    pub fn new(url: &str) -> Self {
+        let mut parts = url.split('/');
+        parts.next();
+        parts.next();
+        if let Some(domain) = parts.next() {
+            let url_path = url.replace(&format!("https://{domain}/"), "");
+            match domain {
+                "tinyurl.com" => Self(1, url_path),
+                _ => Self(0, url.to_string()),
+            }
+        } else {
+            Self(0, url.to_string())
+        }
+    }
+
+    pub async fn to_str(&self) -> Result<String> {
+        let Self(base, url) = self;
+        Ok(match base {
+            1 => format!("https://tinyurl.com/{url}"),
+            _ => url.clone(),
+        })
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MintData {
+    name: String,
+    image: String,
     tokens: u64,
     root: Pubkey,
     frozen: bool,
@@ -94,12 +124,22 @@ impl Mint {
             }
         }
 
-        let meta = mint.meta.borrow();
+        let (frozen, root) = {
+            let meta = mint.meta.borrow();
+            (meta.get_frozen(), meta.get_root())
+        };
         Ok(MintData {
+            name: mint.name.to_string(),
+            image: mint
+                .image
+                .load()?
+                .unwrap_or(Box::new(ImageUrl::new("/file/mint/placeholder.jpg")))
+                .to_str()
+                .await?,
             tokens: mint.tokens.len() as u64,
             schema,
-            frozen: meta.get_frozen(),
-            root: meta.get_root(),
+            frozen,
+            root,
         })
     }
 
@@ -130,13 +170,19 @@ mod wasm {
     use super::Mint;
     use crate::client::Schema;
     use crate::prelude::*;
+    use crate::program::ImageUrl;
     use kaizen::prelude::PubkeyExt;
 
     /// Create mint information/schema
     #[wasm_bindgen(js_name = "createMint")]
-    pub async fn create_mint(schema: Schema) -> Result<JsValue, JsValue> {
+    pub async fn create_mint(
+        name: String,
+        image: String,
+        schema: Schema,
+    ) -> Result<JsValue, JsValue> {
         let authority = Transport::global()?.get_authority_pubkey()?;
-        let tx = Mint::create(&authority, &schema.into()).await?;
+        let image = ImageUrl::new(&image);
+        let tx = Mint::create(&authority, &(name, image, schema).into()).await?;
         //let mint_account_pubkey = tx.target_account()?;
         let ids = tx.ids()?;
         tx.post().await?;

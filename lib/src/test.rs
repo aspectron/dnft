@@ -1,25 +1,27 @@
 #[cfg(not(target_os = "solana"))]
 pub mod tests {
-    use crate::api::*;
-    use crate::prelude::*;
-    use crate::program::ExchangeMechanics;
-    use crate::program::{/*ForSale,*/ MarketState, SaleType};
-    use kaizen::result::Result;
-    use program::MintCreationArgs;
-    use std::str::FromStr;
-
-    const AUTHORITY: &str = "42bML5qB3WkMwfa2cosypjUrN7F2PLQm4qhxBdRDyW7f";
+    use crate::{
+        client::{Mint, Root, Token},
+        program,
+        program::{ExchangeMechanics, ImageUrl, SaleType},
+        program_id,
+    };
+    use kaizen::{prelude::*, result::Result, utils::sol_to_lamports};
+    //use std::str::FromStr;
 
     #[async_std::test]
     async fn example_test() -> Result<()> {
         kaizen::init()?;
+        use std::str::FromStr;
 
         const USE_EMULATOR: bool = false;
+        let with_sample_data = true;
+        const AUTHORITY: &str = "42bML5qB3WkMwfa2cosypjUrN7F2PLQm4qhxBdRDyW7f";
 
         println!("init transport...");
         let transport = if USE_EMULATOR {
             Transport::try_new_for_unit_tests(
-                crate::program_id(),
+                program_id(),
                 Some(Pubkey::from_str(AUTHORITY)?),
                 TransportConfig::default(),
             )
@@ -28,10 +30,10 @@ pub mod tests {
             Transport::try_new("http://127.0.0.1:8899", TransportConfig::default()).await?
         };
 
-        println!("run test...");
-
-        run_test().await?;
-        //run_mint_test().await?;
+        create_root().await?;
+        if with_sample_data {
+            create_sample_data().await?;
+        }
 
         log_info!("");
         if transport.mode().is_emulator() {
@@ -44,29 +46,14 @@ pub mod tests {
         Ok(())
     }
 
-    #[wasm_bindgen]
-    pub async fn run_test() -> Result<()> {
-        let transport = Transport::global()?;
-        if let Some(emulator) = transport.emulator() {
-            let authority = Pubkey::from_str(AUTHORITY)?;
-            transport.set_custom_authority(Some(authority))?;
-            emulator
-                .fund(
-                    &authority,
-                    &Pubkey::default(),
-                    utils::sol_to_lamports(500.0),
-                )
-                .await?;
-        }
-
-        let authority = transport.get_authority_pubkey()?;
-
-        // ----------------------------------------------------------------------------
-        let root = reload_container::<program::Root>(&client::Root::pubkey()).await?;
+    pub async fn create_root() -> Result<()> {
+        let root = reload_container::<program::Root>(&Root::pubkey()).await?;
         if root.is_none() {
             log_info!("creating root");
+            let transport = Transport::global()?;
+            let authority = transport.get_authority_pubkey()?;
             let args = program::RootCreationArgs {};
-            let tx = client::Root::create(&authority, &args).await?;
+            let tx = Root::create(&authority, &args).await?;
             let target_account_pubkey = tx.target_account()?;
             tx.execute().await?;
             let root_container = load_container::<program::Root>(&target_account_pubkey)
@@ -74,6 +61,27 @@ pub mod tests {
                 .expect("¯\\_(ツ)_/¯");
             log_info!("root creation ok {}", root_container.pubkey());
         }
+
+        Ok(())
+    }
+
+    pub async fn create_sample_data() -> Result<()> {
+        log_info!("creating sample data");
+
+        let transport = Transport::global()?;
+        let authority = transport.get_authority_pubkey()?;
+        let mint_images = vec![
+            "/file/mint/pexels-abhishek-rajesh-669030.jpg",
+            "/file/mint/pexels-karolina-grabowska-4040655.jpg",
+            "/file/mint/pexels-angela-roma-7319331.jpg",
+            "/file/mint/pexels-mike-b-109548.jpg",
+            "/file/mint/pexels-chevanon-photography-1108099.jpg",
+            "/file/mint/pexels-petr-ganaj-4055736.jpg",
+            "/file/mint/pexels-denniz-futalan-2523934.jpg",
+            "/file/mint/pexels-pok-rie-239659.jpg",
+            "/file/mint/pexels-karolina-grabowska-4040649.jpg",
+            "/file/mint/pexels-ravi-kant-5161266.jpg",
+        ];
 
         let images = vec![
             "https://tinyurl.com/3nnzazpv",
@@ -87,25 +95,31 @@ pub mod tests {
             "https://images.freeimages.com/vhq/images/previews/9ea/bright-stars-gorgeous-special-effects-02-vector-6216.jpg",
             "https://images.freeimages.com/vhq/images/previews/f3d/gorgeous-diploma-certificate-template-02-vector-6248.jpg",
         ];
+        let mint_names = vec!["The Golden Dog", "The Golden Cat"];
         let names = vec![
-            "Token A",
-            "Token B",
-            "Token C",
+            "The Golden Dog - A",
+            "The Golden Dog - B",
+            "The Golden Dog - C",
+            "The Golden Dog - D",
+            "The Golden Dog - E",
             "The Golden Cat - A",
             "The Golden Cat - B",
             "The Golden Cat - C",
             "The Golden Cat - D",
             "The Golden Cat - E",
-            "The Golden Cat - F",
-            "The Golden Cat - G",
         ];
 
         // ----------------------------------------------------------------------------
         const MAX_MINTS: usize = 1;
-        const MAX_TOKENS: usize = 10;
+        const MAX_TOKENS: usize = 5;
         // ----------------------------------------------------------------------------
 
         let mut mint_pubkeys = vec![];
+
+        let root = reload_container::<program::Root>(&Root::pubkey())
+            .await?
+            .unwrap();
+        let mut mint_index = root.mints.len() + 1;
 
         for mint_seq in 0..MAX_MINTS {
             log_info!("creating mint {mint_seq}");
@@ -117,7 +131,12 @@ pub mod tests {
                 program::DataType::ImageUrl,
             ];
 
-            let args = MintCreationArgs {
+            let args = program::MintCreationArgs {
+                name: mint_names
+                    .get(mint_index)
+                    .unwrap_or(&format!("Mint {mint_index}").as_str())
+                    .to_string(),
+                image: ImageUrl::new(mint_images.get(mint_seq).unwrap()),
                 data_types: Some(data_types),
                 names: Some(vec![
                     "Name".to_string(),
@@ -131,11 +150,13 @@ pub mod tests {
                     "Any number".to_string(),
                     "Score".to_string(),
                     "".to_string(),
-                    "Image url. Use any Url shorten service".to_string(),
+                    "Use any url shortening service".to_string(),
                 ]),
             };
 
-            let tx = client::Mint::create(&authority, &args).await?;
+            mint_index += 1;
+
+            let tx = Mint::create(&authority, &args).await?;
             let mint_account_pubkey = tx.target_account()?;
             tx.execute().await?;
             let mint_container = load_container::<program::Mint>(&mint_account_pubkey)
@@ -149,15 +170,17 @@ pub mod tests {
         //let mint_pubkeys = vec![Pubkey::from_str("8bmnuP1HuDMmM2Yz8gZ5KLRJA8pYXboFVd3uZtLnF3nx").unwrap()];
 
         // ----------------------------------------------------------------------------
-        let sale_types = [
-            SaleType::Auction,
-            SaleType::Barter,
-            SaleType::None,
-            SaleType::Raffle,
-            SaleType::Rent,
-        ];
+        // let sale_types = [
+        //     SaleType::Sale,
+        //     SaleType::Auction,
+        //     SaleType::Barter,
+        //     SaleType::None,
+        //     SaleType::Raffle,
+        //     SaleType::Rent,
+        // ];
+        let mut img_index = 0;
         for mint_seq in 0..MAX_MINTS {
-            let mut sale_type_index = 0;
+            //let mut sale_type_index = 0;
             for token_seq in 0..MAX_TOKENS {
                 log_info!("creating token {mint_seq}:{token_seq}");
 
@@ -166,24 +189,29 @@ pub mod tests {
                     .await?
                     .expect("¯\\_(ツ)_/¯");
 
-                let sale_type = sale_types[sale_type_index];
-                sale_type_index += 1;
-                if sale_type_index == sale_types.len() {
-                    sale_type_index = 0;
-                }
+                //let sale_type = sale_types[sale_type_index];
+                // sale_type_index += 1;
+                // if sale_type_index == sale_types.len() {
+                //     sale_type_index = 0;
+                // }
+                let sol = (token_seq as f64) + 1.0 / 100.0;
                 let args = program::TokenCreateFinalArgs {
                     for_sale: program::ForSale::Yes,
-                    exchange_mechanics: ExchangeMechanics::sale(1, None),
-                    sale_type,
+                    exchange_mechanics: ExchangeMechanics::sale(sol_to_lamports(sol), None),
+                    sale_type: SaleType::Sale,
                     data: vec![
-                        program::Data::String(names.get(token_seq).unwrap().to_string()),
+                        program::Data::String(names.get(img_index).unwrap().to_string()),
                         program::Data::u32((token_seq * 15) as u32),
                         program::Data::u8((token_seq + 1) as u8),
                         program::Data::u64((token_seq * 11) as u64),
-                        program::Data::Url(program::Url::image(images.get(token_seq).unwrap())),
+                        program::Data::Url(program::Url::image(images.get(img_index).unwrap())),
                     ],
                 };
-                let tx = client::Token::create(&authority, mint_container.pubkey(), &args).await?;
+                img_index += 1;
+                if img_index == images.len() {
+                    img_index = 0;
+                }
+                let tx = Token::create(&authority, mint_container.pubkey(), &args).await?;
                 let target_account_pubkey = tx.target_account()?;
                 tx.execute().await?;
                 let token_container = load_container::<program::Token>(&target_account_pubkey)
@@ -198,15 +226,13 @@ pub mod tests {
         }
         // ----------------------------------------------------------------------------
 
-        let root = reload_container::<program::Root>(&client::Root::pubkey())
+        let root = reload_container::<program::Root>(&Root::pubkey())
             .await?
             .expect("¯\\_(ツ)_/¯");
 
         let max_mints = root.mints.len();
         for mint_seq in 0..max_mints {
-            let mint_account_pubkey = root
-                .mints
-                .get_pubkey_at(&crate::program_id(), mint_seq as u64)?;
+            let mint_account_pubkey = root.mints.get_pubkey_at(&program_id(), mint_seq as u64)?;
             let mint_container = reload_container::<program::Mint>(&mint_account_pubkey)
                 .await?
                 .expect("¯\\_(ツ)_/¯");
@@ -217,7 +243,8 @@ pub mod tests {
             for token_seq in 0..token_len {
                 let token_account_pubkey = mint_container
                     .tokens
-                    .get_pubkey_at(&crate::program_id(), token_seq as u64)?;
+                    .get_pubkey_at(&program_id(), token_seq as u64)?;
+
                 let _token = reload_container::<program::Token>(&token_account_pubkey)
                     .await?
                     .expect("¯\\_(ツ)_/¯");
@@ -227,34 +254,6 @@ pub mod tests {
 
             // let schema = mint_container.data_types.load()?;
             // log_info!("\n\nmint container schema: {:#?}\n", schema);
-        }
-
-        Ok(())
-    }
-
-    #[wasm_bindgen]
-    pub async fn run_mint_test() -> Result<()> {
-        //return Ok(());
-        let transport = Transport::global()?;
-        let pubkeys = crate::client::root::Root::get_mint_pubkeys(0, 100).await?;
-        log_trace!("mint pubkeys: {:?}", pubkeys);
-        for pubkey in pubkeys {
-            let data = crate::client::mint::Mint::get_data(pubkey).await?;
-            log_trace!("mint {} => data: {:?}", pubkey.to_string(), data);
-
-            let config = GetProgramAccountsConfig::new()
-                .add_filters(vec![
-                    AccountFilter::MemcmpEncodedBase58(12, pubkey.to_string()),
-                    AccountFilter::MemcmpEncodeBase58(44, MarketState::Listed.into()),
-                    //AccountFilter::MemcmpEncodeBase58(44, ForSale::Yes.try_into()?),
-                ])?
-                .encoding(AccountEncoding::Base64)?;
-
-            let accounts = transport
-                .get_program_accounts_with_config(&crate::program_id(), config)
-                .await?;
-
-            log_trace!("accounts: {accounts:#?}");
         }
 
         Ok(())

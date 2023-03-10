@@ -322,7 +322,8 @@ class App{
 
     async initBrowsePage(){
         let mainEl = $("main");
-        this.schemaListEl = $("#schema-list");
+        this.mintListEl = $("#mint-list");
+        this.mintPanelTpl = $("#mint-panel-tpl");
         this.nftTemplateEl = $("#nft-panel-tpl");
         this.marketNFTTemplateEl = $("#market-panel-tpl");
         this.nftListEl = $("#nft-list");
@@ -579,15 +580,19 @@ class App{
         })
         if (!account)
             return
-        let mintPubkey = account[1].mint();
-        let minData = this.mintData[mintPubkey];
-        if (!minData){
-            console.error("minData data not found for : "+mintPubkey, this.mintData)
-            return
+        let mintPubkey = account[1].mint().toString();
+        let mintData = this.mintData[mintPubkey]||false;
+        if (!mintData){
+            mintData = await this.dnft.getMintData(mintPubkey);
+            if (!mintData){
+                console.error("minData data not found for : "+mintPubkey, this.mintData)
+                return
+            }
+            this.mintData[mintPubkey+""] = mintData;
         }
         console.log("loadNFT::::", account);
         const addPanel = (list, tpl)=>{
-            let panel = this.createNFTPanel(mintPubkey, minData, ...account, tpl);
+            let panel = this.createNFTPanel(mintPubkey, mintData, ...account, tpl);
             let oldPanel = list.querySelector(`.nft-panel[data-pubkey="${panel.dataset.pubkey}"]`)
             //console.log("panel.dataset", panel, oldPanel)
             if (oldPanel){
@@ -738,7 +743,7 @@ class App{
             let data = await this.dnft.getMintData(pubkey);
             //console.log("pubkey data", pubkey, data);
             let el = this.createMintRow(index++, pubkey, data);
-            this.schemaListEl.appendChild(el);
+            this.mintListEl.appendChild(el);
         }
         let length = pubkeys.length;
         if (length){
@@ -751,45 +756,50 @@ class App{
     }
 
     createMintRow(index, pubkey, data){
-        let td_name = document.createElement("td");
-        let pubkey_text = document.createElement("div");
-        pubkey_text.setAttribute("class", "mint-pubkey");
-        pubkey_text.innerHTML = this.dnft.shortenPubkey(pubkey);
-        let td_name_text = document.createElement("div");
-        td_name_text.innerHTML = "DNFT "+index;
-        td_name.appendChild(pubkey_text);
-        td_name.appendChild(td_name_text);
-        td_name.setAttribute("class", "mint-name-cell mdl-data-table__cell--non-numeric");
+        let clone =  this.mintPanelTpl.content.cloneNode(true);
+        clone.querySelector(".mint-title").innerHTML = data.name;
+        clone.querySelector(".mint-image").style.backgroundImage = `url(${data.image})`;
+        clone.querySelector(".mint-pubkey").innerHTML = this.dnft.shortenPubkey(pubkey);
+        clone.querySelector(".create-token").dataset.pubkey = pubkey;
+        // console.log("data#####", data)
+        // let td_name = document.createElement("td");
+        // let pubkey_text = document.createElement("div");
+        // pubkey_text.setAttribute("class", "mint-pubkey");
+        // pubkey_text.innerHTML = this.dnft.shortenPubkey(pubkey);
+        // let td_name_text = document.createElement("div");
+        // td_name_text.innerHTML = "DNFT "+index;
+        // td_name.appendChild(pubkey_text);
+        // td_name.appendChild(td_name_text);
+        // td_name.setAttribute("class", "mint-name-cell mdl-data-table__cell--non-numeric");
 
-        let td_description = document.createElement("td");
         let description = ["<bold>Fields</bold>"];
         for (let field of data.schema){
             description.push(`${field.type}: ${field.name}, ${field.description}`)
         }
-        td_description.innerHTML = `<p>${description.join("<br />")}</p>`;
-        td_description.setAttribute("class", "mdl-data-table__cell--wrap-text");
+        clone.querySelector(".mint-description").innerHTML = `<p>${description.join("<br />")}</p>`;
+        // td_description.setAttribute("class", "mdl-data-table__cell--wrap-text");
 
         
-        let btn = document.createElement("button");
-        btn.classList.add("mdl-button", "mint-dnft");
-        btn.innerHTML = "Mint it";
-        btn.dataset.pubkey = pubkey;
+        // let btn = document.createElement("button");
+        // btn.classList.add("mdl-button", "mint-dnft");
+        // btn.innerHTML = "Mint it";
+        // btn.dataset.pubkey = pubkey;
 
-        let td_action = document.createElement("td");
-        td_action.appendChild(btn);
+        // let td_action = document.createElement("td");
+        // td_action.appendChild(btn);
 
-        let tr = document.createElement("tr");
-        tr.appendChild(td_name);
-        tr.appendChild(td_description);
-        tr.appendChild(td_action);
+        // let tr = document.createElement("tr");
+        // tr.appendChild(td_name);
+        // tr.appendChild(td_description);
+        // tr.appendChild(td_action);
 
-        return tr;
+        return clone;
     }
 
     initCreateDnftForm(){
         this.fieldListEl = $("#field-list");
         this.fieldTypeListEl = $("#field-type-list");
-        this.createDnftMintBtn = $("#create-dnft-mint-btn");
+        this.createDnftMintBtn = $("#create-mint-btn");
 
         const { Field, DataType, Data } = this.dnft;
 
@@ -869,7 +879,21 @@ class App{
             }
         });
 
+        $("#mint-image .upload-file-btn").addEventListener("click", ()=>{
+            this.uploadImage((result)=>{
+                if (result.success && result.file){
+                    $("#mint-image-input").value = location.origin+"/"+result.file;
+                }
+            })
+        })
+
         this.createDnftMintBtn.addEventListener("click", async ()=>{
+            let name = $("#mint-name-input").value;
+            let image = $("#mint-image-input").value;
+            if (!name || !image){
+                this.showError("Name and image field are required.");
+                return
+            }
             let trList = this.fieldListEl.querySelectorAll("tr");
             let fields = [];
             trList.forEach(tr=>{
@@ -883,7 +907,7 @@ class App{
 
             console.log("fields[0]", fields[0].dataType(), fields[0].name(), fields[0].description())
             let schema = new this.dnft.Schema(fields)
-            let ids = await this.dnft.createMint(schema)
+            let ids = await this.dnft.createMint(name, image, schema)
             .catch(err=>{
                 console.log("Unable to create MINT: ", err);
             })
@@ -905,8 +929,8 @@ class App{
         this.mintFormDialog = $dialog("#mint-form-dialog");
         this.mintFormFieldsEl = $("#mint-form-fields");
 
-        this.schemaListEl.addEventListener("click", event=>{
-            let btn = event.target.closest("button.mint-dnft");
+        this.mintListEl.addEventListener("click", event=>{
+            let btn = event.target.closest("button.create-token");
             if(!btn)
                 return
             

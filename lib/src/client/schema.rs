@@ -110,19 +110,21 @@ impl Schema {
     }
 }
 
-impl From<Schema> for MintCreationArgs {
-    fn from(value: Schema) -> Self {
+impl From<(String, ImageUrl, Schema)> for MintCreationArgs {
+    fn from(value: (String, ImageUrl, Schema)) -> Self {
         let mut data_types = program::DataTypes::default();
         let mut names = vec![];
         let mut descriptions = vec![];
 
-        for field in value.fields {
+        for field in value.2.fields {
             data_types.push(field.data_type());
             names.push(field.name());
             descriptions.push(field.description());
         }
 
         Self {
+            name: value.0,
+            image: value.1,
             data_types: Some(data_types),
             names: Some(names),
             descriptions: Some(descriptions),

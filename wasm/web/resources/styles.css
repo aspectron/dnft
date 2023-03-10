@@ -219,7 +219,8 @@ td.actions .material-icons{
   margin: 0px auto 100px;
 }
 .main-container#browse-nft-container,
-.main-container#marketplace-nft-container{
+.main-container#marketplace-nft-container,
+.main-container#browse-mint-container{
   max-width:1110px;
   width:90%;
 }
@@ -285,7 +286,7 @@ td.actions .material-icons{
   padding: 8px;
   padding-top: 48px;
 }
-.mdl-dnft .mdl-card {
+.mdl-dnft .nft-panel {
   height: auto;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -294,10 +295,10 @@ td.actions .material-icons{
       -ms-flex-direction: column;
           flex-direction: column;
 }
-.mdl-dnft .mdl-card > * {
+.mdl-dnft .nft-panel > * {
   height: auto;
 }
-.mdl-dnft .mdl-card .mdl-card__supporting-text {
+.mdl-dnft .nft-panel .mdl-card__supporting-text {
   margin: 40px;
   -webkit-flex-grow: 1;
       -ms-flex-positive: 1;
@@ -486,10 +487,12 @@ td.actions .material-icons{
   margin-bottom:20px;
   display:inline-flex;
 }
-.nft-image{
+.nft-image,
+.mint-image{
   background:center/cover no-repeat rgb(103,59,183, 0.65);
 }
-.nft-panel .mdl-card__actions{
+.nft-panel .mdl-card__actions,
+.mint-panel .mdl-card__actions{
   position: relative;
   text-align: right;
   display: flex;
@@ -510,12 +513,14 @@ td.actions .material-icons{
   text-transform: uppercase;
 }
 
-.nft-panel .mdl-card__title{
+.nft-panel .mdl-card__title,
+.mint-panel .mdl-card__title{
   color: #fff;
   height:300px;
   position: relative;
 }
-.nft-panel .mdl-card__title-text{
+.nft-panel .mdl-card__title-text,
+.mint-panel .mdl-card__title-text{
   color: #ffffff;
   background-color: rgba(0, 0, 0, 0.2);
   padding: 15px;
@@ -530,7 +535,7 @@ td.actions .material-icons{
   width:calc(100% - 40px);
 }
 .nft-panel .nft-pubkey,
-.mint-name-cell .mint-pubkey{
+.mint-panel .mint-pubkey{
   position: absolute;
   top: 10px;
   text-shadow: 0px 0px 4px #000;
@@ -542,12 +547,12 @@ td.actions .material-icons{
 .mdl-dnft .nft-panel:not(.mycoin) .setting-btn{
   display:none;
 }
-.mint-name-cell{
+/* .mint-name-cell{
   position: relative;
 }
 .mint-name-cell .mint-pubkey{
   text-shadow:none;
-}
+} */
 @media (max-width: 600px){
   .mdl-dnft .nft-panel{
     width:calc(100% - 16px);
@@ -556,6 +561,11 @@ td.actions .material-icons{
 @media (min-width: 800px) and (max-width: 1000px){
   .mdl-dnft .nft-panel{
     width:calc(50% - 16px);
+  }
+}
+@media (max-width: 839px){
+  .mdl-dnft .mint-panel{
+    width:calc(100% - 16px);
   }
 }
 
@@ -670,3 +680,12 @@ td.actions .material-icons{
     transform:translate(0,0px)
   }
 }
+
+.mint-panel .mint-image {
+  height:200px;
+  background: no-repeat center/coover;
+}
+.mdl-dnft .mint-panel .mdl-card__supporting-text{
+  flex:1
+}
+.no-left-padding{padding-left:0px;}

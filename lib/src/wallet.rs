@@ -40,22 +40,22 @@ impl Application {
             store_name: store_name.to_string(),
             data: Arc::new(Mutex::new(data)),
             connect_callbacks: CallbackMap::new(),
-            wallet: Wallet::try_new().unwrap()
+            wallet: Wallet::try_new().unwrap(),
         };
 
         unsafe { APPLICATION = Some(app.clone()) };
         app
     }
 
-    pub async fn ensure_wallet()->Result<()>{
-        let app = if let Some(app) = application(){
+    pub async fn ensure_wallet() -> Result<()> {
+        let app = if let Some(app) = application() {
             app
         } else {
-            return Err("Aplication not intilized".into())
+            return Err("Aplication not intilized".into());
         };
 
-        if app.wallet.is_connected(){
-            return Ok(())
+        if app.wallet.is_connected() {
+            return Ok(());
         }
 
         app.connect_wallet().await?;
@@ -150,7 +150,7 @@ impl Application {
     }
 }
 
-pub fn application()->Option<Application>{
+pub fn application() -> Option<Application> {
     unsafe { APPLICATION.clone() }
 }
 

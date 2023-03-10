@@ -1,6 +1,6 @@
 use crate::{
     prelude::*,
-    program::{MarketState, TokenCreateFinalArgs, TokenSaleSettingArgs}
+    program::{MarketState, TokenCreateFinalArgs, TokenSaleSettingArgs},
 };
 use kaizen::result::Result;
 

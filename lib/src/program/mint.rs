@@ -3,18 +3,24 @@
 //!
 
 use crate::prelude::*;
+use kaizen::container::Utf8String;
 use kaizen::error::program_error_code;
 use program::DataType;
 use program::Root;
 
 #[derive(Clone, Debug, Default, BorshSerialize, BorshDeserialize)]
 pub struct MintCreationArgs {
+    pub name: String,
+    pub image: ImageUrl,
     pub data_types: Option<Vec<DataType>>,
     pub names: Option<Vec<String>>,
     pub descriptions: Option<Vec<String>>,
 }
 
 // ~
+
+#[derive(Clone, Debug, Default, BorshSerialize, BorshDeserialize)]
+pub struct ImageUrl(pub u16, pub String);
 
 #[derive(Meta, Copy, Clone)]
 #[repr(packed)]
@@ -28,6 +34,8 @@ pub struct MintMeta {
 pub struct Mint<'info, 'refs> {
     pub meta: RefCell<&'info mut MintMeta>,
     pub store: SegmentStore<'info, 'refs>,
+    pub name: Utf8String<'info, 'refs>,
+    pub image: Serialized<'info, 'refs, ImageUrl>,
     // ---
     #[collection(seed(b"token"), container(program::Token))]
     pub tokens: PdaCollection<'info, 'refs>,
@@ -54,6 +62,10 @@ impl<'info, 'refs> Mint<'info, 'refs> {
 
         mint.tokens.try_create()?;
         mint.update_data(&args)?;
+        unsafe {
+            mint.name.store(&args.name)?;
+        }
+        mint.image.store(&args.image)?;
 
         ctx.sync_rent(mint.account(), &RentCollector::default())?;
 

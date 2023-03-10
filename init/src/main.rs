@@ -1,7 +1,7 @@
 use dnft::{
     client::{Mint, Root, Token},
     program,
-    program::{ExchangeMechanics, SaleType},
+    program::{ExchangeMechanics, ImageUrl, SaleType},
     program_id,
 };
 use kaizen::{prelude::*, result::Result, utils::sol_to_lamports};
@@ -65,6 +65,19 @@ async fn create_sample_data() -> Result<()> {
 
     let transport = Transport::global()?;
     let authority = transport.get_authority_pubkey()?;
+    let mint_images = vec![
+        "/file/mint/pexels-abhishek-rajesh-669030.jpg",
+        "/file/mint/pexels-karolina-grabowska-4040655.jpg",
+        "/file/mint/pexels-angela-roma-7319331.jpg",
+        "/file/mint/pexels-mike-b-109548.jpg",
+        "/file/mint/pexels-chevanon-photography-1108099.jpg",
+        "/file/mint/pexels-petr-ganaj-4055736.jpg",
+        "/file/mint/pexels-denniz-futalan-2523934.jpg",
+        "/file/mint/pexels-pok-rie-239659.jpg",
+        "/file/mint/pexels-karolina-grabowska-4040649.jpg",
+        "/file/mint/pexels-ravi-kant-5161266.jpg",
+    ];
+
     let images = vec![
         "https://tinyurl.com/3nnzazpv",
         "https://images.freeimages.com/365/images/previews/f7e/abstract-rounded-rectangles-vector-graphic-3664.jpg",
@@ -77,26 +90,31 @@ async fn create_sample_data() -> Result<()> {
         "https://images.freeimages.com/vhq/images/previews/9ea/bright-stars-gorgeous-special-effects-02-vector-6216.jpg",
         "https://images.freeimages.com/vhq/images/previews/f3d/gorgeous-diploma-certificate-template-02-vector-6248.jpg",
     ];
-
+    let mint_names = vec!["The Golden Dog", "The Golden Cat"];
     let names = vec![
         "The Golden Dog - A",
         "The Golden Dog - B",
         "The Golden Dog - C",
+        "The Golden Dog - D",
+        "The Golden Dog - E",
         "The Golden Cat - A",
         "The Golden Cat - B",
         "The Golden Cat - C",
         "The Golden Cat - D",
         "The Golden Cat - E",
-        "The Golden Cat - F",
-        "The Golden Cat - G",
     ];
 
     // ----------------------------------------------------------------------------
-    const MAX_MINTS: usize = 1;
-    const MAX_TOKENS: usize = 10;
+    const MAX_MINTS: usize = 2;
+    const MAX_TOKENS: usize = 5;
     // ----------------------------------------------------------------------------
 
     let mut mint_pubkeys = vec![];
+
+    let root = reload_container::<program::Root>(&Root::pubkey())
+        .await?
+        .unwrap();
+    let mut mint_index = root.mints.len();
 
     for mint_seq in 0..MAX_MINTS {
         log_info!("creating mint {mint_seq}");
@@ -109,6 +127,11 @@ async fn create_sample_data() -> Result<()> {
         ];
 
         let args = program::MintCreationArgs {
+            name: mint_names
+                .get(mint_index)
+                .unwrap_or(&format!("Mint {}", mint_index+1).as_str())
+                .to_string(),
+            image: ImageUrl::new(mint_images.get(mint_seq).unwrap()),
             data_types: Some(data_types),
             names: Some(vec![
                 "Name".to_string(),
@@ -125,6 +148,8 @@ async fn create_sample_data() -> Result<()> {
                 "Use any url shortening service".to_string(),
             ]),
         };
+
+        mint_index += 1;
 
         let tx = Mint::create(&authority, &args).await?;
         let mint_account_pubkey = tx.target_account()?;
@@ -148,7 +173,7 @@ async fn create_sample_data() -> Result<()> {
     //     SaleType::Raffle,
     //     SaleType::Rent,
     // ];
-
+    let mut img_index = 0;
     for mint_seq in 0..MAX_MINTS {
         //let mut sale_type_index = 0;
         for token_seq in 0..MAX_TOKENS {
@@ -170,13 +195,17 @@ async fn create_sample_data() -> Result<()> {
                 exchange_mechanics: ExchangeMechanics::sale(sol_to_lamports(sol), None),
                 sale_type: SaleType::Sale,
                 data: vec![
-                    program::Data::String(names.get(token_seq).unwrap().to_string()),
+                    program::Data::String(names.get(img_index).unwrap().to_string()),
                     program::Data::u32((token_seq * 15) as u32),
                     program::Data::u8((token_seq + 1) as u8),
                     program::Data::u64((token_seq * 11) as u64),
-                    program::Data::Url(program::Url::image(images.get(token_seq).unwrap())),
+                    program::Data::Url(program::Url::image(images.get(img_index).unwrap())),
                 ],
             };
+            img_index += 1;
+            if img_index == images.len() {
+                img_index = 0;
+            }
 
             let tx = Token::create(&authority, mint_container.pubkey(), &args).await?;
             let target_account_pubkey = tx.target_account()?;
@@ -199,9 +228,7 @@ async fn create_sample_data() -> Result<()> {
 
     let max_mints = root.mints.len();
     for mint_seq in 0..max_mints {
-        let mint_account_pubkey = root
-            .mints
-            .get_pubkey_at(&crate::program_id(), mint_seq as u64)?;
+        let mint_account_pubkey = root.mints.get_pubkey_at(&program_id(), mint_seq as u64)?;
         let mint_container = reload_container::<program::Mint>(&mint_account_pubkey)
             .await?
             .expect("¯\\_(ツ)_/¯");
@@ -212,7 +239,7 @@ async fn create_sample_data() -> Result<()> {
         for token_seq in 0..token_len {
             let token_account_pubkey = mint_container
                 .tokens
-                .get_pubkey_at(&crate::program_id(), token_seq as u64)?;
+                .get_pubkey_at(&program_id(), token_seq as u64)?;
 
             let _token = reload_container::<program::Token>(&token_account_pubkey)
                 .await?
@@ -236,10 +263,6 @@ async fn main() {
         .map_err(|err| {
             log_error!("DNFT initialize: Error: {}", err);
             println!();
-        })
-        .and_then(|data| {
-            log_info!("DNFT initialize: Success");
-            Ok(data)
         })
         .ok();
 }

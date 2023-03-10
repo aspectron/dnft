@@ -206,7 +206,24 @@
         <div class="mdl-layout__tab-panel" id="browse-mints">
           <div class="main-container no-records" id="browse-mint-container">
             <h2>Select Mint</h2>
-            <table width="100%" class="mdl-data-table">
+            <div class="mdl-grid" id="mint-list"></div>
+            <template id="mint-panel-tpl">
+              <div class="mint-panel mdl-cell mdl-cell--6-col mdl-card mdl-shadow--2dp">
+                <div class="mint-image mdl-card__title">
+                  <span class="mint-pubkey"></span>
+                  <h2 class="mint-title mdl-card__title-text"></h2>
+                </div>
+                <div class="mdl-card__supporting-text">
+                  <div class="mint-description"></div>
+                </div>
+                <div class="mdl-card__actions mdl-card--border">
+                  <button class="create-token mdl-button mdl-js-button mdl-button--big mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                    CREATE TOKEN
+                  </button>
+                </div>
+              </div>
+            </template>
+            <!-- <table width="100%" class="mdl-data-table">
               <thead>
                 <tr>
                   <th class="mdl-data-table__cell--non-numeric" width="30%">Name</th>
@@ -215,15 +232,15 @@
                 </tr>
               </thead>
               <tbody id="schema-list"></tbody>
-            </table>
+            </table> -->
             <dialog id="mint-form-dialog" class="mdl-dialog mint-form-dialog">
-              <h4 class="mdl-dialog__title">Mint DNFT</h4>
+              <h4 class="mdl-dialog__title">CREATE TOKEN</h4>
               <div class="mdl-dialog__content">
                 <div id="mint-form-fields" class="form-panel"></div>
               </div>
               <div class="mdl-dialog__actions">
                 <button id="mint-dnft-btn" class="mdl-button mdl-js-button mdl-button--big mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-                  Mint DNFT
+                  CREATE
                 </button>
                 <button type="button" class="mdl-button mdl-button--big close-dialog">Close</button>
               </div>
@@ -231,22 +248,26 @@
           </div>
         </div>
         <div class="mdl-layout__tab-panel" id="create-dnft">
-          <div class="main-container no-fields" id="create-dnft-main-container">
+          <div class="main-container" id="create-dnft-main-container">
             <h2>Create DNFT MINT</h2>
-
-            <div class="add-field-msg">
-              <button class="add-field-btn mdl-button mdl-button--big mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-                Add fields
-              </button>
-            </div>
             <div class="fields-info">
+              <label class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label has-placeholder" for="mint-name-input">
+                <input type="text" id="mint-name-input" class="mdl-textfield__input">
+                <span class="mdl-textfield__label">Name</span>
+              </label>
+              <label id="mint-image" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label has-placeholder" for="mint-image-input">
+                <input type="text" id="mint-image-input" class="mdl-textfield__input">
+                <span class="mdl-textfield__label">Image</span>
+                <a class="upload-file-btn mdl-textfield__upload-link" href="javascript: void 0">Or upload image</a>
+              </label>
+              <br /><br />
               <div class="h-flex center">
                   <h5 class="flex">Fields:</h5>
                   <button class="add-field-btn mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-                    Add
+                    Add Field
                   </button>
               </div>
-              <table width="100%" class="mdl-data-table mdl-shadow--2dp">
+              <table width="100%" class="mdl-data-table">
                 <thead>
                   <tr>
                     <th class="mdl-data-table__cell--non-numeric">Data Type</th>
@@ -319,7 +340,7 @@
                 </tbody>
               </table>
               <div class="action-bar">
-                <button id="create-dnft-mint-btn" class="mdl-button mdl-js-button mdl-button--big mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                <button id="create-mint-btn" class="mdl-button mdl-js-button mdl-button--big mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
                   Create DNFT Mint
                 </button>
               </div>
