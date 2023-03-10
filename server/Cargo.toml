@@ -6,7 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-workflow-http.workspace = true
 tide.workspace = true
 async-std.workspace = true
 rand.workspace = true
@@ -14,3 +13,4 @@ serde.workspace = true
 http-types.workspace = true
 multipart.workspace = true
 mime.workspace = true
+dnft.workspace = true
