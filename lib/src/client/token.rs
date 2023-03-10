@@ -138,6 +138,7 @@ impl Token {
         {
             return Err("Nothing to update.".into());
         }
+        //log_trace!("update_sale_setting: args:{args:?}");
         let builder = client::Token::execution_context_for(program::Token::update_sale_setting)
             .with_authority(authority_pubkey)
             .with_handler_accounts(&[AccountMeta::new(*token_pubkey, false)])
@@ -151,6 +152,33 @@ impl Token {
             builder.try_into()?,
         );
 
+        Ok(TransactionList::new(vec![transaction]))
+    }
+
+    pub async fn buy(authority_pubkey: &Pubkey, token_pubkey: &Pubkey) -> Result<TransactionList> {
+        // if args.for_sale.is_none() && args.exchange_mechanics.is_none() && args.sale_type.is_none()
+        // {
+        //     return Err("Nothing to update.".into());
+        // }
+        let token = load_container::<program::Token>(token_pubkey)
+            .await?
+            .ok_or_else(|| "Unable to load token container".to_string())?;
+        let owner = token.meta.borrow().get_authority();
+        log_trace!("owner:{}", owner.to_string());
+        let builder = client::Token::execution_context_for(program::Token::buy)
+            .with_authority(authority_pubkey)
+            .with_handler_accounts(&[AccountMeta::new(*token_pubkey, false)])
+            .with_system_program_account()
+            .with_system_accounts(&[AccountMeta::new(owner, false)])
+            .with_instruction_data(&Vec::new())
+            .seal()?;
+
+        let accounts = builder.gather_accounts(None, Some(token_pubkey))?;
+        let transaction = Transaction::new_with_accounts(
+            format!("Buy Token {token_pubkey}").as_str(),
+            accounts,
+            builder.try_into()?,
+        );
         Ok(TransactionList::new(vec![transaction]))
     }
 }
@@ -336,6 +364,17 @@ mod wasm {
         item.push(&data);
         item.push(&AccountReference::from(&account_data).into());
         Ok(item)
+    }
+
+    /// Returns a token for a specific pubkey
+    #[wasm_bindgen(js_name = "buyToken")]
+    pub async fn buy_token(pubkey: JsValue) -> Result<(), JsValue> {
+        let pubkey = Pubkey::from_value(&pubkey)?;
+        let authority = Transport::global()?.get_authority_pubkey()?;
+
+        let tx = Token::buy(&authority, &pubkey).await?;
+        tx.post().await?;
+        Ok(())
     }
 
     #[wasm_bindgen(js_name = "updateTokenSaleSetting")]

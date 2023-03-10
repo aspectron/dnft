@@ -5,6 +5,8 @@
 use crate::prelude::*;
 use kaizen::program_error_code;
 use program::{Data, ExchangeMechanics, Mint, SaleType};
+use solana_program::program::invoke;
+use solana_program::system_instruction::transfer;
 
 pub type DataVec = Vec<program::Data>;
 
@@ -81,7 +83,8 @@ impl Sale {
     }
 
     pub fn set_for_sale(&mut self, for_sale: ForSale) {
-        let market_state = if for_sale == ForSale::Yes || self.sale_type != SaleType::None {
+        let market_state = if for_sale == ForSale::Yes {
+            // || self.sale_type != SaleType::None {
             MarketState::Listed
         } else {
             MarketState::Unlisted
@@ -221,6 +224,52 @@ impl<'info, 'refs> Token<'info, 'refs> {
         Ok(())
     }
 
+    pub fn buy(ctx: &ContextReference) -> ProgramResult {
+        let token = Token::try_load(&ctx.handler_accounts[0])?;
+        let authority = token.meta.borrow().get_authority();
+        if &authority == ctx.authority.key {
+            return Err(ProgramError::IllegalOwner);
+        }
+
+        let owner = ctx.system_accounts[1].clone();
+        if &authority != owner.key {
+            return Err(ProgramError::IllegalOwner);
+        }
+
+        let meta = token.meta.borrow_mut();
+        let sale = meta.sale;
+        if sale.market_state != MarketState::Listed {
+            return Err(ErrorCode::TokenNotAvailableForSale.into());
+        }
+
+        let price = if let ExchangeMechanics::Sale(sale) = sale.exchange_mechanics {
+            match sale {
+                program::exchange::Sale::Sol { price } => price,
+                program::exchange::Sale::Spl { price: _, token: _ } => {
+                    return Err(ErrorCode::TokenNotAvailableForSale.into());
+                }
+            }
+        } else {
+            return Err(ErrorCode::TokenNotAvailableForSale.into());
+        };
+
+        let transfer_tokens_instruction = transfer(ctx.authority.key, owner.key, price);
+
+        let required_accounts_for_transfer =
+            [ctx.authority.clone(), owner, ctx.system_accounts[0].clone()];
+
+        // Passing the TransactionInstruction to send
+        invoke(
+            &transfer_tokens_instruction,
+            &required_accounts_for_transfer,
+        )?;
+
+        let token = Token::try_load(&ctx.handler_accounts[0])?;
+        token.meta.borrow_mut().set_authority(*ctx.authority.key);
+
+        Ok(())
+    }
+
     // pub fn update_data(&mut self, mint: &Mint, args: &TokenUpdateArgs) -> ProgramResult {
     //     // let data_types = mint.data_types.load()?.ok_or(ProgramError::Custom(ErrorCode::MintData.into()))?;
     //     let data_types = mint
@@ -267,6 +316,7 @@ declare_handlers!(
     [
         Token::create_final,
         Token::update_sale_setting,
+        Token::buy,
         Token::create_with_template
     ]
 );

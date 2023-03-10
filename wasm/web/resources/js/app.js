@@ -233,10 +233,10 @@ class App{
                 this.loadMints();
             }else if (name.includes("creating token")){
                 this.loadNFT(accounts[0]);
-            }else if (name.includes("updating token")){
+            }else if (name.includes("updating token") || name.includes("buy token")){
                 setTimeout(()=>{
                     this.loadNFT(accounts[0]);
-                }, 1000)
+                }, 3000)
             }
         })
 
@@ -379,6 +379,7 @@ class App{
                 if (!pubkey || !mint)
                     return
                 if(action=="buy"){
+                    this.dnft.buyToken(pubkey);
                     return
                 }
 
@@ -399,11 +400,18 @@ class App{
 
     updateSettingListed(listed){
         let checkbox = $("#setting-for-sale").MaterialCheckbox;
+        let priceField = $("#setting-sale-price");
+        let priceInput = priceField.MaterialTextfield;
         if (listed){
             checkbox.check();
+            priceInput.enable();
+            priceField.parentElement.classList.remove("disabled")
         }else{
             checkbox.uncheck();
+            priceInput.disable();
+            priceField.parentElement.classList.add("disabled")
         }
+
         $$(`[name="setting-sale-type"]`).forEach(input=>{
             //console.log("input.value", checked, input.value, input.parentElement.MaterialRadio)
             if (listed && input.value == "none"){
@@ -412,6 +420,8 @@ class App{
                 input.parentElement.MaterialRadio.disable();
             }
         })
+
+        
     }
 
     openSaleSetting(pubkey, mint, coinMeta){
@@ -422,7 +432,7 @@ class App{
         console.log("sale.sale_type()", sale.sale_type());
         let em = sale.exchange_mechanics();
         let lastSalePrice = em?this.dnft.lamportsToSol(em.price):"";
-        $("#setting-sale-price").value = lastSalePrice;
+        $("#setting-sale-price-input").value = lastSalePrice;
         let lastListed = coinMeta.sale().listed();
         this.updateSettingListed(lastListed)
 
@@ -433,7 +443,7 @@ class App{
             if (lastListed != newListed){
                 listed = newListed
             }
-            let salePrice = $("#setting-sale-price").value;
+            let salePrice = $("#setting-sale-price-input").value;
             if (salePrice != lastSalePrice)
                 salePrice = +salePrice
             else{

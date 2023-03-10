@@ -8,6 +8,7 @@ pub enum ErrorCode {
     MintSchema,
     PartialTokenData,
     AccessDenied,
+    TokenNotAvailableForSale,
 }
 
 impl From<ErrorCode> for ProgramError {
