@@ -489,7 +489,7 @@ td.actions .material-icons{
 }
 .nft-image,
 .mint-image{
-  background:center/cover no-repeat rgb(103,59,183, 0.65);
+  background:center / cover no-repeat rgb(103,59,183, 0.65);
 }
 .nft-panel .mdl-card__actions,
 .mint-panel .mdl-card__actions{
@@ -683,7 +683,7 @@ td.actions .material-icons{
 
 .mint-panel .mint-image {
   height:200px;
-  background: no-repeat center/coover;
+  background: center / cover no-repeat;
 }
 .mdl-dnft .mint-panel .mdl-card__supporting-text{
   flex:1
