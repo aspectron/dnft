@@ -945,6 +945,7 @@ class App{
 
     initCreateDnftForm(){
         this.fieldListEl = $("#field-list");
+        this.fieldListItemTplEl = $("#field-list-item-tpl");
         this.fieldTypeListEl = $("#field-type-list");
         this.createDnftMintBtn = $("#create-mint-btn");
 
@@ -1062,9 +1063,9 @@ class App{
             let trList = this.fieldListEl.querySelectorAll("tr");
             let fields = [];
             trList.forEach(tr=>{
-                let dataType = tr.children[0].innerText;
-                let name = escapeHtml(tr.children[1].innerText).replace(/\n/g, " ")
-                let discription = escapeHtml(tr.children[2].innerText).replace(/\n/g, " ");
+                let dataType = tr.querySelector("label.field-type").innerText;
+                let name = escapeHtml(tr.querySelector(".field-name-input").value).replace(/\n/g, " ")
+                let discription = escapeHtml(tr.querySelector(".field-description-input").value).replace(/\n/g, " ");
                 //let a = DataType[dataType];
                 //console.log("dataType:", dataType, a);
                 fields.push(new Field(DataType[dataType], name, discription))
@@ -1254,47 +1255,55 @@ class App{
     appendToFieldList(fields){
         const { Field, DataType, Data } = this.dnft;
         for(let field of fields){
-            let td_type = document.createElement("td");
-            td_type.innerHTML = DataType[field.dataType()];
-            td_type.setAttribute("class", "mdl-data-table__cell--non-numeric");
+            let clone = this.fieldListItemTplEl.content.cloneNode(true);
+            clone.querySelector(".field-type").innerHTML = DataType[field.dataType()];
+            clone.children[0]._field = field
+            clone.querySelectorAll(".mdl-textfield").forEach(el=>{
+                componentHandler.upgradeElement(el, "MaterialTextfield");
+            })
+            this.fieldListEl.appendChild(clone);
+
+            // let td_type = document.createElement("td");
+            // td_type.innerHTML = DataType[field.dataType()];
+            // td_type.setAttribute("class", "mdl-data-table__cell--non-numeric");
 
 
-            let input_name = document.createElement("div");
-            input_name.innerHTML = field.name();
-            input_name.setAttribute("class", "editable");
-            input_name.setAttribute("contentEditable", "true");
+            // let input_name = document.createElement("div");
+            // input_name.innerHTML = field.name();
+            // input_name.setAttribute("class", "editable");
+            // input_name.setAttribute("contentEditable", "true");
 
-            let td_name = document.createElement("td");
-            td_name.appendChild(input_name);
-            td_name.setAttribute("class", "mdl-data-table__cell--non-numeric edit-container");
-
-
-            let input_descr = document.createElement("div");
-            input_descr.innerHTML = field.description();
-            input_descr.setAttribute("class", "editable");
-            input_descr.setAttribute("contentEditable", "true");
-
-            let td_descr = document.createElement("td");
-            td_descr.appendChild(input_descr);
-            td_descr.setAttribute("class", "mdl-data-table__cell--non-numeric edit-container");
+            // let td_name = document.createElement("td");
+            // td_name.appendChild(input_name);
+            // td_name.setAttribute("class", "mdl-data-table__cell--non-numeric edit-container");
 
 
-            let btn_move_down = createIconBtn("expand_more", "Move down", {"data-action":"move-down"});
-            let btn_move_up = createIconBtn("expand_less", "Move up", {"data-action":"move-up"});
-            let btn_delete = createIconBtn("delete", "Delete", {"data-action":"delete"});
+            // let input_descr = document.createElement("div");
+            // input_descr.innerHTML = field.description();
+            // input_descr.setAttribute("class", "editable");
+            // input_descr.setAttribute("contentEditable", "true");
 
-            let td_action = document.createElement("td");
-            td_action.appendChild(btn_move_down);
-            td_action.appendChild(btn_move_up);
-            td_action.appendChild(btn_delete);
-            td_action.setAttribute("class", "actions");
+            // let td_descr = document.createElement("td");
+            // td_descr.appendChild(input_descr);
+            // td_descr.setAttribute("class", "mdl-data-table__cell--non-numeric edit-container");
 
-            let tr = document.createElement("tr");
-            tr.appendChild(td_type);
-            tr.appendChild(td_name);
-            tr.appendChild(td_descr);
-            tr.appendChild(td_action);
-            this.fieldListEl.appendChild(tr);
+
+            // let btn_move_down = createIconBtn("expand_more", "Move down", {"data-action":"move-down"});
+            // let btn_move_up = createIconBtn("expand_less", "Move up", {"data-action":"move-up"});
+            // let btn_delete = createIconBtn("delete", "Delete", {"data-action":"delete"});
+
+            // let td_action = document.createElement("td");
+            // td_action.appendChild(btn_move_down);
+            // td_action.appendChild(btn_move_up);
+            // td_action.appendChild(btn_delete);
+            // td_action.setAttribute("class", "actions");
+
+            // let tr = document.createElement("tr");
+            // tr.appendChild(td_type);
+            // tr.appendChild(td_name);
+            // tr.appendChild(td_descr);
+            // tr.appendChild(td_action);
+            // this.fieldListEl.appendChild(tr);
         }
     }
 

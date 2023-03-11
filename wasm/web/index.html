@@ -73,7 +73,7 @@
           console.log("program_id: ", dnft.dnft_program_id());
           console.dir(dnft);
           //let transport = await dnft.Transport.InProcUnitTests(program_id,authority);
-          let transport = await new dnft.Transport("http://localhost:8899");
+          let transport = await new dnft.Transport(`http://${location.hostname}:8899`);
           let app = new App(dnft, transport);
       })();
   </script>
@@ -96,14 +96,14 @@
           </div>
         </div>
         <div id="top-tabs" class="mdl-layout__tab-bar mdl-js-ripple-effect mdl-color--primary-dark">
-            <a href="#browse" class="mdl-layout__tab is-active">Browse NFTs</a>
+            <a href="#browse" class="mdl-layout__tab">Browse NFTs</a>
             <a href="#marketplace" class="mdl-layout__tab">Marketplace</a>
             <a href="#browse-mints" class="mdl-layout__tab">Browse Mints</a>
-            <a href="#create-dnft" class="mdl-layout__tab">Create  Mint</a>
+            <a href="#create-dnft" class="mdl-layout__tab is-active">Create  Mint</a>
         </div>
       </header>
       <main class="mdl-layout__content">
-        <div class="mdl-layout__tab-panel is-active" id="browse">
+        <div class="mdl-layout__tab-panel" id="browse">
           <div class="main-container" id="browse-nft-container">
             <h2 id="browse-list-title">NFTs</h2>
             <div id="browse-mint-panel-holder" class="browse-mint-panel-holder"></div>
@@ -284,7 +284,7 @@
             </dialog>
           </div>
         </div>
-        <div class="mdl-layout__tab-panel" id="create-dnft">
+        <div class="mdl-layout__tab-panel is-active" id="create-dnft">
           <div class="main-container" id="create-dnft-main-container">
             <h2>Create DNFT MINT</h2>
             <div class="fields-info">
@@ -307,7 +307,12 @@
               <div class="schema-container _mdl-shadow--2dp">
                 <div class="head">
                   <h5 class="heading">Main Schema</h5>
-                  <div>Authorities: Token Issuer</div>
+                  <div class="mint-authority-container">Authorities: 
+                    <span class="mint-authority">Token Issuer</span>
+                    <button type="button" disabled data-action="change-authority" class="user-btn mdl-button authority-btn">
+                      <i class="material-icons">settings</i>
+                    </button>
+                  </div>
                 </div>
                 <div class="schema-action-bar">
                   <div class="flex"></div>
@@ -316,20 +321,36 @@
                   </button>
                 </div>
                 
-                <table width="100%" class="mdl-data-table">
-                  <thead>
+                <table width="100%" class="field-list-table mdl-data-table">
+                  <!-- <thead>
                     <tr>
-                      <th class="mdl-data-table__cell--non-numeric">Data Type</th>
-                      <th class="mdl-data-table__cell--non-numeric" width="20%">Field Name</th>
-                      <th class="mdl-data-table__cell--non-numeric" width="60%">Description</th>
+                      <th class="mdl-data-table__cell--non-numeric" width="80%">
+                        <div>Data Type</div>
+                        <div>Field Name</div>
+                        <div>Description</div>
+                      </th>
                       <th></th>
                     </tr>
-                  </thead>
+                  </thead> -->
                   <tbody id="field-list" class="sortable-list">
-                    <!--tr>
-                      <td class="mdl-data-table__cell--non-numeric">String</td>
-                      <td class="mdl-data-table__cell--non-numeric" contentEditable="true">Name</td>
-                      <td class="mdl-data-table__cell--non-numeric" contentEditable="true">Item Name</td>
+                    <tr>
+                      <td class="mdl-data-table__cell--non-numeric edit-container-holder">
+                        <div class="edit-container">
+                          <label class="field-type">String</label>
+                          <div class="editable-holder">
+                            <label class="mdl-textfield mdl-js-textfield">
+                              <input type="text" placeholder="Field name" class="field-name-input mdl-textfield__input">
+                              <span class="mdl-textfield__label">Field name</span>
+                            </label>
+                          </div>
+                          <div class="editable-holder">
+                            <label class="mdl-textfield mdl-js-textfield">
+                              <input type="text" placeholder="Description" class="field-description-input mdl-textfield__input">
+                              <span class="mdl-textfield__label">Field Description</span>
+                            </label>
+                          </div>
+                        </div>
+                      </td>
                       <td class="actions">
                         <button class="mdl-button mdl-button--icon" data-action="move-down">
                           <i class="material-icons">
@@ -346,7 +367,7 @@
                         </button>
                       </td>
                     </tr>
-                    <tr>
+                    <!-- <tr>
                       <td class="mdl-data-table__cell--non-numeric">u8</td>
                       <td class="mdl-data-table__cell--non-numeric" contentEditable="true">Color</td>
                       <td class="mdl-data-table__cell--non-numeric" contentEditable="true">Item Color</td>
@@ -385,9 +406,45 @@
                           <i class="material-icons">delete</i>
                         </button>
                       </td>
-                    </tr-->
+                    </tr> -->
                   </tbody>
                 </table>
+                <template id="field-list-item-tpl">
+                  <tr>
+                    <td class="mdl-data-table__cell--non-numeric edit-container-holder">
+                      <div class="edit-container">
+                        <label class="field-type">String</label>
+                        <div class="editable-holder">
+                          <label class="mdl-textfield mdl-js-textfield">
+                            <input type="text" placeholder="Field name" class="field-name-input mdl-textfield__input">
+                            <span class="mdl-textfield__label">Field name</span>
+                          </label>
+                        </div>
+                        <div class="editable-holder">
+                          <label class="mdl-textfield mdl-js-textfield">
+                            <input type="text" placeholder="Description" class="field-description-input mdl-textfield__input">
+                            <span class="mdl-textfield__label">Field Description</span>
+                          </label>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="actions">
+                      <button class="mdl-button mdl-button--icon" data-action="move-down">
+                        <i class="material-icons">
+                          expand_more
+                        </i>
+                      </button>
+                      <button class="mdl-button mdl-button--icon" data-action="move-up">
+                        <i class="material-icons">
+                          expand_less
+                        </i>
+                      </button>
+                      <button class="mdl-button mdl-button--icon" data-action="delete">
+                        <i class="material-icons">delete</i>
+                      </button>
+                    </td>
+                  </tr>
+                </template>
               </div>
               <div class="action-bar">
                 <button id="create-mint-btn" class="mdl-button mdl-js-button mdl-button--big mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
