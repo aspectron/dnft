@@ -66,12 +66,12 @@ async fn create_sample_data() -> Result<()> {
     let transport = Transport::global()?;
     let authority = transport.get_authority_pubkey()?;
     let mint_images = vec![
+        "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg?auto=compress&cs=tinysrgb&w=1000&h=400&dpr=2",
+        "https://images.pexels.com/photos/45170/kittens-cat-cat-puppy-rush-45170.jpeg?auto=compress&cs=tinysrgb&w=1000&h=350&dpr=2",
         "https://images.pexels.com/photos/5011647/pexels-photo-5011647.jpeg?auto=compress&cs=tinysrgb&w=1000&h=350&dpr=2",
         "https://images.pexels.com/photos/9436715/pexels-photo-9436715.jpeg?auto=compress&cs=tinysrgb&w=1000&h=350&dpr=2",
         "https://images.pexels.com/photos/4818709/pexels-photo-4818709.jpeg?auto=compress&cs=tinysrgb&w=1000&h=350&dpr=2",
         "https://images.pexels.com/photos/1475938/pexels-photo-1475938.jpeg?auto=compress&cs=tinysrgb&w=1000&h=350&dpr=2",
-        "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg?auto=compress&cs=tinysrgb&w=1000&h=400&dpr=2",
-        "https://images.pexels.com/photos/45170/kittens-cat-cat-puppy-rush-45170.jpeg?auto=compress&cs=tinysrgb&w=1000&h=350&dpr=2",
         "https://images.pexels.com/photos/2640604/pexels-photo-2640604.jpeg?auto=compress&cs=tinysrgb&w=1000&h=350&dpr=2",
     ];
 

@@ -499,7 +499,17 @@ td.actions .material-icons{
   flex-direction: row-reverse;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   padding:5px 20px;
+}
+.nft-panel .mdl-card__actions{
+  justify-content: space-around;
+}
+.nft-panel .mdl-card__actions{
+  justify-content: space-around;
+}
+.nft-panel .mdl-card__actions{
+  justify-content: space-around;
 }
 .nft-panel .mdl-card__actions .mdl-progress{
   position:absolute;
