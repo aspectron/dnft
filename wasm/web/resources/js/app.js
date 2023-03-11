@@ -758,6 +758,7 @@ class App{
     createNFTPanel(mint, minData, pubkey, meta, data, account, tpl){
         
         const clone = (tpl || this.nftTemplateEl).content.cloneNode(true);
+        let isMarketplace = !!tpl;
         let el = clone.children[0];
         if (!pubkey){
             el.classList.add("placeholder-panel");
@@ -782,7 +783,9 @@ class App{
                     let price = this.dnft.lamportsToSol(em.price).toFixed(5);
                     salePriceEl.innerHTML = `${price} ${em.coin}`
                 }
-
+                clone.querySelector(".setting-btn-text").innerHTML = isMarketplace? "Sale Setting" :"LISTED FOR SALE";
+            }else{
+                clone.querySelector(".setting-btn-text").innerHTML = `NOT LISTED`;
             }
             el.coinMeta = meta;
             if (this.walletPubkey?.toString() == meta.authority().toString()){

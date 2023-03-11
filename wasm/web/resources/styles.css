@@ -502,14 +502,17 @@ td.actions .material-icons{
   flex-wrap: wrap;
   padding:5px 20px;
 }
-.nft-panel .mdl-card__actions{
-  justify-content: space-around;
+.nft-panel .mdl-card__actions button{
+  font-size:1rem;
 }
 .nft-panel .mdl-card__actions{
-  justify-content: space-around;
+  justify-content_: space-around;
 }
-.nft-panel .mdl-card__actions{
-  justify-content: space-around;
+.nft-panel .mdl-card__actions .setting-btn-text{
+  margin-right:2px;
+}
+.nft-panel .mdl-card__actions .setting-btn i{
+  font-size:1.2rem;
 }
 .nft-panel .mdl-card__actions .mdl-progress{
   position:absolute;
@@ -520,6 +523,7 @@ td.actions .material-icons{
 }
 .nft-panel .sale-price{
   font-size:1.3rem;
+  line-height: 2;
   text-transform: uppercase;
 }
 
@@ -712,3 +716,5 @@ td.actions .material-icons{
 .browse-mint-panel-holder .mint-panel .change-mint{
   position:absolute;top:10px;right:10px;
 }
+.h-box{display:flex;}
+.h-box.center{align-items:center;}
