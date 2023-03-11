@@ -129,7 +129,7 @@ async fn create_sample_data() -> Result<()> {
         let args = program::MintCreationArgs {
             name: mint_names
                 .get(mint_index)
-                .unwrap_or(&format!("Mint {}", mint_index+1).as_str())
+                .unwrap_or(&format!("Mint {}", mint_index + 1).as_str())
                 .to_string(),
             image: ImageUrl::new(mint_images.get(mint_seq).unwrap()),
             data_types: Some(data_types),

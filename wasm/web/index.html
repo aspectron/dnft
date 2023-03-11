@@ -96,17 +96,18 @@
           </div>
         </div>
         <div id="top-tabs" class="mdl-layout__tab-bar mdl-js-ripple-effect mdl-color--primary-dark">
-            <a href="#browse" class="mdl-layout__tab">Browse NFTs</a>
-            <a href="#marketplace" class="mdl-layout__tab is-active">Marketplace</a>
+            <a href="#browse" class="mdl-layout__tab is-active">Browse NFTs</a>
+            <a href="#marketplace" class="mdl-layout__tab">Marketplace</a>
             <a href="#browse-mints" class="mdl-layout__tab">Browse Mints</a>
             <a href="#create-dnft" class="mdl-layout__tab">Create  Mint</a>
         </div>
       </header>
       <main class="mdl-layout__content">
-        <div class="mdl-layout__tab-panel" id="browse">
-          <div class="main-container no-records" id="browse-nft-container">
-            <h2>NFTs</h2>
-            <div class="mdl-grid" id="nft-list">
+        <div class="mdl-layout__tab-panel is-active" id="browse">
+          <div class="main-container" id="browse-nft-container">
+            <h2 id="browse-list-title">NFTs</h2>
+            <div id="browse-mint-panel-holder" class="browse-mint-panel-holder"></div>
+            <div class="mdl-grid nft-list" id="browse-list">
 
             </div>
             <template id="nft-panel-tpl">
@@ -132,8 +133,11 @@
             </template>
           </div>
         </div>
-        <div class="mdl-layout__tab-panel is-active" id="marketplace">
-          <div class="marketplace-head"><h2>Marketplace</h2></div>
+        <div class="mdl-layout__tab-panel" id="marketplace">
+          <div class="marketplace-head">
+            <h2 id="marketplace-title">Marketplace</h2>
+            <div id="marketplace-mint-panel-holder"></div>
+          </div>
           <div class="marketplace-header">
             <header class="mdl-layout__header sticky" id="marketplace-header">
               <div class="mdl-layout__header-row">
@@ -178,8 +182,8 @@
               </div>
             </header>
           </div>
-          <div class="main-container no-records" id="marketplace-nft-container">
-            <div class="mdl-grid" id="marketplace-list"></div>
+          <div class="main-container" id="marketplace-nft-container">
+            <div class="mdl-grid marketplace-list" id="marketplace-list"></div>
             <template id="market-panel-tpl">
               <div class="nft-panel mdl-cell mdl-card mdl-shadow--2dp">
                 <div class="nft-image mdl-card__title">
@@ -201,12 +205,24 @@
                 </div>
               </div>
             </template>
+
+            <template id="mint-header-panel-tpl">
+              <div class="mint-panel mdl-card mdl-shadow--2dp">
+                <div class="mint-image mdl-card__title">
+                  <span class="mint-pubkey"></span>
+                  <h2 class="mint-title mdl-card__title-text"></h2>
+                  <button class="change-mint mdl-button mdl-js-button mdl-button--big mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                    CHANGE MINT
+                  </button>
+                </div>
+              </div>
+            </template>
           </div>
         </div>
         <div class="mdl-layout__tab-panel" id="browse-mints">
           <div class="main-container no-records" id="browse-mint-container">
             <h2>Select Mint</h2>
-            <div class="mdl-grid" id="mint-list"></div>
+            <div class="mdl-grid mint-list" id="mint-list"></div>
             <template id="mint-panel-tpl">
               <div class="mint-panel mdl-cell mdl-cell--6-col mdl-card mdl-shadow--2dp">
                 <div class="mint-image mdl-card__title">
@@ -219,6 +235,9 @@
                 <div class="mdl-card__actions mdl-card--border">
                   <button class="create-token mdl-button mdl-js-button mdl-button--big mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
                     CREATE TOKEN
+                  </button>
+                  <button data-action="open" class="open mdl-button mdl-js-button mdl-button--big mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                    OPEN
                   </button>
                 </div>
               </div>

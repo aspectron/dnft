@@ -689,3 +689,16 @@ td.actions .material-icons{
   flex:1
 }
 .no-left-padding{padding-left:0px;}
+.marketplace-list .mint-panel .create-token,
+.nft-list .mint-panel .create-token,
+.mint-list .mint-panel .open{
+  display:none;
+}
+.browse-mint-panel-holder .mint-panel,
+.marketplace-head .mint-panel{
+  width:100%;
+}
+.marketplace-head .mint-panel .change-mint,
+.browse-mint-panel-holder .mint-panel .change-mint{
+  position:absolute;top:10px;right:10px;
+}

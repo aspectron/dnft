@@ -105,7 +105,7 @@ const field_info = {
     }
 };
 
-console.log("field_info", field_info)
+//console.log("field_info", field_info)
 
 
 class App{
@@ -120,10 +120,14 @@ class App{
     }
 
     async init(){
+        this.mintData = {};
+        this._browseLoadState = {};
+        this._marketLoadState = {page: 0, saleType:1};
         this.initMsgDialog();
         await this.initApp();
         this.initUpload();
     }
+
     afterWalletInit(){
         this.initBrowsePage();
         this.initCreateDnftForm();
@@ -230,14 +234,19 @@ class App{
             this.dnft.discardTxChain(data.txChain.id)
             let name = data.transaction.name.toLowerCase()||"";
             let accounts = data.transaction.meta.accounts;
+            let pubkey = new this.dnft.Pubkey(accounts[0]);
             if (name.includes("creating mint")){
-                this.loadMints();
-            }else if (name.includes("creating token")){
-                this.loadNFT(accounts[0]);
-            }else if (name.includes("updating token") || name.includes("buy token")){
-                this.activateNFTProgress(accounts[0]);
                 setTimeout(()=>{
-                    this.loadNFT(accounts[0]);
+                    this.loadMint(pubkey);
+                }, 2000);
+            }else if (name.includes("creating token")){
+                setTimeout(()=>{
+                    this.loadNFT(pubkey);
+                }, 2000);
+            }else if (name.includes("updating token") || name.includes("buy token")){
+                this.activateNFTProgress(pubkey);
+                setTimeout(()=>{
+                    this.loadNFT(pubkey);
                 }, 3000)
             }
         })
@@ -324,10 +333,15 @@ class App{
         let mainEl = $("main");
         this.mintListEl = $("#mint-list");
         this.mintPanelTpl = $("#mint-panel-tpl");
+        this.mintHeaderPanelTpl = $("#mint-header-panel-tpl");
         this.nftTemplateEl = $("#nft-panel-tpl");
         this.marketNFTTemplateEl = $("#market-panel-tpl");
-        this.nftListEl = $("#nft-list");
+        this.nftListEl = $("#browse-list");
+        this.nftListTitleEl = $("#browse-list-title");
+        this.browseMintPanelHolder = $("#browse-mint-panel-holder")
         this.marketplaceListEl = $("#marketplace-list");
+        this.marketplaceTitleEl = $("#marketplace-title");
+        this.marketplaceMintPanelHolder = $("#marketplace-mint-panel-holder");
         this.saleSettingDialog = $dialog("#sale-setting");
         this.marketFilter = {};
         this.mainEl = mainEl;
@@ -362,7 +376,7 @@ class App{
                 if (isBrowseActive){
                     this.loadNFTs();
                 }else{
-                    this.loadMints();
+                    //this.loadMints();
                 }
             }
         });
@@ -387,10 +401,35 @@ class App{
         [this.marketplaceListEl, this.nftListEl].forEach(list=>{
             list.addEventListener("click", (e)=>{
                 let el = e.target.closest("[data-action]");
+                if (!el){
+                    return
+                }
+                let action = el.dataset.action;
+                if (action == "open"){
+                    let mintPanelEl = el?.closest(".mint-panel");
+                    if(!mintPanelEl){
+                        return
+                    }
+                    if (mintPanelEl.parentElement.classList.contains("nft-list")){
+                        this._browseLoadState = {
+                            mintPubkey: mintPanelEl.dataset.pubkey,
+                            mintData: mintPanelEl.mintData
+                        }
+                        this.loadNFTs();
+                    }else{
+                        this.marketFilter = {
+                            mintPubkey: mintPanelEl.dataset.pubkey,
+                            mintData: mintPanelEl.mintData
+                        }
+                        this.loadMarketplace();
+                    }
+                    return
+                }
+
                 let nftEl = el?.closest(".nft-panel");
                 if(!nftEl)
                     return
-                let action = el.dataset.action;
+                
                 let {pubkey, mint} = nftEl.dataset;
                 if (!pubkey || !mint)
                     return
@@ -475,90 +514,119 @@ class App{
         return this.transport.getProgramAccounts(this.programId, config);
     }
 
+    _addNFTPlaceholders(listEl, tabName){
+        let panels = this.createNFTPanels("", {schema:[]}, [
+            [],[],[],[],[],[],[],[],[],[]
+        ]);
+        this._addPlaceholdersPanels(listEl, tabName, panels)
+    }
+    _addMintPlaceholders(listEl, tabName){
+        let panels = new Array(5).fill(0).map(e=>this.createMintPenel());
+        this._addPlaceholdersPanels(listEl, tabName, panels)
+    }
+    _addPlaceholdersPanels(listEl, tabName, panels){
+        let scrollTop = 0;
+        // if (tabName == "marketplace"){
+        //     scrollTop = 150;
+        // }
+        if (this.mainEl.scrollTop >= scrollTop && this.getActiveTabName() == tabName){
+            //this.mainEl.scrollTo({top: scrollTop, behavior:"smooth"});
+        }
+        listEl.innerHTML = "";
+        panels.forEach(panel=>{
+            listEl.appendChild(panel);
+        })
+    }
+
     async loadMarketplace(){
-        if (this._marketLoading)
-            return
-        this._marketLoading = true;
-        const LOAD_COUNT = 1000;
-        let count = 1000n;
         let filter = this.marketFilter;
-        if (!this._marketLoadState){
-            this._marketLoadState = {start: 0n, saleType:1};
+        if (!filter.mintPubkey || !filter.mintData){//load mints
+            this._marketLoadState.mintPubkey = false; 
+            this.marketplaceTitleEl.innerHTML = "Select Mint";
+            //this.marketplaceHeader.
+            this._addMintPlaceholders(this.marketplaceListEl, "marketplace");
+            this.marketplaceMintPanelHolder.innerHTML = "";
+            let panels = await this._loadMints(0n, "marketplace");
+            let scrollTop = 0;//this.mainEl.scrollTop;
+            this.marketplaceListEl.innerHTML = "";
+            panels.forEach(el=>this._appendPanel(this.marketplaceListEl, el, ".mint-panel"))
+            if (this.getActiveTabName() == "marketplace"){
+                this.mainEl.scrollTo({top: scrollTop, behavior:"smooth"});
+            }
+            return
         }
 
+        this.marketplaceTitleEl.innerHTML = "Marketplace";
         let loadState = this._marketLoadState;
+        if (loadState.loading)
+            return
+        loadState.loading = true;
+        let {mintPubkey, mintData} = this.marketFilter;
+
+        if (loadState.mintPubkey != mintPubkey){
+            let mintPanel = this.createMintHeaderPanel(mintPubkey, mintData, ()=>{
+                this.marketFilter.mintData = false;
+                this.marketFilter.mintPubkey = false;
+                this.loadMarketplace()
+            });
+            this.marketplaceMintPanelHolder.innerHTML = "";
+            this.marketplaceMintPanelHolder.appendChild(mintPanel);
+        }
+
         let havePlaceholder = false;
-        if (filter.saleType != loadState.saleType){
+        if (filter.saleType != loadState.saleType || mintPubkey != loadState.mintPubkey){
             havePlaceholder = true;
             this._marketLoadState = {
                 forSale: filter.forSale,
                 saleType: filter.saleType,
-                start: 0n
+                page: 0,
+                mintPubkey: mintPubkey
             }
             loadState = this._marketLoadState;
-            //TODO: add placeholders
-            let panels = this.createNFTPanels("", {schema:[]}, [
-                [],[],[],[],[],[],[],[],[],[]
-            ]);
-            if (this.mainEl.scrollTop >=150 && this.getActiveTabName() == "marketplace"){
-                this.mainEl.scrollTop = 150;
-            }
-            this.marketplaceListEl.innerHTML = "";
-            panels.forEach(panel=>{
-                this.marketplaceListEl.appendChild(panel);
-            })
-        }
-        
-        
-        let {start} = loadState;
-        
-        let pubkeys = await this.dnft.getMintPubkeys(start, start+count);
-        
-        console.log("getMintPubkeys: start:", start, "pubkeys:", pubkeys)
-        let elements = [];
-        for (let mint of pubkeys){
-            if (elements.length >= LOAD_COUNT){
-                break;
-            }
-            let minData = await this.dnft.getMintData(mint);
-            //console.log("mint data", mint, minData);
-            let page = loadState[mint] || 0;
-            let accounts = [];
-            do{
-                if (filter.saleType) {
-                    accounts = await this.dnft.getMarketTokensByType(
-                        mint,
-                        page,
-                        filter.saleType
-                    );
-                }else{
-                    accounts = await this.dnft.getMarketTokens(mint, page);
-                }                
-                console.log("getTokens::::", "page:"+page, accounts);
 
-                let panels = this.createNFTPanels(mint, minData, accounts, this.marketNFTTemplateEl);
-                elements.push(...panels);
-                loadState[mint] = page
-                page++;
-            } while (accounts.length && elements.length < LOAD_COUNT);
+            //TODO: add placeholders
+            this._addNFTPlaceholders(this.marketplaceListEl, "marketplace");
         }
+
+        let elements = [];
+        let accounts = [];
+        let page = loadState.page;
+
+        mintPubkey = mintPubkey+"";
+        console.log("mintPubkey, mintData", mintPubkey, mintData)
+        const LOAD_COUNT = 1000;
+        do{
+            if (filter.saleType) {
+                accounts = await this.dnft.getMarketTokensByType(
+                    mintPubkey,
+                    page,
+                    filter.saleType
+                );
+            }else{
+                accounts = await this.dnft.getMarketTokens(mintPubkey, page);
+            }                
+            console.log("getTokens::::", "page:", page, "accounts:", accounts);
+
+            let panels = this.createNFTPanels(mintPubkey, mintData, accounts, this.marketNFTTemplateEl);
+            elements.push(...panels);
+            loadState.page = page
+            page++;
+        } while (accounts.length && elements.length < LOAD_COUNT);
+        
         let scrollTop = this.mainEl.scrollTop;
         if (havePlaceholder){
+            scrollTop = 130;
             this.marketplaceListEl.innerHTML = "";
         }
-        elements.map(el=>this.marketplaceListEl.appendChild(el));
-        let length = pubkeys.length;
-        if (length){
-            loadState.start = start + BigInt(length);
-            if (this.getActiveTabName() == "marketplace"){
-                this.mainEl.scrollTop = scrollTop;
-            }
+        elements.map(el=>this._appendPanel(this.marketplaceListEl, el, ".nft-panel"));
+        if (elements.length && this.getActiveTabName() == "marketplace"){
+            this.mainEl.scrollTo({top: scrollTop, behavior:"smooth"});
         }
-        this._marketLoading = false;
+        loadState.loading = false;
     }
 
     activateNFTProgress(tokenPubkey){
-        let pubkey = (new this.dnft.Pubkey(tokenPubkey)).toString();
+        let pubkey = tokenPubkey.toString();
         console.log("activateNFTProgress", pubkey)
         $$(`.nft-panel[data-pubkey="${pubkey}"]`).forEach(panel=>{
             //console.log("activateNFTProgress:panel", panel)
@@ -570,7 +638,7 @@ class App{
     }
 
     async loadNFT(tokenPubkey, loadCount=0){
-        let account = await this.dnft.getToken(tokenPubkey)
+        let account = await this.dnft.getToken(tokenPubkey+"")
         .catch(err=>{
             if (loadCount < 60){
                 setTimeout(()=>{
@@ -593,69 +661,93 @@ class App{
         console.log("loadNFT::::", account);
         const addPanel = (list, tpl)=>{
             let panel = this.createNFTPanel(mintPubkey, mintData, ...account, tpl);
-            let oldPanel = list.querySelector(`.nft-panel[data-pubkey="${panel.dataset.pubkey}"]`)
-            //console.log("panel.dataset", panel, oldPanel)
-            if (oldPanel){
-                list.insertBefore(panel, oldPanel);
-                oldPanel.remove();
-            }else{
-                list.appendChild(panel);
-            }
+            this._appendPanel(list, panel, ".nft-panel");
         }
-        //console.log("account[1]?.sale?.()", account[1]?.sale?.().listed())
         if (account[1]?.sale?.().listed()){
-            //console.log("adding to marketplace");
-            addPanel(this.marketplaceListEl, this.marketNFTTemplateEl)
+            if (mintPubkey == this.marketFilter.mintPubkey){
+                addPanel(this.marketplaceListEl, this.marketNFTTemplateEl)
+            }
         }else{
             let oldPanel = this.marketplaceListEl.querySelector(`.nft-panel[data-pubkey="${account[0]}"]`)
             if (oldPanel){
                 oldPanel.remove();
             }
         }
-        addPanel(this.nftListEl)
+        if (mintPubkey == this._browseLoadState.mintPubkey){
+            addPanel(this.nftListEl)
+        }
     }
 
     async loadNFTs(){
-        if (this._nftsLoading)
-            return
-        this._nftsLoading = true;
-        const LOAD_COUNT = 1000;
-        let count = 1000n;
-        let start = this._nftStartIndex || 0n;
-        let pubkeys = await this.dnft.getMintPubkeys(start, start+count);
-        this.mintData = this.mintData || {};
-        let loadState = {};
-        //console.log("getMintPubkeys: start:", start, "pubkeys:", pubkeys)
-        let elements = [];
-        for (let mint of pubkeys){
-            let minData = await this.dnft.getMintData(mint);
-            this.mintData[mint] = minData;
-            //console.log("mint data", mint, minData);
-            let page = loadState[mint] || 0;
-            let accounts;
-            do{
-                accounts = await this.dnft.getAllTokens(
-                    mint,
-                    page
-                );
-                //console.log("getAllTokens::::", accounts);
-
-                let panels = this.createNFTPanels(mint, minData, accounts);
-                elements.push(...panels);
-                loadState[mint] = page
-                page++;
-            } while (accounts.length && elements.length < LOAD_COUNT);
-        }
-        let scrollTop = this.mainEl.scrollTop;
-        elements.map(el=>this.nftListEl.appendChild(el));
-        let length = pubkeys.length;
-        if (length){
-            this._nftStartIndex = start + BigInt(length);
-            if (this.getActiveTabName() == "browse"){
-                this.mainEl.scrollTop = scrollTop;
+        let loadState = this._browseLoadState;
+        if (!loadState.mintPubkey || !loadState.mintData){
+            if (loadState.mintLoaded){
+                return
             }
+            loadState.mintLoaded = true;
+            loadState.loadedMintPubkey = false;
+            loadState.page = 0;
+            this.nftListTitleEl.innerHTML = "Select Mint";
+            //this.marketplaceHeader.
+            this._addMintPlaceholders(this.nftListEl, "browse");
+            this.browseMintPanelHolder.innerHTML = "";
+            let panels = await this._loadMints(0n, "browse");
+            let scrollTop = 0;//this.mainEl.scrollTop;
+            this.nftListEl.innerHTML = "";
+            panels.forEach(el=>this._appendPanel(this.nftListEl, el, ".mint-panel"))
+            if (this.getActiveTabName() == "browse"){
+                this.mainEl.scrollTo({top: scrollTop, behavior:"smooth"});
+            }
+            return
         }
-        this._nftsLoading = false;
+        this.nftListTitleEl.innerHTML = "NFTs";
+        loadState.mintLoaded = false;
+
+        if (loadState.loading)
+            return
+        loadState.loading = true;
+        let {mintPubkey, mintData} = loadState;
+        let havePlaceholder = false;
+        if (loadState.loadedMintPubkey != mintPubkey){
+            loadState.loadedMintPubkey = mintPubkey;
+            loadState.page = 0;
+            let mintPanel = this.createMintHeaderPanel(mintPubkey, mintData, ()=>{
+                this._browseLoadState.mintData = false;
+                this._browseLoadState.mintPubkey = false;
+                this.loadNFTs();
+            });
+            this.browseMintPanelHolder.innerHTML = "";
+            this.browseMintPanelHolder.appendChild(mintPanel);
+
+            this._addNFTPlaceholders(this.nftListEl, "browse");
+            havePlaceholder = true;
+        }
+        
+        
+        let elements = [];
+        let accounts = [];
+        let page = loadState.page;
+
+        mintPubkey = mintPubkey+"";
+        const LOAD_COUNT = 1000;
+        do{
+            accounts = await this.dnft.getAllTokens(mintPubkey, page);
+            let panels = this.createNFTPanels(mintPubkey, mintData, accounts);
+            elements.push(...panels);
+            loadState.page = page
+            page++;
+        } while (accounts.length && elements.length < LOAD_COUNT);
+        
+        let scrollTop = 0;
+        if (havePlaceholder){
+            scrollTop = 130;
+            this.nftListEl.innerHTML = "";
+        }
+        elements.map(el=>this._appendPanel(this.nftListEl, el, ".nft-panel"));
+        if (elements.length && this.getActiveTabName() == "browse"){
+            this.mainEl.scrollTo({top: scrollTop, behavior:"smooth"});
+        }
+        loadState.loading = false;
     }
 
     createNFTPanels(mint, minData, accounts, tpl){
@@ -729,38 +821,86 @@ class App{
         
     }
 
-    async loadMints(){
-        if (this._mintAccountsLoading)
-            return
-        this._mintAccountsLoading = true;
-        let count = 1000n;
-        let start = this._mintAccountsStartIndex || 0n;
-        let pubkeys = await this.dnft.getMintPubkeys(start, start+count);
-        let scrollTop = this.mainEl.scrollTop;
-        //console.log("getMintPubkeys: start:", start, "pubkeys:", pubkeys)
-        let index = start+1n;
-        for (let pubkey of pubkeys){
-            let data = await this.dnft.getMintData(pubkey);
-            //console.log("pubkey data", pubkey, data);
-            let el = this.createMintRow(index++, pubkey, data);
-            this.mintListEl.appendChild(el);
+    _appendPanel(list, panel, selector=".nft-panel"){
+        let oldPanel = list.querySelector(`${selector}[data-pubkey="${panel.dataset.pubkey}"]`)
+        if (oldPanel){
+            list.insertBefore(panel, oldPanel);
+            oldPanel.remove();
+        }else{
+            list.appendChild(panel);
         }
-        let length = pubkeys.length;
-        if (length){
-            this._mintAccountsStartIndex = start + BigInt(length);
+    }
+
+    async loadMint(pubkey){
+        pubkey = pubkey.toString();
+        let data = this.mintData[pubkey] || await this.dnft.getMintData(pubkey);
+        this.mintData[pubkey] = data;
+        let el = this.createMintPenel(pubkey, data);
+        this._appendPanel(this.mintListEl, el, ".mint-panel");
+    }
+
+    async loadMints(){
+        this._addMintPlaceholders(this.mintListEl, "browse-mints");
+        let panels = await this._loadMints(0n, "mints");
+        let scrollTop = this.mainEl.scrollTop;
+        this.mintListEl.innerHTML = "";
+        panels.forEach(el=>this._appendPanel(this.mintListEl, el, ".mint-panel"))
+        if (panels.length){
             if (this.getActiveTabName() == "browse-mints"){
                 this.mainEl.scrollTop = scrollTop;
             }
         }
-        this._mintAccountsLoading = false;
+    }
+    async _loadMints(start, key="mints"){
+        key = "_mintsLoading"+key;
+        if (this[key])
+            return [];
+        this[key] = true;
+        let count = 1000n;
+        let pubkeys = await this.dnft.getMintPubkeys(start, start+count);
+        let panels = [];
+        for (let pubkey of pubkeys){
+            let data = this.mintData[pubkey+""] || await this.dnft.getMintData(pubkey);
+            this.mintData[pubkey+""] = data;
+            let el = this.createMintPenel(pubkey, data);
+            panels.push(el)
+        }
+        this[key] = false;
+        return panels
     }
 
-    createMintRow(index, pubkey, data){
-        let clone =  this.mintPanelTpl.content.cloneNode(true);
+    createMintHeaderPanel(pubkey, data, changeBtnCallback){
+        let clone =  this.mintHeaderPanelTpl.content.cloneNode(true);
+        let panel = clone.children[0];
+        panel.mintData = data;
+        panel.dataset.pubkey = pubkey;
         clone.querySelector(".mint-title").innerHTML = data.name;
         clone.querySelector(".mint-image").style.backgroundImage = `url(${data.image})`;
-        clone.querySelector(".mint-pubkey").innerHTML = this.dnft.shortenPubkey(pubkey);
-        clone.querySelector(".create-token").dataset.pubkey = pubkey;
+        clone.querySelector(".mint-pubkey").innerHTML = this.shortenPubkey(pubkey);
+        clone.querySelector(".change-mint").addEventListener("click", ()=>{
+            console.log("changeBtnCallback")
+            changeBtnCallback();
+        })
+        return panel
+    }
+
+    createMintPenel(pubkey, data){
+        let clone =  this.mintPanelTpl.content.cloneNode(true);
+        let panel = clone.children[0];
+        if (data){
+            panel.mintData = data;
+            panel.dataset.pubkey = pubkey;
+            clone.querySelector(".mint-title").innerHTML = data.name;
+            clone.querySelector(".create-token").dataset.pubkey = pubkey;
+            clone.querySelector(".mint-image").style.backgroundImage = `url(${data.image})`;
+            let description = ["<bold>Fields</bold>"];
+            for (let field of data.schema){
+                description.push(`${field.type}: ${field.name}, ${field.description}`)
+            }
+            clone.querySelector(".mint-description").innerHTML = `<p>${description.join("<br />")}</p>`;
+        }
+        clone.querySelector(".mint-pubkey").innerHTML = this.shortenPubkey(pubkey);
+        
         // console.log("data#####", data)
         // let td_name = document.createElement("td");
         // let pubkey_text = document.createElement("div");
@@ -772,11 +912,7 @@ class App{
         // td_name.appendChild(td_name_text);
         // td_name.setAttribute("class", "mint-name-cell mdl-data-table__cell--non-numeric");
 
-        let description = ["<bold>Fields</bold>"];
-        for (let field of data.schema){
-            description.push(`${field.type}: ${field.name}, ${field.description}`)
-        }
-        clone.querySelector(".mint-description").innerHTML = `<p>${description.join("<br />")}</p>`;
+        
         // td_description.setAttribute("class", "mdl-data-table__cell--wrap-text");
 
         
@@ -793,7 +929,13 @@ class App{
         // tr.appendChild(td_description);
         // tr.appendChild(td_action);
 
-        return clone;
+        return panel;
+    }
+    shortenPubkey(pubkey){
+        if (!pubkey){
+            return "ABCD....WXYZ";
+        }
+        return this.dnft.shortenPubkey(pubkey)
     }
 
     initCreateDnftForm(){
