@@ -813,6 +813,9 @@ class App{
             if (field.type == "ImageUrl"){
                 img.style.backgroundImage = `url(${value})`;
             }
+            if (field.type == "Bool"){
+                value = value?"True":"False";
+            }
             el.innerHTML = `<label>${field.name}: </label> <span>${value||""}</span>`;
             description.appendChild(el);
             if (field.name == "Name" && typeof value == "string"){
@@ -1094,10 +1097,17 @@ class App{
 
         $("#mint-dnft-btn").addEventListener("click", async ()=>{
             let inputs = this.mintFormFieldsEl.querySelectorAll(".mdl-textfield__input");
+            let checkboxs = this.mintFormFieldsEl.querySelectorAll(".mdl-checkbox__input");
+            
             //const { Field, DataType, Data } = this.dnft;
             let fieldsData = [];
             inputs.forEach(input=>{
                 let data = createData(input._field, input.value);
+                console.log("data:", data);
+                fieldsData.push(data);
+            });
+            checkboxs.forEach(input=>{
+                let data = createData(input._field, input.checked);
                 console.log("data:", data);
                 fieldsData.push(data);
             });
