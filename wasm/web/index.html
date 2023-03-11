@@ -299,83 +299,96 @@
               </label>
               <br /><br />
               <div class="h-flex center">
-                  <h5 class="flex">Fields:</h5>
+                <h4 class="flex">Create Schema:</h4>
+                <button disabled class="add-schema-btn mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                  Add Schema
+                </button>
+              </div>
+              <div class="schema-container _mdl-shadow--2dp">
+                <div class="head">
+                  <h5 class="heading">Main Schema</h5>
+                  <div>Authorities: Token Issuer</div>
+                </div>
+                <div class="schema-action-bar">
+                  <div class="flex"></div>
                   <button class="add-field-btn mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
                     Add Field
                   </button>
+                </div>
+                
+                <table width="100%" class="mdl-data-table">
+                  <thead>
+                    <tr>
+                      <th class="mdl-data-table__cell--non-numeric">Data Type</th>
+                      <th class="mdl-data-table__cell--non-numeric" width="20%">Field Name</th>
+                      <th class="mdl-data-table__cell--non-numeric" width="60%">Description</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="field-list" class="sortable-list">
+                    <!--tr>
+                      <td class="mdl-data-table__cell--non-numeric">String</td>
+                      <td class="mdl-data-table__cell--non-numeric" contentEditable="true">Name</td>
+                      <td class="mdl-data-table__cell--non-numeric" contentEditable="true">Item Name</td>
+                      <td class="actions">
+                        <button class="mdl-button mdl-button--icon" data-action="move-down">
+                          <i class="material-icons">
+                            expand_more
+                          </i>
+                        </button>
+                        <button class="mdl-button mdl-button--icon" data-action="move-up">
+                          <i class="material-icons">
+                            expand_less
+                          </i>
+                        </button>
+                        <button class="mdl-button mdl-button--icon" data-action="delete">
+                          <i class="material-icons">delete</i>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="mdl-data-table__cell--non-numeric">u8</td>
+                      <td class="mdl-data-table__cell--non-numeric" contentEditable="true">Color</td>
+                      <td class="mdl-data-table__cell--non-numeric" contentEditable="true">Item Color</td>
+                      <td class="actions">
+                        <button class="mdl-button mdl-button--icon" data-action="move-down">
+                          <i class="material-icons">
+                            expand_more
+                          </i>
+                        </button>
+                        <button class="mdl-button mdl-button--icon" data-action="move-up">
+                          <i class="material-icons">
+                            expand_less
+                          </i>
+                        </button>
+                        <button class="mdl-button mdl-button--icon" data-action="delete">
+                          <i class="material-icons">delete</i>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="mdl-data-table__cell--non-numeric">u16</td>
+                      <td class="mdl-data-table__cell--non-numeric" contentEditable="true">Speed</td>
+                      <td class="mdl-data-table__cell--non-numeric" contentEditable="true">Item Speed</td>
+                      <td class="actions">
+                        <button class="mdl-button mdl-button--icon" data-action="move-down">
+                          <i class="material-icons">
+                            expand_more
+                          </i>
+                        </button>
+                        <button class="mdl-button mdl-button--icon" data-action="move-up">
+                          <i class="material-icons">
+                            expand_less
+                          </i>
+                        </button>
+                        <button class="mdl-button mdl-button--icon" data-action="delete">
+                          <i class="material-icons">delete</i>
+                        </button>
+                      </td>
+                    </tr-->
+                  </tbody>
+                </table>
               </div>
-              <table width="100%" class="mdl-data-table">
-                <thead>
-                  <tr>
-                    <th class="mdl-data-table__cell--non-numeric">Data Type</th>
-                    <th class="mdl-data-table__cell--non-numeric" width="20%">Field Name</th>
-                    <th class="mdl-data-table__cell--non-numeric" width="60%">Description</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody id="field-list" class="sortable-list">
-                  <!--tr>
-                    <td class="mdl-data-table__cell--non-numeric">String</td>
-                    <td class="mdl-data-table__cell--non-numeric" contentEditable="true">Name</td>
-                    <td class="mdl-data-table__cell--non-numeric" contentEditable="true">Item Name</td>
-                    <td class="actions">
-                      <button class="mdl-button mdl-button--icon" data-action="move-down">
-                        <i class="material-icons">
-                          expand_more
-                        </i>
-                      </button>
-                      <button class="mdl-button mdl-button--icon" data-action="move-up">
-                        <i class="material-icons">
-                          expand_less
-                        </i>
-                      </button>
-                      <button class="mdl-button mdl-button--icon" data-action="delete">
-                        <i class="material-icons">delete</i>
-                      </button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="mdl-data-table__cell--non-numeric">u8</td>
-                    <td class="mdl-data-table__cell--non-numeric" contentEditable="true">Color</td>
-                    <td class="mdl-data-table__cell--non-numeric" contentEditable="true">Item Color</td>
-                    <td class="actions">
-                      <button class="mdl-button mdl-button--icon" data-action="move-down">
-                        <i class="material-icons">
-                          expand_more
-                        </i>
-                      </button>
-                      <button class="mdl-button mdl-button--icon" data-action="move-up">
-                        <i class="material-icons">
-                          expand_less
-                        </i>
-                      </button>
-                      <button class="mdl-button mdl-button--icon" data-action="delete">
-                        <i class="material-icons">delete</i>
-                      </button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="mdl-data-table__cell--non-numeric">u16</td>
-                    <td class="mdl-data-table__cell--non-numeric" contentEditable="true">Speed</td>
-                    <td class="mdl-data-table__cell--non-numeric" contentEditable="true">Item Speed</td>
-                    <td class="actions">
-                      <button class="mdl-button mdl-button--icon" data-action="move-down">
-                        <i class="material-icons">
-                          expand_more
-                        </i>
-                      </button>
-                      <button class="mdl-button mdl-button--icon" data-action="move-up">
-                        <i class="material-icons">
-                          expand_less
-                        </i>
-                      </button>
-                      <button class="mdl-button mdl-button--icon" data-action="delete">
-                        <i class="material-icons">delete</i>
-                      </button>
-                    </td>
-                  </tr-->
-                </tbody>
-              </table>
               <div class="action-bar">
                 <button id="create-mint-btn" class="mdl-button mdl-js-button mdl-button--big mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
                   Create DNFT Mint

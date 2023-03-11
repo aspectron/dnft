@@ -41,7 +41,6 @@ function createIconBtn(icon, title="", attributes={}){
 
     return btn;
 }
-
 function createCheckbox(value, label="", id="", cls=""){
     let input = document.createElement('input');
     input.type = "checkbox";
@@ -958,12 +957,30 @@ class App{
 
             fields.push(new Field(DataType[dataType], dataType, descr));
         }
+        let sorting = ["", "String", "Bool", "ImageUrl", "u8", "u16", "u32"];
+        fields = fields.sort((a, b)=>{
+            let index = sorting.indexOf(a.name());
+            let index2 = sorting.indexOf(b.name());
+
+            if (index>0 && index2>0){
+                return -1*(index2-index);
+            }else if (index>0){
+                return -1;
+            }else if (index2>0){
+                return 1;
+            }
+            return 1;
+        })
 
         for(let field of fields){
-            let type = field.dataType()
+            let name = field.name()
+            if (name == "None")
+                continue;
 
+            
+            let type = field.dataType()
             let td_type = document.createElement("td");
-            td_type.innerHTML = field.name();
+            td_type.innerHTML = name;
             td_type.setAttribute("class", "mdl-data-table__cell--non-numeric");
 
             let td_descr = document.createElement("td");
