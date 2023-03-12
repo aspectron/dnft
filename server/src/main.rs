@@ -123,10 +123,8 @@ async fn main() -> Result<(), dnft::client::error::Error> {
             Ok(json!({"success":true, "file": format!("file/{file_name}") }))
         });
 
-    if open_url{
-        if let Err(_) = open::that("http://localhost:8085"){
-            println!("Unable to open web app in browser, So you can open it manually `http://localhost:8085`");
-        }
+    if open_url && open::that("http://localhost:8085").is_err() {
+        println!("Unable to open web app in browser, So you can open it manually `http://localhost:8085`");
     }
     app.listen("0.0.0.0:8085").await?;
 
