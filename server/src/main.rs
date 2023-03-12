@@ -120,6 +120,7 @@ async fn main() -> Result<(), dnft::client::error::Error> {
             Ok(json!({"success":true, "file": format!("file/{file_name}") }))
         });
 
+    open::that("http://localhost:8085")?;
     app.listen("0.0.0.0:8085").await?;
 
     Ok(())

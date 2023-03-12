@@ -50,3 +50,4 @@ async-std = {version = "1.12.0", features = ["attributes"]}
 http-types = {version = "2.12.0", features=[]}
 multipart = "0.18.0"
 mime = "0.3.16"
+open = "4.0.0"

@@ -14,3 +14,4 @@ http-types.workspace = true
 multipart.workspace = true
 mime.workspace = true
 dnft.workspace = true
+open.workspace = true
