@@ -41,5 +41,5 @@ check_error "Building wasm"
 # start server
 msg "Starting server"
 cd ../server
-cargo run
+cargo run -- --open
 check_error "Starting server"

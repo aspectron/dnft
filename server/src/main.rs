@@ -14,6 +14,9 @@ async fn main() -> Result<(), dnft::client::error::Error> {
     use rand::distributions::{Alphanumeric, DistString};
     use tide::{prelude::*, Request};
 
+    let args: Vec<String> = std::env::args().collect();
+    let open_url = args.contains(&"--open".to_string());
+
     let files_path = std::env::current_dir()?.join("files");
     if !files_path.exists() {
         fs::create_dir(files_path)?;
@@ -120,7 +123,11 @@ async fn main() -> Result<(), dnft::client::error::Error> {
             Ok(json!({"success":true, "file": format!("file/{file_name}") }))
         });
 
-    open::that("http://localhost:8085")?;
+    if open_url{
+        if let Err(_) = open::that("http://localhost:8085"){
+            println!("Unable to open web app in browser, So you can open it manually `http://localhost:8085`");
+        }
+    }
     app.listen("0.0.0.0:8085").await?;
 
     Ok(())
