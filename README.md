@@ -2,36 +2,75 @@
 
 Delta NFT project - created for [Solana Grizzlython](https://solana.com/grizzlython) Hackathon
 
-[https://deltanft.xyz](https://deltanft.xyz)
+The goal of this project is to create a new NFT standard that provides users with the ability to create NFTs that contain custom authority-managed data schemas. Data schemas that can be created are meant to represent different real or virtual assets, while carrying detailed information about them within each token issued. Authority-managed means that data stored in each schema can be managed by pre-defined set of authorities.
 
-The goal of this project is to create a new NFT standard that provides users with an ability to create NFTs that contain custom data schemas. Data schemas that can be created are meant to represent different real or virtual assets, while carrying detailed information about them within each token issued.
+DNFT mints are similar to database tables, where groups of fields can have different authorities managing them.
 
-DNFT mints are more akin to database tables, where groups of fields can have different authorities managing them.
+Detailed information about this project can be found at [https://deltanft.xyz](https://deltanft.xyz)
 
-Key features:
+## Requirements
 
-- A user can create a custom schema and register it with the DNFT program.
-- Once created, any number of tokens can be issued against this schema by anyone (there is an unlimited number of tokens).
-- Each token can have an associated price or specified exchange mechanism (sale, auction). The "for sale" flag as well as sale properties can be enabled or disabled only by the owner.
-- Once published, if "for sale" flag is active, the token can be acquired by anyone making the corresponding payment or following through the sale process, such as an auction.
-- Additional rules, such as % of sale revenue can be setup within each token specifically.
-- Token category can also be configured to provide additional revenue sharing for the category creator (or a dedicated account address)
-- Token creation can be restricted to a specific like of accounts - accounts are associated with the caregory and can be managed by the category creator.
+- Latest Rust: https://www.rust-lang.org
+- WASM-PACK: https://rustwasm.github.io/wasm-pack/
+- Solana Tool Suite: https://docs.solana.com/cli/install-solana-cli-tools
 
-Schema, Viewers and Editors:
+## Running this project
 
-- The schema is defined by custom data types, allowing it to be created from 2nd-tier languages such as TypeScript or JavaScript.
-- A developer can use the shcema definitoin to programmatically or manually create an editor capable of submitting data needed for token creation or to create a Viewer needed to visualize the token data.
+### Clone repositories
+You need to clone this repository as well as Solana Kaizen repository into the same folder:
+```bash
+mkdir demo
+cd demo
+git clone https://github.com/solana-kaizen/kaizen
+git clone https://github.com/aspectron/dnft
+```
 
-Security, Vulnerabilities and Spam:
+Solana Kaizen is currently under development, so it is not yet published to *crates.io*.
 
-- Like any asset, the token has a dedicated account and its authenticity should be validated by the account key.
-- Anyone can create as many tokens as they like - it is the responsibility of the data service providers and applications to filter out invalid tokens.
+### Start Solana Test Validator
+```bash
+mkdir test-validator
+cd test-validator
+solana-test-validator
+```
 
+If you would like to see program execution logs start log monitoring:
+```bash
+solana logs
+```
 
-#### Setup development environment
-- Start test validator: `solana-test-validator`, then open new terminal window/tab
-- clone this repository `git clone https://github.com/aspectron/dnft.git`
-- Build and deploy program: `cd dnft/program && ./build && ./deploy`
-- Build wasm : `cd ../wasm && ./build-web-dev`
-- Start http server : `cd ./web && simple-http-server ./`
+### Setup your wallet
+
+This demo currently works only with [Solana Phantom wallet](https://phantom.app)
+
+Install and configure Phantom to run against your local validator by selecting
+`Developer Settings` -> `Change Network` -> `Localhost`
+
+Get some SOL on your local validator and transfer it to the Phantom Wallet
+```bash
+solana airdrop 500
+solana transfer 6Lmr...VuLP 400 --allow-unfunded-recipient
+```
+Documentaion for sending tokens is available here: [https://docs.solana.com/cli/transfer-tokens](https://docs.solana.com/cli/transfer-tokens)
+
+### Build and start the project
+
+We have setup a `boot` script that performs the following actions:
+- Builds and deploys the program to the local validator
+- Initializes root program accounts
+- Deploys test DNFT mints (test data)
+- Builds WASM application
+- Starts a built-in HTTP server
+
+Please note that the `boot` script is usable on MacOS or Linux platforms.
+To run on Windows, you must run the contents of the scripts manually.
+The `boot` script is available in the root of the dnft repository:
+https://github.com/aspectron/dnft/blob/master/boot
+
+### Load the application in the browser
+
+The `boot` script will start a built-in HTTP server, following which, the application
+can be loaded at [https://localhost:8085](https://localhost:8085)
+
+If running manually, you can use any HTTP server (such as [`basic-http-server`](https://crates.io/search?q=basic-http-server))
+capable of serving local content. The server needs to be started in the following folder as root: `dnft/wasm/web`
