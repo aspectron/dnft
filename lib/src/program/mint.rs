@@ -83,7 +83,7 @@ impl<'info, 'refs> Mint<'info, 'refs> {
     }
 
     pub fn update_data(&mut self, args: &MintCreationArgs) -> ProgramResult {
-        log_info!("Mint::update CTX: {:#?}", args);
+        //log_info!("Mint::update CTX: {:#?}", args);
 
         if let Some(data_types) = &args.data_types {
             self.data_types.store(data_types)?;

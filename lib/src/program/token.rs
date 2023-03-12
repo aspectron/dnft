@@ -158,14 +158,13 @@ impl<'info, 'refs> Token<'info, 'refs> {
             .data_types
             .load()?
             .ok_or::<ProgramError>(program_error_code!(ErrorCode::MintSchema))?;
-
         if data_types.len() != args.data.len() {
             return Err(program_error_code!(ErrorCode::MintSchema));
-        } else {
-            for (idx, data) in args.data.iter().enumerate() {
-                if &data.get_data_type() != data_types.get(idx).unwrap() {
-                    return Err(program_error_code!(ErrorCode::MintSchema));
-                }
+        }
+
+        for (idx, data) in args.data.iter().enumerate() {
+            if &data.get_data_type() != data_types.get(idx).unwrap() {
+                return Err(program_error_code!(ErrorCode::MintSchema));
             }
         }
 

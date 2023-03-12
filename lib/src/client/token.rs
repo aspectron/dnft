@@ -213,11 +213,14 @@ mod wasm {
             if !value.is_undefined() {
                 let value: Data = value.as_ref().try_into().unwrap();
                 data.push(value.into());
+            } else {
+                return Err(format!("Invalid field data at index : {index}").into());
             }
         }
 
-        log_trace!("create_token: data: {data:?}, sale_type:{sale_type:?}");
         let for_sale = for_sale.into();
+        log_trace!("create_token: data: {data:?}, for_sale:{for_sale:?}, sale_type: {sale_type:?}");
+
         let args = TokenCreateFinalArgs {
             for_sale,
             sale_type: sale_type.into(),

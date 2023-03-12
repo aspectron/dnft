@@ -810,6 +810,7 @@ class App{
             let value = data[index];
             //console.log("index, type, value", index, field.type, value)
             if (field.type == "ImageUrl"){
+                value = value.replace("http://localhost", `http://${location.hostname}`);
                 img.style.backgroundImage = `url(${value})`;
             }
             if (field.type == "Bool"){
@@ -880,7 +881,8 @@ class App{
         panel.mintData = data;
         panel.dataset.pubkey = pubkey;
         clone.querySelector(".mint-title").innerHTML = data.name;
-        clone.querySelector(".mint-image").style.backgroundImage = `url(${data.image})`;
+        let image = data.image.replace("http://localhost", `http://${location.hostname}`);
+        clone.querySelector(".mint-image").style.backgroundImage = `url(${image})`;
         clone.querySelector(".mint-pubkey").innerHTML = this.shortenPubkey(pubkey);
         clone.querySelector(".change-mint").addEventListener("click", ()=>{
             console.log("changeBtnCallback")
@@ -897,7 +899,8 @@ class App{
             panel.dataset.pubkey = pubkey;
             clone.querySelector(".mint-title").innerHTML = data.name;
             clone.querySelector(".create-token").dataset.pubkey = pubkey;
-            clone.querySelector(".mint-image").style.backgroundImage = `url(${data.image})`;
+            let image = data.image.replace("http://localhost", `http://${location.hostname}`);
+            clone.querySelector(".mint-image").style.backgroundImage = `url(${image})`;
             let description = ["<bold>Fields</bold>"];
             for (let field of data.schema){
                 description.push(`${field.type}: ${field.name}, ${field.description}`)
@@ -1114,21 +1117,19 @@ class App{
         }
 
         $("#mint-dnft-btn").addEventListener("click", async ()=>{
-            let inputs = this.mintFormFieldsEl.querySelectorAll(".mdl-textfield__input");
-            let checkboxs = this.mintFormFieldsEl.querySelectorAll(".mdl-checkbox__input");
+            let inputs = this.mintFormFieldsEl.querySelectorAll(".mdl-textfield__input, .mdl-checkbox__input");
             
             //const { Field, DataType, Data } = this.dnft;
             let fieldsData = [];
             inputs.forEach(input=>{
-                let data = createData(input._field, input.value);
-                console.log("data:", data);
+                let value = input.value;
+                if (input.classList.contains("mdl-checkbox__input")){
+                    value = input.checked
+                }
+                let data = createData(input._field, value);
                 fieldsData.push(data);
             });
-            checkboxs.forEach(input=>{
-                let data = createData(input._field, input.checked);
-                console.log("data:", data);
-                fieldsData.push(data);
-            });
+
             let mintPubkey = this.mintFormDialog._mintPubkey;
             let result = await this.dnft.createToken(
                 mintPubkey,

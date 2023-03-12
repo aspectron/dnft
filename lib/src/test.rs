@@ -107,8 +107,8 @@ pub mod tests {
         ];
 
         // ----------------------------------------------------------------------------
-        const MAX_MINTS: usize = 2;
-        const MAX_TOKENS: usize = 5;
+        const MAX_MINTS: usize = 1;
+        const MAX_TOKENS: usize = 1;
         // ----------------------------------------------------------------------------
 
         let mut mint_pubkeys = vec![];
@@ -124,8 +124,18 @@ pub mod tests {
                 program::DataType::String,
                 program::DataType::u32,
                 program::DataType::u8,
-                program::DataType::u64,
+                program::DataType::Bool,
+                program::DataType::String,
                 program::DataType::ImageUrl,
+                program::DataType::ImageUrl,
+                program::DataType::ImageUrl,
+                program::DataType::ImageUrl,
+                program::DataType::ImageUrl,
+                program::DataType::String,
+                program::DataType::String,
+                program::DataType::String,
+                program::DataType::String,
+                program::DataType::String,
             ];
 
             let args = program::MintCreationArgs {
@@ -139,15 +149,35 @@ pub mod tests {
                     "Name".to_string(),
                     "Weight".to_string(),
                     "Score".to_string(),
-                    "Index".to_string(),
+                    "Testing".to_string(),
+                    "Stringvalue".to_string(),
                     "Image".to_string(),
+                    "Image".to_string(),
+                    "Image".to_string(),
+                    "Image".to_string(),
+                    "Image".to_string(),
+                    "Stringvalue".to_string(),
+                    "Stringvalue".to_string(),
+                    "Stringvalue".to_string(),
+                    "Stringvalue".to_string(),
+                    "Stringvalue".to_string(),
                 ]),
                 descriptions: Some(vec![
                     "Token name".to_string(),
                     "Any number".to_string(),
                     "Score".to_string(),
-                    "".to_string(),
+                    "Are you testing?".to_string(),
+                    "Bool testing".to_string(),
                     "Use any url shortening service".to_string(),
+                    "Use any url shortening service".to_string(),
+                    "Use any url shortening service".to_string(),
+                    "Use any url shortening service".to_string(),
+                    "Use any url shortening service".to_string(),
+                    "String field".to_string(),
+                    "String field".to_string(),
+                    "String field".to_string(),
+                    "String field".to_string(),
+                    "String field".to_string(),
                 ]),
             };
 
@@ -200,8 +230,18 @@ pub mod tests {
                         program::Data::String(names.get(img_index).unwrap().to_string()),
                         program::Data::u32((token_seq * 15) as u32),
                         program::Data::u8((token_seq + 1) as u8),
-                        program::Data::u64((token_seq * 11) as u64),
+                        program::Data::Bool(false),
+                        program::Data::String(names.get(img_index).unwrap().to_string()),
                         program::Data::Url(program::Url::image(images.get(img_index).unwrap())),
+                        program::Data::Url(program::Url::image(images.get(img_index).unwrap())),
+                        program::Data::Url(program::Url::image(images.get(img_index).unwrap())),
+                        program::Data::Url(program::Url::image(images.get(img_index).unwrap())),
+                        program::Data::Url(program::Url::image(images.get(img_index).unwrap())),
+                        program::Data::String(names.get(img_index).unwrap().to_string()),
+                        program::Data::String(names.get(img_index).unwrap().to_string()),
+                        program::Data::String(names.get(img_index).unwrap().to_string()),
+                        program::Data::String(names.get(img_index).unwrap().to_string()),
+                        program::Data::String(names.get(img_index).unwrap().to_string()),
                     ],
                 };
                 img_index += 1;
