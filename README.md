@@ -1,10 +1,12 @@
-# delta-nft
+# `delta-nft framework`
 
 Delta NFT project - created for [Solana Grizzlython](https://solana.com/grizzlython) Hackathon
 
 The goal of this project is to create a new NFT standard that provides users with the ability to create NFTs that contain custom authority-managed data schemas. Data schemas that can be created are meant to represent different real or virtual assets, while carrying detailed information about them within each token issued. Authority-managed means that data stored in each schema can be managed by pre-defined set of authorities.
 
 DNFT mints are similar to database tables, where groups of fields can have different authorities managing them.
+
+The secondary goal of this project is to demonstrate the upcoming [Solana Kaizen Framework](https://aspectron.com/en/projects/kaizen.html) - a Rust-centric framework that focuses on allowing the creation of business-oriented WebAssembly-powered (WASM32) DApps.
 
 Detailed information about this project can be found at [https://deltanft.xyz](https://deltanft.xyz)
 
@@ -69,8 +71,8 @@ https://github.com/aspectron/dnft/blob/master/boot
 
 ### Load the application in the browser
 
-The `boot` script will start a built-in HTTP server, following which, the application
-can be loaded at [https://localhost:8085](https://localhost:8085)
+The `boot` script will start a built-in HTTP server, following that, the application
+will open a browser window pointing to [https://localhost:8085](https://localhost:8085)
 
 If running manually, you can use any HTTP server (such as [`basic-http-server`](https://crates.io/search?q=basic-http-server))
 capable of serving local content. The server needs to be started in the following folder as root: `dnft/wasm/web`
