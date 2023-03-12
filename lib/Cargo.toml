@@ -15,7 +15,6 @@ kaizen.workspace = true
 serde.workspace = true
 solana-program.workspace = true
 workflow-core.workspace = true
-workflow-log.workspace = true
 workflow-wasm.workspace = true
 workflow-store.workspace = true
 wasm-bindgen.workspace = true
@@ -29,3 +28,7 @@ sha2.workspace = true
 thiserror.workspace = true
 wasm-bindgen-futures.workspace = true
 solana-sdk.workspace = true
+workflow-log.workspace = true
+
+[target.'cfg(target_os = "solana")'.dependencies]
+workflow-log = {workspace = true, features = ["solana"]}
