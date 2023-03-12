@@ -87,18 +87,18 @@ async fn create_sample_data() -> Result<()> {
         "https://images.freeimages.com/vhq/images/previews/9ea/bright-stars-gorgeous-special-effects-02-vector-6216.jpg",
         "https://images.freeimages.com/vhq/images/previews/f3d/gorgeous-diploma-certificate-template-02-vector-6248.jpg",
     ];
-    let mint_names = vec!["The Golden Dog", "The Golden Cat"];
+    let mint_names = vec!["Dog Tokens", "Cat Tokens"];
     let names = vec![
-        "The Golden Dog - A",
-        "The Golden Dog - B",
-        "The Golden Dog - C",
-        "The Golden Dog - D",
-        "The Golden Dog - E",
-        "The Golden Cat - A",
-        "The Golden Cat - B",
-        "The Golden Cat - C",
-        "The Golden Cat - D",
-        "The Golden Cat - E",
+        "Dog Token - A",
+        "Dog Token - B",
+        "Dog Token - C",
+        "Dog Token - D",
+        "Dog Token - E",
+        "Cat Token - A",
+        "Cat Token - B",
+        "Cat Token - C",
+        "Cat Token - D",
+        "Cat Token - E",
     ];
 
     // ----------------------------------------------------------------------------
