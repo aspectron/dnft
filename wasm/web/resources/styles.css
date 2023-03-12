@@ -593,13 +593,43 @@ td.actions .material-icons{
   position: absolute;
   top: 10px;
   text-shadow: 0px 0px 4px #000;
-  text-transform: uppercase;
   font-size:1rem;
 }
 .mdl-dnft .nft-panel.mycoin .buy-btn,
 .mdl-dnft .nft-panel.mycoin .availability-btn,
 .mdl-dnft .nft-panel:not(.mycoin) .setting-btn{
   display:none;
+}
+.mint-description-text{
+  margin-bottom:10px;
+  overflow:hidden;
+  transition:all 0.2s ease;
+}
+.mint-panel.hide-description .mint-description-text{
+  height:0px;
+  margin:0px;
+}
+.mint-list .mint-panel.hide-description .mdl-card__supporting-text{
+  padding:0px;
+}
+.nft-list .mint-panel,
+.marketplace-list .mint-panel{
+  cursor: pointer;
+}
+.mint-panel .mdl-card__supporting-text,
+.nft-panel .mdl-card__supporting-text{
+  width:100%;
+}
+.token-form{
+  padding-top:0px;
+}
+.mint-info-toggle-btn{
+  position: absolute;
+    right: 10px;
+    bottom: 12px;
+    min-width: 0px;
+    width:55px;
+    color: #FFF;
 }
 /* .mint-name-cell{
   position: relative;

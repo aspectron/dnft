@@ -406,8 +406,15 @@ class App{
                     return
                 }
                 let action = el.dataset.action;
+                let mintPanelEl = el?.closest(".mint-panel");
+                if (action=="toggle-description"){
+                    if(!mintPanelEl){
+                        return
+                    }
+                    mintPanelEl.classList.toggle("hide-description")
+                    return
+                }
                 if (action == "open"){
-                    let mintPanelEl = el?.closest(".mint-panel");
                     if(!mintPanelEl){
                         return
                     }
@@ -849,7 +856,7 @@ class App{
 
     async loadMints(){
         this._addMintPlaceholders(this.mintListEl, "browse-mints");
-        let panels = await this._loadMints(0n, "mints");
+        let panels = await this._loadMints(0n, "mints", true);
         let scrollTop = this.mainEl.scrollTop;
         this.mintListEl.innerHTML = "";
         panels.forEach(el=>this._appendPanel(this.mintListEl, el, ".mint-panel"))
@@ -859,7 +866,7 @@ class App{
             }
         }
     }
-    async _loadMints(start, key="mints"){
+    async _loadMints(start, key="mints", isMintPage=false){
         key = "_mintsLoading"+key;
         if (this[key])
             return [];
@@ -870,7 +877,7 @@ class App{
         for (let pubkey of pubkeys){
             let data = this.mintData[pubkey+""] || await this.dnft.getMintData(pubkey);
             this.mintData[pubkey+""] = data;
-            let el = this.createMintPenel(pubkey, data);
+            let el = this.createMintPenel(pubkey, data, isMintPage);
             panels.push(el)
         }
         this[key] = false;
@@ -893,7 +900,7 @@ class App{
         return panel
     }
 
-    createMintPenel(pubkey, data){
+    createMintPenel(pubkey, data, isMintPage=false){
         let clone =  this.mintPanelTpl.content.cloneNode(true);
         let panel = clone.children[0];
         if (data){
@@ -907,7 +914,18 @@ class App{
             for (let field of data.schema){
                 description.push(`${field.type}: ${field.name}, ${field.description}`)
             }
-            clone.querySelector(".mint-description").innerHTML = `<p>${description.join("<br />")}</p>`;
+            let descrEl = clone.querySelector(".mint-description");
+            if (!isMintPage){
+                clone.querySelector(".mdl-card__actions").remove();
+                panel.dataset.action = "open";
+                panel.classList.add("hide-description");
+                descrEl.innerHTML = 
+                `<div class="mint-description-text">${description.join("<br />")}</div><div>Click to Browse</div>`;
+            }else{
+                descrEl.innerHTML = 
+                `<div class="mint-description-text">${description.join("<br />")}</div>`;
+            }
+            
         }
         clone.querySelector(".mint-pubkey").innerHTML = this.shortenPubkey(pubkey);
         
@@ -1098,15 +1116,26 @@ class App{
 
     initMintDnftPage(){
         this.mintFormDialog = $dialog("#mint-form-dialog");
-        this.mintFormFieldsEl = $("#mint-form-fields");
+        this.mintFormFieldsEl = $("#token-form-fields");
 
         this.mintListEl.addEventListener("click", event=>{
-            let btn = event.target.closest("button.create-token");
+            let btn = event.target.closest("[data-action]");
             if(!btn)
                 return
-            
-            this.loadSchema(btn.dataset.pubkey);
-            this.mintFormDialog.showModal();
+            let action = btn.dataset.action;
+            if (action=="create-token"){
+                this.loadSchema(btn.dataset.pubkey);
+                this.mintFormDialog.showModal();
+                return
+            }
+            if (action=="toggle-description"){
+                let mintPanelEl = btn.closest(".mint-panel");
+                if(!mintPanelEl){
+                    return
+                }
+                mintPanelEl.classList.toggle("hide-description")
+                return
+            }
         });
 
         const createData = (field, value)=>{
@@ -1152,10 +1181,19 @@ class App{
         while(this.mintFormFieldsEl.childNodes.length){
             this.mintFormFieldsEl.childNodes[0].remove();
         }
+        let schemaContainer = document.createElement("div")
+        let title = document.createElement("h4")
+        title.innerHTML = "Default schema";
+        schemaContainer.appendChild(title)
+        schemaContainer.classList.add("schema-field-container")
+        let schemaBody = document.createElement("div");
+        schemaBody.classList.add("schema-body")
+        schemaContainer.appendChild(schemaBody);
         for(let field of fields){
             let el = this.createFormField(field);
-            this.mintFormFieldsEl.appendChild(el);
+            schemaBody.appendChild(el);
         }
+        this.mintFormFieldsEl.appendChild(schemaContainer);
     }
 
     createFormField(field, attributes={}){

@@ -117,10 +117,9 @@ async fn create_sample_data() -> Result<()> {
         log_info!("creating mint {mint_seq}");
         let data_types = vec![
             program::DataType::String,
-            program::DataType::u32,
-            program::DataType::u8,
-            program::DataType::u64,
             program::DataType::ImageUrl,
+            program::DataType::u32,
+            program::DataType::u64,
         ];
 
         let args = program::MintCreationArgs {
@@ -132,17 +131,15 @@ async fn create_sample_data() -> Result<()> {
             data_types: Some(data_types),
             names: Some(vec![
                 "Name".to_string(),
+                "Image".to_string(),
                 "Weight".to_string(),
                 "Score".to_string(),
-                "Index".to_string(),
-                "Image".to_string(),
             ]),
             descriptions: Some(vec![
                 "Token name".to_string(),
+                "Use any url shortening service".to_string(),
                 "Any number".to_string(),
                 "Score".to_string(),
-                "".to_string(),
-                "Use any url shortening service".to_string(),
             ]),
         };
 
@@ -193,10 +190,9 @@ async fn create_sample_data() -> Result<()> {
                 sale_type: SaleType::Sale,
                 data: vec![
                     program::Data::String(names.get(img_index).unwrap().to_string()),
-                    program::Data::u32((token_seq * 15) as u32),
-                    program::Data::u8((token_seq + 1) as u8),
-                    program::Data::u64((token_seq * 11) as u64),
                     program::Data::Url(program::Url::image(images.get(img_index).unwrap())),
+                    program::Data::u32((token_seq * 15) as u32),
+                    program::Data::u64((token_seq + 1) as u64),
                 ],
             };
             img_index += 1;

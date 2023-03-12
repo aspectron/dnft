@@ -125,7 +125,7 @@
                     <div class="bufferbar bar bar2" style="width: 100%;"></div>
                     <div class="auxbar bar bar3" style="width: 0%;"></div>
                   </div>
-                  <button type="button" data-action="buy" disabled class="user-btn mdl-button availability-btn _mdl-button--raised">See availability</button>
+                  <!--button type="button" data-action="buy" disabled class="user-btn mdl-button availability-btn _mdl-button--raised">See availability</button-->
                   <button type="button" data-action="setting" class="user-btn mdl-button setting-btn mdl-button--raised _mdl-button--accent mdl-button--primary">
                     <span class="setting-btn-text"></span>
                     <i class="material-icons">settings</i>
@@ -230,7 +230,7 @@
                   <span class="mint-pubkey"></span>
                   <h2 class="mint-title mdl-card__title-text"></h2>
                   <button class="change-mint mdl-button mdl-js-button mdl-button--big mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-                    CHANGE MINT
+                    Select Another Mint
                   </button>
                 </div>
               </div>
@@ -246,16 +246,16 @@
                 <div class="mint-image mdl-card__title">
                   <span class="mint-pubkey"></span>
                   <h2 class="mint-title mdl-card__title-text"></h2>
+                  <button data-action="toggle-description" class="mdl-button mint-info-toggle-btn">
+                    <i class="material-icons">information</i>
+                  </button>
                 </div>
                 <div class="mdl-card__supporting-text">
                   <div class="mint-description"></div>
                 </div>
                 <div class="mdl-card__actions mdl-card--border">
-                  <button class="create-token mdl-button mdl-js-button mdl-button--big mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                  <button data-action="create-token" class="create-token mdl-button mdl-js-button mdl-button--big mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
                     CREATE TOKEN
-                  </button>
-                  <button data-action="open" class="open mdl-button mdl-js-button mdl-button--big mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-                    OPEN
                   </button>
                 </div>
               </div>
@@ -273,7 +273,7 @@
             <dialog id="mint-form-dialog" class="mdl-dialog mint-form-dialog">
               <h4 class="mdl-dialog__title">CREATE TOKEN</h4>
               <div class="mdl-dialog__content">
-                <div id="mint-form-fields" class="form-panel"></div>
+                <div id="token-form-fields" class="token-form form-panel"></div>
               </div>
               <div class="mdl-dialog__actions">
                 <button id="mint-dnft-btn" class="mdl-button mdl-js-button mdl-button--big mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
@@ -290,23 +290,23 @@
             <div class="fields-info">
               <label class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label has-placeholder" for="mint-name-input">
                 <input type="text" id="mint-name-input" class="mdl-textfield__input">
-                <span class="mdl-textfield__label">Name</span>
+                <span class="mdl-textfield__label">Mint Name</span>
               </label>
               <label id="mint-image" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label has-placeholder" for="mint-image-input">
                 <input type="text" id="mint-image-input" class="mdl-textfield__input">
-                <span class="mdl-textfield__label">Image</span>
+                <span class="mdl-textfield__label">Mint Image</span>
                 <a class="upload-file-btn mdl-textfield__upload-link" href="javascript: void 0">Or upload image</a>
               </label>
               <br /><br />
               <div class="h-flex center">
-                <h4 class="flex">Create Schema:</h4>
+                <h4 class="flex">Edit Schema</h4>
                 <button disabled class="add-schema-btn mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
                   Add Schema
                 </button>
               </div>
               <div class="schema-container _mdl-shadow--2dp">
                 <div class="head">
-                  <h5 class="heading">Main Schema</h5>
+                  <h5 class="heading">Default Schema</h5>
                   <div class="mint-authority-container">Authorities: 
                     <span class="mint-authority">Token Issuer</span>
                     <button type="button" disabled data-action="change-authority" class="user-btn mdl-button authority-btn">
