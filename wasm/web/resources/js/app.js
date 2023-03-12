@@ -273,7 +273,9 @@ class App{
                 }
                 timeoutId = setTimeout(()=>{
                     //console.log("Ratio###", e.intersectionRatio)
-                    e.target.toggleAttribute('stuck', e.intersectionRatio < 1)
+                    if (e.target.closest(".mdl-layout__tab-panel")?.classList.contains("is-active")){
+                        e.target.toggleAttribute('stuck', e.intersectionRatio < 1)
+                    }
                 }, 1)
                 
             },
