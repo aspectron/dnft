@@ -243,9 +243,10 @@ class App{
                     this.loadNFT(pubkey);
                 }, 2000);
             }else if (name.includes("updating token") || name.includes("buy token")){
+                let isBuyActivity = name.includes("buy token");
                 this.activateNFTProgress(pubkey);
                 setTimeout(()=>{
-                    this.loadNFT(pubkey);
+                    this.loadNFT(pubkey, isBuyActivity);
                 }, 3000)
             }
         })
@@ -650,12 +651,12 @@ class App{
         })
     }
 
-    async loadNFT(tokenPubkey, loadCount=0){
+    async loadNFT(tokenPubkey, isBuyActivity, loadCount=0){
         let account = await this.dnft.getToken(tokenPubkey+"")
         .catch(err=>{
             if (loadCount < 60){
                 setTimeout(()=>{
-                    this.loadNFT(tokenPubkey, loadCount++)
+                    this.loadNFT(tokenPubkey, isBuyActivity, loadCount++)
                 }, 1000)
             }
         })
@@ -676,7 +677,7 @@ class App{
             let panel = this.createNFTPanel(mintPubkey, mintData, ...account, tpl);
             this._appendPanel(list, panel, ".nft-panel");
         }
-        if (account[1]?.sale?.().listed()){
+        if (isBuyActivity || account[1]?.sale?.().listed()){
             if (mintPubkey == this.marketFilter.mintPubkey){
                 addPanel(this.marketplaceListEl, this.marketNFTTemplateEl)
             }
