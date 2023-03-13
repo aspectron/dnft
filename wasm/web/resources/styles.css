@@ -271,6 +271,11 @@ td.actions .material-icons{
   z-index:5;
   margin: 0px
 }
+.marketplace-header .mdl-layout__header{
+  background-color: #FFF;
+  border: 1px solid #e3e3e3;
+  color: initial;
+}
 .marketplace-header .mdl-layout__header,
 .marketplace-head{
   max-width:1110px;
@@ -325,6 +330,7 @@ td.actions .material-icons{
 .mdl-dnft main > .mdl-layout__tab-panel {
   /* padding: 8px; */
   padding-top: 48px;
+  min-height: calc(90vh - 100px);
 }
 .mdl-dnft .nft-panel {
   height: auto;
@@ -731,13 +737,13 @@ td.actions .material-icons{
 .mdl-layout__header-row .mdl-radio{
   margin-left:10px;
 }
-.mdl-layout__header-row .mdl-radio__outer-circle,
+/* .mdl-layout__header-row .mdl-radio__outer-circle,
 .mdl-layout__header-row .mdl-radio.is-checked .mdl-radio__outer-circle{
   border-color:#FFF;
 }
 .mdl-layout__header-row .mdl-radio .mdl-radio__inner-circle{
   background-color: #FFF;
-}
+} */
 .placeholder-panel{
   opacity:0.3;
 }
@@ -826,6 +832,13 @@ td.actions .material-icons{
   .mdl-snackbar--active{
     transform:translate(0,0px)
   }
+}
+
+.header-with-button{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .mint-panel .mint-image {

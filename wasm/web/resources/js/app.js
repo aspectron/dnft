@@ -345,11 +345,16 @@ class App{
         this.marketplaceMintPanelHolder = $("#marketplace-mint-panel-holder");
         this.saleSettingDialog = $dialog("#sale-setting");
         this.mintSchemaInfoDialog = $dialog("#mint-schema-info-dialog");
+        this.selectAnotherMintForBrowseBtn = $(".select-another-mint-for-browse");
+        this.selectAnotherMintForMarketplaceBtn = $(".select-another-mint-for-marketplace");
         this.marketFilter = {};
         this.mainEl = mainEl;
         this.loadMints();
         this.loadNFTs();
         this.loadMarketplace();
+
+        this.selectAnotherMintForBrowseBtn.addEventListener("click", this.selectAnotherMintForBrowse.bind(this));
+        this.selectAnotherMintForMarketplaceBtn.addEventListener("click", this.selectAnotherMintForMarketplace.bind(this));
         
         let browseEl = $("#browse");
         let browseMintsEl = $("#browse-mints");
@@ -550,7 +555,8 @@ class App{
     async loadMarketplace(){
         let filter = this.marketFilter;
         if (!filter.mintPubkey || !filter.mintData){//load mints
-            this._marketLoadState.mintPubkey = false; 
+            this._marketLoadState.mintPubkey = false;
+            this.selectAnotherMintForMarketplaceBtn.style.display = "none";
             this.marketplaceTitleEl.innerHTML = "Select Mint";
             //this.marketplaceHeader.
             this._addMintPlaceholders(this.marketplaceListEl, "marketplace");
@@ -566,6 +572,7 @@ class App{
         }
 
         this.marketplaceTitleEl.innerHTML = "Marketplace";
+        this.selectAnotherMintForMarketplaceBtn.style.display = "block";
         let loadState = this._marketLoadState;
         if (loadState.loading)
             return
@@ -573,11 +580,7 @@ class App{
         let {mintPubkey, mintData} = this.marketFilter;
 
         if (loadState.mintPubkey != mintPubkey){
-            let mintPanel = this.createMintHeaderPanel(mintPubkey, mintData, ()=>{
-                this.marketFilter.mintData = false;
-                this.marketFilter.mintPubkey = false;
-                this.loadMarketplace()
-            });
+            let mintPanel = this.createMintHeaderPanel(mintPubkey, mintData);
             this.marketplaceMintPanelHolder.innerHTML = "";
             this.marketplaceMintPanelHolder.appendChild(mintPanel);
         }
@@ -687,12 +690,24 @@ class App{
         }
     }
 
+    selectAnotherMintForBrowse(){
+        this._browseLoadState.mintData = false;
+        this._browseLoadState.mintPubkey = false;
+        this.loadNFTs();
+    }
+    selectAnotherMintForMarketplace(){
+        this.marketFilter.mintData = false;
+        this.marketFilter.mintPubkey = false;
+        this.loadMarketplace()
+    }
+
     async loadNFTs(){
         let loadState = this._browseLoadState;
         if (!loadState.mintPubkey || !loadState.mintData){
             if (loadState.mintLoaded){
                 return
             }
+            this.selectAnotherMintForBrowseBtn.style.display = "none";
             loadState.mintLoaded = true;
             loadState.loadedMintPubkey = false;
             loadState.page = 0;
@@ -709,6 +724,7 @@ class App{
             }
             return
         }
+        this.selectAnotherMintForBrowseBtn.style.display = "block";
         this.nftListTitleEl.innerHTML = "NFTs";
         loadState.mintLoaded = false;
 
@@ -720,11 +736,7 @@ class App{
         if (loadState.loadedMintPubkey != mintPubkey){
             loadState.loadedMintPubkey = mintPubkey;
             loadState.page = 0;
-            let mintPanel = this.createMintHeaderPanel(mintPubkey, mintData, ()=>{
-                this._browseLoadState.mintData = false;
-                this._browseLoadState.mintPubkey = false;
-                this.loadNFTs();
-            });
+            let mintPanel = this.createMintHeaderPanel(mintPubkey, mintData);
             this.browseMintPanelHolder.innerHTML = "";
             this.browseMintPanelHolder.appendChild(mintPanel);
 
@@ -894,9 +906,9 @@ class App{
         let image = data.image.replace("http://localhost", `http://${location.hostname}`);
         clone.querySelector(".mint-image").style.backgroundImage = `url(${image})`;
         clone.querySelector(".mint-pubkey").innerHTML = this.shortenPubkey(pubkey);
-        clone.querySelector(".change-mint").addEventListener("click", ()=>{
+        clone.querySelector(".change-mint")?.addEventListener("click", ()=>{
             console.log("changeBtnCallback")
-            changeBtnCallback();
+            changeBtnCallback?.();
         })
         return panel
     }
@@ -933,6 +945,10 @@ class App{
             clickToViewEl.innerHTML = "Click to Browse";
             clickToViewEl.classList.add("click-to-browse-btn")
             panel.querySelector(".mdl-card__title-text").appendChild(clickToViewEl);
+        }
+        if (key != "mints"){
+            clone.querySelector(".mdl-card__actions").remove();
+            return panel
         }
         // clone.querySelector(".mint-description").innerHTML = 
         // `<div class="mint-description-text">${description.join("<br />")}</div>`;

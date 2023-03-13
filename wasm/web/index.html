@@ -105,7 +105,12 @@
       <main class="mdl-layout__content">
         <div class="mdl-layout__tab-panel is-active" id="browse">
           <div class="main-container" id="browse-nft-container">
-            <h2 id="browse-list-title">NFTs</h2>
+            <div class="header-with-button">
+              <h2 id="browse-list-title">NFTs</h2>
+              <button class="select-another-mint-for-browse mdl-button mdl-js-button mdl-button--big mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                Select Another Mint
+              </button>
+            </div>
             <div id="browse-mint-panel-holder" class="browse-mint-panel-holder"></div>
             <div class="mdl-grid nft-list" id="browse-list">
 
@@ -144,7 +149,12 @@
         </div>
         <div class="mdl-layout__tab-panel" id="marketplace">
           <div class="marketplace-head">
-            <h2 id="marketplace-title">Marketplace</h2>
+            <div class="header-with-button">
+              <h2 id="marketplace-title">Marketplace</h2>
+              <button class="select-another-mint-for-marketplace mdl-button mdl-js-button mdl-button--big mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                Select Another Mint
+              </button>
+            </div>
             <div id="marketplace-mint-panel-holder"></div>
           </div>
           <div class="marketplace-header">
@@ -229,9 +239,9 @@
                 <div class="mint-image mdl-card__title">
                   <span class="mint-pubkey"></span>
                   <h2 class="mint-title mdl-card__title-text"></h2>
-                  <button class="change-mint mdl-button mdl-js-button mdl-button--big mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                  <!-- <button class="change-mint mdl-button mdl-js-button mdl-button--big mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
                     Select Another Mint
-                  </button>
+                  </button> -->
                 </div>
               </div>
             </template>
