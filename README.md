@@ -1,14 +1,14 @@
 # `delta-nft framework`
 
-Delta NFT project - created for [Solana Grizzlython](https://solana.com/grizzlython) Hackathon
+Detailed information about this project can be found at [https://deltanft.xyz](https://deltanft.xyz)
+
+Delta NFT project - created for the [Solana Grizzlython](https://solana.com/grizzlython) Hackathon
 
 The goal of this project is to create a new NFT standard that provides users with the ability to create NFTs that contain custom authority-managed data schemas. Data schemas that can be created are meant to represent different real or virtual assets, while carrying detailed information about them within each token issued. Authority-managed means that data stored in each schema can be managed by pre-defined set of authorities.
 
 DNFT mints are similar to database tables, where groups of fields can have different authorities managing them.
 
 The secondary goal of this project is to demonstrate the upcoming [Solana Kaizen Framework](https://aspectron.com/en/projects/kaizen.html) - a Rust-centric framework that focuses on allowing the creation of business-oriented WebAssembly-powered (WASM32) DApps.
-
-Detailed information about this project can be found at [https://deltanft.xyz](https://deltanft.xyz)
 
 ## Requirements
 
