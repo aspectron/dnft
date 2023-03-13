@@ -264,7 +264,11 @@ impl<'info, 'refs> Token<'info, 'refs> {
         )?;
 
         let token = Token::try_load(&ctx.handler_accounts[0])?;
-        token.meta.borrow_mut().set_authority(*ctx.authority.key);
+        let mut meta = token.meta.borrow_mut();
+        meta.set_authority(*ctx.authority.key);
+        let mut sale = meta.sale;
+        sale.set_for_sale(ForSale::No);
+        meta.set_sale(sale);
 
         Ok(())
     }
