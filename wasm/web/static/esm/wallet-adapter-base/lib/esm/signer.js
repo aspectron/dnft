@@ -1,10 +1,11 @@
-import { BaseWalletAdapter } from './adapter.js';
+import { BaseWalletAdapter, } from './adapter.js';
 import { WalletSendTransactionError, WalletSignTransactionError } from './errors.js';
+import { isVersionedTransaction } from './transaction.js';
 export class BaseSignerWalletAdapter extends BaseWalletAdapter {
     async sendTransaction(transaction, connection, options = {}) {
         let emit = true;
         try {
-            if ('version' in transaction) {
+            if (isVersionedTransaction(transaction)) {
                 if (!this.supportedTransactionVersions)
                     throw new WalletSendTransactionError(`Sending versioned transactions isn't supported by this wallet`);
                 if (!this.supportedTransactionVersions.has(transaction.version))
@@ -51,7 +52,7 @@ export class BaseSignerWalletAdapter extends BaseWalletAdapter {
     }
     async signAllTransactions(transactions) {
         for (const transaction of transactions) {
-            if ('version' in transaction) {
+            if (isVersionedTransaction(transaction)) {
                 if (!this.supportedTransactionVersions)
                     throw new WalletSignTransactionError(`Signing versioned transactions isn't supported by this wallet`);
                 if (!this.supportedTransactionVersions.has(transaction.version))
