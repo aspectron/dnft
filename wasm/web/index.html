@@ -64,6 +64,8 @@
             PhantomWalletAdapter,
             WalletReadyState
           } = await import("/static/solana.js");
+          solanaWeb3.PhantomWalletAdapter = PhantomWalletAdapter;
+          solanaWeb3.WalletReadyState = WalletReadyState;
 
           const wasm = await dnft.default('./dnft/dnft_bg.wasm');
 

@@ -15,10 +15,47 @@ let program_id = new PublicKey("5UAQGzYRWKEgdbpZCqoUjKDKiWpNbHeataWknRpvswEH");
 
 let key_data = Uint8Array.from([199,8,110,17,134,223,143,213,213,118,61,54,185,122,37,153,126,183,243,252,165,177,1,156,58,179,30,234,5,103,1,166,137,204,62,6,108,70,181,61,102,137,201,245,209,108,20,107,218,144,142,9,237,45,167,71,176,4,165,192,75,135,58,183]);
 const payer = Keypair.fromSecretKey(key_data);
-const connection = new Connection(
+const connection = new solanaWeb3.Connection(
     "http://localhost:8899",
     'confirmed'
 );
+
+async function testWallet(){
+    const connection = new solanaWeb3.Connection(
+        "http://localhost:8899",
+        'confirmed'
+    );
+
+    let blockhash = (await connection.getLatestBlockhash()).blockhash;
+
+    // let tx = new solanaWeb3.Transaction({
+    //     "recentBlockhash": blockhash,//"CScCTs3vxCTGioKssbQc3X4pHNFhwASxB6711ABN1gja",
+    //     "feePayer": new solanaWeb3.PublicKey("J92gL9eTqSLMGZQzr2yw2Jh2Wbsk1UEtJEnsMNY2HS9D"),
+    //     "nonceInfo": null,
+    // });
+    let feePayer = new solanaWeb3.PublicKey("J92gL9eTqSLMGZQzr2yw2Jh2Wbsk1UEtJEnsMNY2HS9D");
+    let tx = new solanaWeb3.Transaction();
+    tx.recentBlockhash = blockhash;
+    tx.feePayer = feePayer;
+    tx.add({
+        "keys":[{
+            "pubkey":new solanaWeb3.PublicKey("J92gL9eTqSLMGZQzr2yw2Jh2Wbsk1UEtJEnsMNY2HS9D"),
+            "isSigner":true,
+            "isWritable":true
+        },{
+            "pubkey":new solanaWeb3.PublicKey("YA7NvczboDEtoBUUqFQzhX1NLtDf6qKEYQFiLqrNubm"),
+            "isSigner":false,
+            "isWritable":true
+        }],
+        "programId":new solanaWeb3.PublicKey("5UAQGzYRWKEgdbpZCqoUjKDKiWpNbHeataWknRpvswEH"),
+        //"data": solanaWeb3.Buffer.from([1,0,0,0,0,0,0,0,0,17,0,17,0,2,0,1,0,0,0,1,1,0,0,184,100,217,69,0,0,0])
+        "data": Uint8Array.from([1,0,0,0,0,0,0,0,0,17,0,17,0,2,0,1,0,0,0,1,1,0,0,184,100,217,69,0,0,0])
+    });
+
+    let a = await solana.signAndSendTransaction(tx);
+    console.log("sssss", a);
+
+}
 
 
 async function check_mint(){
