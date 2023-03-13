@@ -870,7 +870,9 @@ class App{
                 }
                 clone.querySelector(".setting-btn-text").innerHTML = isMarketplace? "Sale Settings" :"LISTED FOR SALE";
             }else{
-                clone.querySelector(".setting-btn-text").innerHTML = `NOT LISTED`;
+                let btn = clone.querySelector(".setting-btn-text");
+                btn.innerHTML = `NOT LISTED`;
+                btn.parentElement.classList.add("not-listed");
             }
             el.coinMeta = meta;
             if (this.walletPubkey?.toString() == meta.authority().toString()){

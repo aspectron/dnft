@@ -562,6 +562,9 @@ td.actions .material-icons{
 .nft-panel .mdl-card__actions .setting-btn i{
   font-size:1.2rem;
 }
+.nft-panel .mdl-card__actions .setting-btn.not-listed{
+  opacity:0.6;
+}
 .nft-panel .mdl-card__actions .mdl-progress{
   position:absolute;
   top:-1px;left:0px;right:0px; 
