@@ -245,15 +245,20 @@
               <div class="mint-panel mdl-cell mdl-cell--6-col mdl-card mdl-shadow--2dp">
                 <div class="mint-image mdl-card__title">
                   <span class="mint-pubkey"></span>
-                  <h2 class="mint-title mdl-card__title-text"></h2>
-                  <button data-action="toggle-description" class="mdl-button mint-info-toggle-btn">
-                    <i class="material-icons">information</i>
-                  </button>
+                  <div class="mdl-card__title-text">
+                    <h3 class="mint-title"></h3>
+                  </div>
                 </div>
-                <div class="mdl-card__supporting-text">
+                <!-- <div class="mdl-card__supporting-text">
                   <div class="mint-description"></div>
-                </div>
+                  
+                </div> -->
                 <div class="mdl-card__actions mdl-card--border">
+                  <div class="show-schema-information-btn-holder">
+                    <button data-action="show-schema-information" class="mdl-button show-schema-information-btn">
+                      <i class="material-icons">info</i> Schema Information 
+                    </button>
+                  </div>
                   <button data-action="create-token" class="create-token mdl-button mdl-js-button mdl-button--big mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
                     CREATE TOKEN
                   </button>
@@ -472,6 +477,22 @@
             </dialog>
           </div>
         </div>
+        <dialog id="mint-schema-info-dialog" class="mdl-dialog mint-schema-info-dialog">
+          <div class="image">
+            <h4 class="mdl-dialog__title title"></h4>
+          </div>
+          <div class="mdl-dialog__content">
+            <div>Mint Address: <span class="pubkey"></span></div>
+            <div class="description">
+              <h4>Default Schema</h4>
+              <div class="schema-detail"></div>
+            </div>
+          </div>
+          <div class="mdl-dialog__actions">
+            <button class="action-btn mdl-button mdl-js-button mdl-button--big mdl-button--raised mdl-js-ripple-effect mdl-button--accent"></button>
+            <button type="button" class="mdl-button mdl-button--big close-dialog">Close</button>
+          </div>
+        </dialog>
         <dialog id="msg-dialog" class="mdl-dialog msg-dialog">
           <h4 class="mdl-dialog__title title"></h4>
           <div class="mdl-dialog__content msg"></div>

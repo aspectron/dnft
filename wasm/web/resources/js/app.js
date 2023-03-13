@@ -344,6 +344,7 @@ class App{
         this.marketplaceTitleEl = $("#marketplace-title");
         this.marketplaceMintPanelHolder = $("#marketplace-mint-panel-holder");
         this.saleSettingDialog = $dialog("#sale-setting");
+        this.mintSchemaInfoDialog = $dialog("#mint-schema-info-dialog");
         this.marketFilter = {};
         this.mainEl = mainEl;
         this.loadMints();
@@ -866,8 +867,8 @@ class App{
             }
         }
     }
-    async _loadMints(start, key="mints", isMintPage=false){
-        key = "_mintsLoading"+key;
+    async _loadMints(start, pageType="mints"){
+        let key = "_mintsLoading"+pageType;
         if (this[key])
             return [];
         this[key] = true;
@@ -877,7 +878,7 @@ class App{
         for (let pubkey of pubkeys){
             let data = this.mintData[pubkey+""] || await this.dnft.getMintData(pubkey);
             this.mintData[pubkey+""] = data;
-            let el = this.createMintPenel(pubkey, data, isMintPage);
+            let el = this.createMintPenel(pubkey, data, pageType);
             panels.push(el)
         }
         this[key] = false;
@@ -900,63 +901,86 @@ class App{
         return panel
     }
 
-    createMintPenel(pubkey, data, isMintPage=false){
+    createMintPenel(pubkey, data, key="mints"){
         let clone =  this.mintPanelTpl.content.cloneNode(true);
         let panel = clone.children[0];
-        if (data){
-            panel.mintData = data;
-            panel.dataset.pubkey = pubkey;
-            clone.querySelector(".mint-title").innerHTML = data.name;
-            clone.querySelector(".create-token").dataset.pubkey = pubkey;
-            let image = data.image.replace("http://localhost", `http://${location.hostname}`);
-            clone.querySelector(".mint-image").style.backgroundImage = `url(${image})`;
-            let description = ["<bold>Fields</bold>"];
-            for (let field of data.schema){
-                description.push(`${field.type}: ${field.name}, ${field.description}`)
-            }
-            let descrEl = clone.querySelector(".mint-description");
-            if (!isMintPage){
-                clone.querySelector(".mdl-card__actions").remove();
-                panel.dataset.action = "open";
-                panel.classList.add("hide-description");
-                descrEl.innerHTML = 
-                `<div class="mint-description-text">${description.join("<br />")}</div><div>Click to Browse</div>`;
-            }else{
-                descrEl.innerHTML = 
-                `<div class="mint-description-text">${description.join("<br />")}</div>`;
-            }
-            
-        }
         clone.querySelector(".mint-pubkey").innerHTML = this.shortenPubkey(pubkey);
-        
-        // console.log("data#####", data)
-        // let td_name = document.createElement("td");
-        // let pubkey_text = document.createElement("div");
-        // pubkey_text.setAttribute("class", "mint-pubkey");
-        // pubkey_text.innerHTML = this.dnft.shortenPubkey(pubkey);
-        // let td_name_text = document.createElement("div");
-        // td_name_text.innerHTML = "DNFT "+index;
-        // td_name.appendChild(pubkey_text);
-        // td_name.appendChild(td_name_text);
-        // td_name.setAttribute("class", "mint-name-cell mdl-data-table__cell--non-numeric");
+        if (!data){
+            return panel
+        }
+    
+        panel.mintData = data;
+        panel.dataset.pubkey = pubkey;
+        clone.querySelector(".mint-title").innerHTML = data.name;
+        clone.querySelector(".create-token").dataset.pubkey = pubkey;
+        let image = data.image.replace("http://localhost", `http://${location.hostname}`);
+        clone.querySelector(".mint-image").style.backgroundImage = `url(${image})`;
+        let description = [];
+        for (let field of data.schema){
+            description.push(`<div class="field-info">
+                <div class="field-type-name">
+                    <span class="field-type">${field.type}</span>
+                    <span class="field-name">${field.name}</span>
+                </div>
+                <div class="field-description">${field.description}</div>
+            </div>`)
+        }
+        if (key!="mints"){
+            //clone.querySelector(".mdl-card__actions").remove();
+            panel.dataset.action = "open";
+            //panel.classList.add("hide-description");
+            let clickToViewEl = document.createElement("div")
+            clickToViewEl.innerHTML = "Click to Browse";
+            clickToViewEl.classList.add("click-to-browse-btn")
+            panel.querySelector(".mdl-card__title-text").appendChild(clickToViewEl);
+        }
+        // clone.querySelector(".mint-description").innerHTML = 
+        // `<div class="mint-description-text">${description.join("<br />")}</div>`;
+        clone.querySelector(".show-schema-information-btn").addEventListener("click", ()=>{
+            let dlg = this.mintSchemaInfoDialog;
+            dlg.querySelector(".image").style.backgroundImage = `url(${image})`;
+            dlg.querySelector(".pubkey").innerHTML = pubkey;
+            dlg.querySelector(".schema-detail").innerHTML = description.join("");
+            dlg.querySelector(".title").innerHTML = data.name;
+            let btn = dlg.querySelector(".action-btn");
+            if (!btn._eventLisnterAdded){
+                btn._eventLisnterAdded = true;
+                btn.addEventListener("click", ()=>{
+                    btn._clickCallback?.();
+                })
+            }
 
-        
-        // td_description.setAttribute("class", "mdl-data-table__cell--wrap-text");
-
-        
-        // let btn = document.createElement("button");
-        // btn.classList.add("mdl-button", "mint-dnft");
-        // btn.innerHTML = "Mint it";
-        // btn.dataset.pubkey = pubkey;
-
-        // let td_action = document.createElement("td");
-        // td_action.appendChild(btn);
-
-        // let tr = document.createElement("tr");
-        // tr.appendChild(td_name);
-        // tr.appendChild(td_description);
-        // tr.appendChild(td_action);
-
+            if (key == "browse"){
+                btn.innerHTML = "Browse Mint";
+                btn._clickCallback = ()=>{
+                    dlg.close();
+                    this._browseLoadState = {
+                        mintPubkey: panel.dataset.pubkey,
+                        mintData: panel.mintData
+                    }
+                    this.loadNFTs();
+                }
+            }else if (key=="marketplace"){
+                btn.innerHTML = "Browse Mint";
+                btn._clickCallback = ()=>{
+                    dlg.close();
+                    this.marketFilter = {
+                        mintPubkey: panel.dataset.pubkey,
+                        mintData: panel.mintData
+                    }
+                    this.loadMarketplace();
+                }
+            }else{
+                btn.innerHTML = "Create Token";
+                btn._clickCallback = ()=>{
+                    dlg.close();
+                    this.loadSchema(panel.dataset.pubkey);
+                    this.mintFormDialog.showModal();
+                }
+            }
+            dlg.showModal();
+            dlg.scrollTo({top:0, behavior:"smooth"});
+        })
         return panel;
     }
     shortenPubkey(pubkey){

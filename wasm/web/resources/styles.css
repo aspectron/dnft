@@ -540,7 +540,8 @@ td.actions .material-icons{
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  padding:5px 20px;
+  padding:10px 20px;
+  min-height:72px;
 }
 .nft-panel .mdl-card__actions button{
   font-size:1rem;
@@ -574,7 +575,8 @@ td.actions .material-icons{
   position: relative;
 }
 .nft-panel .mdl-card__title-text,
-.mint-panel .mdl-card__title-text{
+.mint-panel .mdl-card__title-text,
+.mint-schema-info-dialog .image .mdl-dialog__title{
   color: #ffffff;
   background-color: rgba(0, 0, 0, 0.2);
   padding: 15px;
@@ -623,13 +625,74 @@ td.actions .material-icons{
 .token-form{
   padding-top:0px;
 }
-.mint-info-toggle-btn{
-  position: absolute;
-    right: 10px;
-    bottom: 12px;
-    min-width: 0px;
-    width:55px;
-    color: #FFF;
+.show-schema-information-btn-holder{
+  flex: 1;
+  min-width: fit-content;
+  text-align: left;
+}
+.show-schema-information-btn{
+  text-transform: none;
+  padding:0px 5px;
+  color:#808080;
+  white-space: nowrap;
+  min-width: fit-content;
+  text-align: left;
+  margin:5px 10px 5px 0px;
+}
+.mint-schema-info-dialog{
+  width: 90%;
+  max-width: 700px;
+}
+.mint-schema-info-dialog .description{
+  padding:0px 0px 20px;
+}
+.mint-schema-info-dialog .image{
+  height: 250px;
+  background: center / cover no-repeat;
+  position: relative;
+}
+
+.mint-schema-info-dialog .field-info{
+  display:flex;
+  align-items:center;
+  flex-wrap: wrap;
+  border-bottom:1px solid #EDEDED;
+  padding:5px 0px;
+}
+.mint-schema-info-dialog .field-info .field-type-name{
+  margin-right:10px;
+}
+.mint-schema-info-dialog .field-info .field-type,
+.mint-schema-info-dialog .field-info .field-name{
+  min-width:100px;display:inline-block;
+  margin-right:10px;
+}
+.mint-schema-info-dialog .field-info .field-description{
+  margin:5px 0px;
+}
+@media (max-width:600px) {
+  .mint-schema-info-dialog .pubkey{
+    font-size:1rem;
+  }
+}
+
+.mint-panel .mdl-card__title-text{
+  display:flex;
+  align-items:center;
+  flex-wrap: wrap;
+}
+.mint-panel .mdl-card__title-text .mint-title{
+  margin:0px 5px 0px;
+  font-size:24px;
+  flex:1;line-height:1;
+}
+.mint-list .mint-panel .mdl-card__actions{
+  flex-direction:row;
+  justify-content: flex-end;
+}
+.click-to-browse-btn{
+  white-space:nowrap;
+  font-size:20px;
 }
 /* .mint-name-cell{
   position: relative;
