@@ -260,7 +260,8 @@ td.actions .material-icons{
 }
 .main-container#browse-nft-container,
 .main-container#marketplace-nft-container,
-.main-container#browse-mint-container{
+.main-container#browse-mint-container,
+.main-container#mynfts-container{
   max-width:1110px;
   width:90%;
 }

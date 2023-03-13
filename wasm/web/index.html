@@ -100,6 +100,7 @@
             <a href="#marketplace" class="mdl-layout__tab">Marketplace</a>
             <a href="#create-dnft" class="mdl-layout__tab">Create  Mint</a>
             <a href="#browse-mints" class="mdl-layout__tab">Create Tokens</a>
+            <a href="#mynfts" class="mdl-layout__tab">My NFTs</a>
         </div>
       </header>
       <main class="mdl-layout__content">
@@ -130,17 +131,10 @@
                     <div class="bufferbar bar bar2" style="width: 100%;"></div>
                     <div class="auxbar bar bar3" style="width: 0%;"></div>
                   </div>
-                  <!--button type="button" data-action="buy" disabled class="user-btn mdl-button availability-btn _mdl-button--raised">See availability</button-->
                   <button type="button" data-action="setting" class="user-btn mdl-button setting-btn mdl-button--raised _mdl-button--accent mdl-button--primary">
                     <span class="setting-btn-text"></span>
                     <i class="material-icons">settings</i>
                   </button>
-                  <!-- <div class="setting-btn h-box center">
-                    <span class="setting-btn-text"></span>
-                    <button type="button" data-action="setting" class="user-btn mdl-button setting-btn">
-                      <i class="material-icons">settings</i>
-                    </button>
-                  </div> -->
                   <div class="sale-price"></div>
                 </div>
               </div>
@@ -485,6 +479,20 @@
                 <button type="button" class="mdl-button close-dialog">Close</button>
               </div>
             </dialog>
+          </div>
+        </div>
+        <div class="mdl-layout__tab-panel" id="mynfts">
+          <div class="main-container" id="mynfts-container">
+            <div class="header-with-button">
+              <h2 id="browse-list-title">My NFTs</h2>
+              <!-- <button class="select-another-mint-for-browse mdl-button mdl-js-button mdl-button--big mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                Select Another Mint
+              </button> -->
+            </div>
+            <!-- <div id="mynfts-panel-holder" class="my-nfts-panel-holder"></div> -->
+            <div class="mdl-grid mynfts-list" id="mynfts-list">
+
+            </div>
           </div>
         </div>
         <dialog id="mint-schema-info-dialog" class="mdl-dialog mint-schema-info-dialog">

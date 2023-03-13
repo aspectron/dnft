@@ -122,6 +122,7 @@ class App{
         this.mintData = {};
         this._browseLoadState = {};
         this._marketLoadState = {page: 0, saleType:1};
+        this._myNFTsLoadState = {};
         this.initMsgDialog();
         await this.initApp();
         this.initUpload();
@@ -344,6 +345,7 @@ class App{
         this.marketplaceListEl = $("#marketplace-list");
         this.marketplaceTitleEl = $("#marketplace-title");
         this.marketplaceMintPanelHolder = $("#marketplace-mint-panel-holder");
+        this.mynftsListEl =$("#mynfts-list");
         this.saleSettingDialog = $dialog("#sale-setting");
         this.mintSchemaInfoDialog = $dialog("#mint-schema-info-dialog");
         this.selectAnotherMintForBrowseBtn = $(".select-another-mint-for-browse");
@@ -353,6 +355,7 @@ class App{
         this.loadMints();
         this.loadNFTs();
         this.loadMarketplace();
+        this.loadMyNFTs();
 
         this.selectAnotherMintForBrowseBtn.addEventListener("click", this.selectAnotherMintForBrowse.bind(this));
         this.selectAnotherMintForMarketplaceBtn.addEventListener("click", this.selectAnotherMintForMarketplace.bind(this));
@@ -406,7 +409,7 @@ class App{
             })
         });
 
-        [this.marketplaceListEl, this.nftListEl].forEach(list=>{
+        [this.marketplaceListEl, this.nftListEl, this.mynftsListEl].forEach(list=>{
             list.addEventListener("click", (e)=>{
                 let el = e.target.closest("[data-action]");
                 if (!el){
@@ -677,7 +680,8 @@ class App{
             let panel = this.createNFTPanel(mintPubkey, mintData, ...account, tpl);
             this._appendPanel(list, panel, ".nft-panel");
         }
-        if (isBuyActivity || account[1]?.sale?.().listed()){
+        let meta = account[1];
+        if (isBuyActivity || meta?.sale?.().listed()){
             if (mintPubkey == this.marketFilter.mintPubkey){
                 addPanel(this.marketplaceListEl, this.marketNFTTemplateEl)
             }
@@ -689,6 +693,10 @@ class App{
         }
         if (mintPubkey == this._browseLoadState.mintPubkey){
             addPanel(this.nftListEl)
+        }
+
+        if (meta && this.walletPubkey?.toString() == meta.authority().toString()){
+            addPanel(this.mynftsListEl)
         }
     }
 
@@ -768,6 +776,60 @@ class App{
         }
         elements.map(el=>this._appendPanel(this.nftListEl, el, ".nft-panel"));
         if (elements.length && this.getActiveTabName() == "browse"){
+            this.mainEl.scrollTo({top: scrollTop, behavior:"smooth"});
+        }
+        loadState.loading = false;
+    }
+
+    async loadMyNFTs(){
+        let loadState = this._myNFTsLoadState;
+        if (loadState.loading)
+            return
+        loadState.loading = true;
+        let havePlaceholder = false;
+        if (!loadState._loaded){
+            loadState._loaded = true;
+            loadState.mintPages = {};
+            this._addNFTPlaceholders(this.mynftsListEl, "mynfts");
+            havePlaceholder = true;
+        }
+        
+        let elements = [];
+        let accounts = [];
+
+        let mintPubkeys = await this.dnft.getMintPubkeys(0n, 2000n);
+
+        const LOAD_COUNT = 1000;
+        for(let index=0; index<mintPubkeys.length; index++){
+            let mintPubkey = mintPubkeys[index]+"";
+            let mintData = this.mintData[mintPubkey] || await this.dnft.getMintData(mintPubkey);
+            console.log("mintPubkey###", mintPubkey, mintData)
+            let page = loadState.mintPages[mintPubkey] || 0;
+            do{
+                accounts = await this.dnft.getAllTokens(mintPubkey, page);
+                let accountFilted = accounts.filter(info=>{
+                    let meta = info[1];
+                    return (this.walletPubkey?.toString() == meta.authority().toString())
+                })
+                let panels = this.createNFTPanels(mintPubkey, mintData, accountFilted);
+                elements.push(...panels);
+                loadState.mintPages[mintPubkey] = page
+                page++;
+                console.log("accounts", accounts)
+            } while (accounts.length && elements.length < LOAD_COUNT);
+
+            if (elements.length >= LOAD_COUNT){
+                break;
+            }
+        }
+        
+        let scrollTop = 0;
+        if (havePlaceholder){
+            scrollTop = 130;
+            this.mynftsListEl.innerHTML = "";
+        }
+        elements.map(el=>this._appendPanel(this.mynftsListEl, el, ".nft-panel"));
+        if (elements.length && this.getActiveTabName() == "mynfts"){
             this.mainEl.scrollTo({top: scrollTop, behavior:"smooth"});
         }
         loadState.loading = false;
