@@ -796,6 +796,11 @@ td.actions .material-icons{
 }
 .sale-setting-dialog .mdl-dialog__title .pubkey{
   font-size:1rem;
+  display:block;
+}
+.sale-setting-dialog:not(.listed) .setting-sale-type-inputs,
+.sale-setting-dialog:not(.listed) .price-input{
+  display:none;
 }
 .setting-sale-type-inputs{
   margin:10px 0px;

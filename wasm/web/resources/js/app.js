@@ -468,6 +468,7 @@ class App{
     }
 
     updateSettingListed(listed){
+        this.saleSettingDialog.classList.toggle("listed", listed);
         let checkbox = $("#setting-for-sale").MaterialCheckbox;
         let priceField = $("#setting-sale-price");
         let priceInput = priceField.MaterialTextfield;
@@ -804,7 +805,7 @@ class App{
                     let price = this.dnft.lamportsToSol(em.price).toFixed(5);
                     salePriceEl.innerHTML = `${price} ${em.coin}`
                 }
-                clone.querySelector(".setting-btn-text").innerHTML = isMarketplace? "Sale Setting" :"LISTED FOR SALE";
+                clone.querySelector(".setting-btn-text").innerHTML = isMarketplace? "Sale Settings" :"LISTED FOR SALE";
             }else{
                 clone.querySelector(".setting-btn-text").innerHTML = `NOT LISTED`;
             }
