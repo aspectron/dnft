@@ -40,9 +40,3 @@ impl<'info, 'refs> Root<'info, 'refs> {
 }
 
 declare_handlers!(Root::<'info, 'refs>, [Root::create]);
-
-// #[cfg(not(target_os = "solana"))]
-// pub mod client {
-//     use super::*;
-
-// }

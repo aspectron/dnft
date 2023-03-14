@@ -68,18 +68,9 @@ impl From<Error> for JsValue {
     }
 }
 
-// impl From<Error> for JsError {
-//     fn from(err: Error) -> Self {
-//         match err {
-//             Error::JsError(err) => err,
-//             _ => Error::JsError(err.to_string())
-//         }
-//     }
-// }
-
 impl From<JsValue> for Error {
     fn from(value: JsValue) -> Self {
-        Error::JsValue(value) //JsValue::from(&value.as_string().unwrap_or_else(||format!("{}", value))))
+        Error::JsValue(value)
     }
 }
 

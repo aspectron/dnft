@@ -1,6 +1,5 @@
 use super::result::Result;
 use crate::prelude::*;
-// use super::error::Error;
 use crate::program::*;
 
 pub type Description = String;
@@ -53,14 +52,6 @@ impl Field {
 
 impl fmt::Display for Field {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        /*
-        f.debug_struct("Field")
-            .field("type", &format!("{:?}", self.data_type))
-            .field("name", &format!("{}", self.name))
-            .field("description", &format!("{}", self.description));
-        Ok(())
-        */
-
         write!(
             f,
             "Field {{ type: {:?},  name:'{}', descr:'{}' }}",

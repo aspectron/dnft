@@ -7,7 +7,6 @@ pub mod tests {
         program_id,
     };
     use kaizen::{prelude::*, result::Result, utils::sol_to_lamports};
-    //use std::str::FromStr;
 
     #[async_std::test]
     async fn example_test() -> Result<()> {
@@ -194,20 +193,8 @@ pub mod tests {
             log_info!("mint {mint_seq} creation ok - {}", mint_container.pubkey());
         }
 
-        //let mint_pubkeys = vec![Pubkey::from_str("8bmnuP1HuDMmM2Yz8gZ5KLRJA8pYXboFVd3uZtLnF3nx").unwrap()];
-
-        // ----------------------------------------------------------------------------
-        // let sale_types = [
-        //     SaleType::Sale,
-        //     SaleType::Auction,
-        //     SaleType::Barter,
-        //     SaleType::None,
-        //     SaleType::Raffle,
-        //     SaleType::Rent,
-        // ];
         let mut img_index = 0;
         for mint_seq in 0..MAX_MINTS {
-            //let mut sale_type_index = 0;
             for token_seq in 0..MAX_TOKENS {
                 log_info!("creating token {mint_seq}:{token_seq}");
 
@@ -216,11 +203,6 @@ pub mod tests {
                     .await?
                     .expect("¯\\_(ツ)_/¯");
 
-                //let sale_type = sale_types[sale_type_index];
-                // sale_type_index += 1;
-                // if sale_type_index == sale_types.len() {
-                //     sale_type_index = 0;
-                // }
                 let sol = (token_seq as f64) + 1.0 / 100.0;
                 let args = program::TokenCreateFinalArgs {
                     for_sale: program::ForSale::Yes,
@@ -288,9 +270,6 @@ pub mod tests {
 
                 log_info!("\ttoken {token_seq} {token_account_pubkey}");
             }
-
-            // let schema = mint_container.data_types.load()?;
-            // log_info!("\n\nmint container schema: {:#?}\n", schema);
         }
 
         Ok(())

@@ -1,10 +1,7 @@
 use super::error::Error;
 use super::result::Result;
 use crate::prelude::*;
-// use crate::program;
-// use crate::program::DataType;
 use program::{DataType, Url};
-// use program::Url;
 
 #[derive(Debug, Clone, TryFromJsValue)]
 #[wasm_bindgen]
@@ -24,15 +21,6 @@ fn get_data_type(js_value: &JsValue) -> Result<DataType> {
     Ok(data_type)
 }
 
-//     fn load_data(args: &JsValue) -> Result<program::Data> {
-//         let mut vec = js_sys::Array::from(args).to_vec();
-//         let data_type = get_data_type(&vec.remove(0))?;
-//         let data: program::Data = (data_type, vec).try_into()?;
-//         // Ok(Data {
-//         Ok(data)
-//         // })
-// }
-
 #[wasm_bindgen]
 impl Data {
     #[wasm_bindgen(constructor, variadic)]
@@ -46,7 +34,6 @@ impl Data {
     #[allow(clippy::inherent_to_string)]
     #[wasm_bindgen(js_name = "toString")]
     pub fn to_string(&self) -> String {
-        // format!("{}", self.data)
         self.data.to_string()
     }
 }
@@ -87,15 +74,10 @@ impl From<Data> for program::Data {
 }
 
 impl TryFrom<(DataType, Vec<JsValue>)> for program::Data {
-    // type Error = kaizen::error::Error;
-    // type Error = JsError;
     type Error = Error;
-    // fn try_from((data_type, args): (DataType, Vec<JsValue>)) -> Result<Self, Self::Error> {
-    // fn try_from((data_type, args): (DataType, Vec<JsValue>)) -> Result<Self, Self::Error> {
     fn try_from(
         (data_type, args): (DataType, Vec<JsValue>),
     ) -> std::result::Result<Self, Self::Error> {
-        // use program::Data;
         let data = match data_type {
             DataType::Bool => {
                 ensure_args(&args, 1)?;
@@ -202,28 +184,3 @@ impl TryFrom<(DataType, Vec<JsValue>)> for program::Data {
         Ok(data)
     }
 }
-
-// impl From<String> for JsError {
-//     fn from(err: String) -> Self {
-//         JsError::new(&err)
-//     }
-// }
-
-// fn get_instance<T>(js : &JsValue) -> Result<T,JsError>
-// fn get_instance<T>(js : &JsValue) -> Result<T>
-// where T: RefFromWasmAbi<Abi = u32> + Clone
-// {
-
-//     let ctor = ::js_sys::Reflect::get(js, &::wasm_bindgen::JsValue::from_str("constructor"))?;
-//     log_info!("ctor: {:?}", ctor);
-//     let name = ::js_sys::Reflect::get(&ctor, &::wasm_bindgen::JsValue::from_str("name"))?;
-//     log_info!("name: {:?}", name);
-
-//     let ptr = ::js_sys::Reflect::get(js, &::wasm_bindgen::JsValue::from_str("ptr"))?;
-//         // .map_err(|err| JsError::new(&format!("{:?}", err)))?; //format!("{:?}", err))?;
-//     let ptr_u32: u32 = ptr.as_f64().ok_or(::wasm_bindgen::JsValue::NULL)?
-//         // .map_err(|err| JsError::new(&format!("{:?}", err)))? //format!("{:?}", err))?
-//         as u32;
-//     let instance_ref = unsafe { T::ref_from_abi(ptr_u32) };
-//     Ok(instance_ref.clone())
-// }

@@ -183,7 +183,6 @@ mod wasm {
         let authority = Transport::global()?.get_authority_pubkey()?;
         let image = ImageUrl::new(&image);
         let tx = Mint::create(&authority, &(name, image, schema).into()).await?;
-        //let mint_account_pubkey = tx.target_account()?;
         let ids = tx.ids()?;
         tx.post().await?;
         Ok(to_value(&ids).unwrap())

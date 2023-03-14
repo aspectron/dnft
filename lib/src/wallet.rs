@@ -11,7 +11,6 @@ use workflow_core::id::Id;
 use workflow_log::log_trace;
 use workflow_store::Store;
 use workflow_wasm::prelude::*;
-//use kaizen::transport::Transport;
 
 static mut APPLICATION: Option<Application> = None;
 
@@ -126,8 +125,6 @@ impl Application {
         self.wallet.connect(Some(adapter)).await?;
 
         self.set_wallet_auto_connect(true).await?;
-        //let transport = Transport::global()?;
-        //let pubkey = transport.wallet();
         let pubkey = self.wallet.pubkey()?;
 
         for (_id, callback) in self.connect_callbacks.inner().iter() {

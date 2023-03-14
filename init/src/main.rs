@@ -22,9 +22,9 @@ pub async fn async_main(with_sample_data: bool) -> Result<()> {
             TransportConfig::default(),
         )
         .await?
-    } else if use_devnet{
+    } else if use_devnet {
         Transport::try_new("https://api.devnet.solana.com", TransportConfig::default()).await?
-    }else{
+    } else {
         Transport::try_new("http://127.0.0.1:8899", TransportConfig::default()).await?
     };
 
@@ -84,7 +84,6 @@ async fn create_sample_data() -> Result<()> {
         "https://cdn.pixabay.com/photo/2019/12/03/22/22/dog-4671215_1280.jpg",
         "https://cdn.pixabay.com/photo/2017/08/18/16/14/dog-2655472_1280.jpg",
         "https://cdn.pixabay.com/photo/2019/05/23/19/29/dog-4224638_1280.jpg",
-
         "https://cdn.pixabay.com/photo/2020/04/08/08/33/cat-5016374_1280.jpg",
         "https://cdn.pixabay.com/photo/2022/02/18/14/27/cat-7020822_1280.jpg",
         "https://cdn.pixabay.com/photo/2021/11/21/22/17/british-shorthair-6815384_1280.jpg",
@@ -160,20 +159,8 @@ async fn create_sample_data() -> Result<()> {
         log_info!("mint {mint_seq} creation ok - {}", mint_container.pubkey());
     }
 
-    //let mint_pubkeys = vec![Pubkey::from_str("8bmnuP1HuDMmM2Yz8gZ5KLRJA8pYXboFVd3uZtLnF3nx").unwrap()];
-
-    // ----------------------------------------------------------------------------
-    // let sale_types = [
-    //     SaleType::Sale,
-    //     SaleType::Auction,
-    //     SaleType::Barter,
-    //     SaleType::None,
-    //     SaleType::Raffle,
-    //     SaleType::Rent,
-    // ];
     let mut img_index = 0;
     for mint_seq in 0..MAX_MINTS {
-        //let mut sale_type_index = 0;
         for token_seq in 0..MAX_TOKENS {
             log_info!("creating token {mint_seq}:{token_seq}");
 
@@ -182,11 +169,6 @@ async fn create_sample_data() -> Result<()> {
                 .await?
                 .expect("¯\\_(ツ)_/¯");
 
-            //let sale_type = sale_types[sale_type_index];
-            // sale_type_index += 1;
-            // if sale_type_index == sale_types.len() {
-            //     sale_type_index = 0;
-            // }
             let sol = (token_seq as f64) + 1.0 / 100.0;
             let args = program::TokenCreateFinalArgs {
                 for_sale: program::ForSale::Yes,
@@ -244,9 +226,6 @@ async fn create_sample_data() -> Result<()> {
 
             log_info!("\ttoken {token_seq} {token_account_pubkey}");
         }
-
-        // let schema = mint_container.data_types.load()?;
-        // log_info!("\n\nmint container schema: {:#?}\n", schema);
     }
 
     Ok(())

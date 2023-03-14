@@ -64,24 +64,12 @@ impl Data {
             // Data::Table(_) => DataType::Table,
         }
     }
-
-    // pub fn is_none(&self) -> bool {
-    //     matches!(self, Data::None)
-    // }
-
-    // pub fn is_some(&self) -> bool {
-    //     !matches!(self, Data::None)
-    // }
 }
 
 #[cfg(not(target_os = "solana"))]
 impl fmt::Display for Data {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // use super::Data;
         match self {
-            // Data::None => {
-            //     write!(f, "None")
-            // }
             Data::Bool(v) => {
                 write!(f, "{v}")
             }
@@ -146,15 +134,6 @@ impl fmt::Display for Data {
 
 #[cfg(not(target_os = "solana"))]
 use wasm_bindgen::prelude::*;
-
-// #[cfg(not(target_os = "solana"))]
-// #[derive(Debug, Serialize, Deserialize)]
-// #[serde(rename_all = "camelCase")]
-// pub enum UrlInfo{
-//     Image(String),
-//     Page(String),
-//     StorageProviderAccess(String)
-// }
 
 #[cfg(not(target_os = "solana"))]
 impl From<Data> for JsValue {
@@ -326,7 +305,6 @@ impl Url {
 #[cfg(not(target_os = "solana"))]
 impl fmt::Display for Url {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // use super::Data;
         match self {
             Url::StorageProviderAccess(url) => write!(f, "{url}"),
             Url::Page(base, url) => write!(f, "{}", Self::build_url(*base, url)),

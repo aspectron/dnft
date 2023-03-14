@@ -67,13 +67,6 @@ impl SaleReference {
     }
 
     pub fn sale_type(&self) -> String {
-        // let mut writer = vec![];
-        // let a = self.inner.sale_type.serialize(&mut writer);
-        // log_trace!("SaleReference:writer: {:?}, a:{:?}", writer, a);
-        // //let v:Vec<u8> = self.inner.sale_type.into();
-        // //log_trace!("SaleReference:sale_type: {:?}", v);
-        // //self.inner.sale_type.into()
-        // "xxxxx".to_string()
         self.inner.sale_type.into()
     }
 
@@ -120,7 +113,6 @@ impl Token {
 
         let token_pubkey = builder.collection_template_pubkey_at(0);
         let accounts = builder.gather_accounts(None, Some(&token_pubkey))?;
-        // log_info!("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ {:?}", accounts);
         let transaction = Transaction::new_with_accounts(
             format!("Creating token {token_pubkey}").as_str(),
             accounts,
@@ -138,7 +130,6 @@ impl Token {
         {
             return Err("Nothing to update.".into());
         }
-        //log_trace!("update_sale_setting: args:{args:?}");
         let builder = client::Token::execution_context_for(program::Token::update_sale_setting)
             .with_authority(authority_pubkey)
             .with_handler_accounts(&[AccountMeta::new(*token_pubkey, false)])
@@ -156,10 +147,6 @@ impl Token {
     }
 
     pub async fn buy(authority_pubkey: &Pubkey, token_pubkey: &Pubkey) -> Result<TransactionList> {
-        // if args.for_sale.is_none() && args.exchange_mechanics.is_none() && args.sale_type.is_none()
-        // {
-        //     return Err("Nothing to update.".into());
-        // }
         let token = load_container::<program::Token>(token_pubkey)
             .await?
             .ok_or_else(|| "Unable to load token container".to_string())?;
@@ -271,11 +258,7 @@ mod wasm {
             //AccountFilter::MemcmpEncodeBase58(40, vec![1]),
         ];
 
-        // log_trace!("market_state: {:?}", market_state);
-        // log_trace!("for_sale: {:?}", for_sale);
-        // log_trace!("sale_type: {:?}", sale_type);
         let sale_type = workflow_wasm::abi::ref_from_abi_as_option!(SaleType, sale_type)?;
-        //log_trace!("sale_type: {sale_type:?}");
         if let Some(state) = market_state {
             let mut state_bytes: Vec<u8> = MarketState::from(state).into();
             if let Some(for_sale) = for_sale {
