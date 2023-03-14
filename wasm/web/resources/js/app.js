@@ -323,9 +323,7 @@ class App{
             $$(".user-btn[disabled]").forEach(el=>{
                 el.disabled = false;
             })
-            setTimeout(()=>{
-                this.loadMyNFTs();
-            }, 1000)
+            this.loadMyNFTs(true);
         }
     }
 
@@ -786,7 +784,7 @@ class App{
         loadState.loading = false;
     }
 
-    async loadMyNFTs(){
+    async loadMyNFTs(resetState = false){
         let loadState = this._myNFTsLoadState;
         if (loadState.loading)
             return
@@ -797,6 +795,9 @@ class App{
             loadState.mintPages = {};
             this._addNFTPlaceholders(this.mynftsListEl, "mynfts");
             havePlaceholder = true;
+        }
+        if (resetState){
+            loadState.mintPages = {}
         }
         
         let elements = [];
