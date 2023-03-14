@@ -900,11 +900,13 @@ class App{
         title.innerHTML = "&nbsp;";
         let img = clone.querySelector(".nft-image");
         let description = clone.querySelector(".nft-description");
+        let haveImage = false;
         minData.schema.forEach((field, index)=>{
             let el = document.createElement("div");
             let value = data[index];
             //console.log("index, type, value", index, field.type, value)
-            if (field.type == "ImageUrl"){
+            if (!haveImage && field.type == "ImageUrl"){
+                haveImage = true;
                 value = value.replace("http://localhost", `http://${location.hostname}`);
                 img.style.backgroundImage = `url(${value})`;
             }
