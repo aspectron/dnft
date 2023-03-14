@@ -706,6 +706,8 @@ class App{
     selectAnotherMintForBrowse(){
         this._browseLoadState.mintData = false;
         this._browseLoadState.mintPubkey = false;
+        this._browseLoadState.mintLoaded = false;
+        console.log("selectAnotherMintForBrowse")
         this.loadNFTs();
     }
     selectAnotherMintForMarketplace(){
