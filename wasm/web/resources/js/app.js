@@ -321,6 +321,8 @@ class App{
             $$(".user-btn[disabled]").forEach(el=>{
                 el.disabled = false;
             })
+
+            this.loadMyNFTs();
         }
     }
 
@@ -825,7 +827,6 @@ class App{
         
         let scrollTop = 0;
         if (havePlaceholder){
-            scrollTop = 130;
             this.mynftsListEl.innerHTML = "";
         }
         elements.map(el=>this._appendPanel(this.mynftsListEl, el, ".nft-panel"));
