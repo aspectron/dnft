@@ -11,6 +11,7 @@ pub async fn async_main(with_sample_data: bool) -> Result<()> {
     kaizen::init()?;
 
     const USE_EMULATOR: bool = false;
+    let use_devnet = false;
     const AUTHORITY: &str = "42bML5qB3WkMwfa2cosypjUrN7F2PLQm4qhxBdRDyW7f";
 
     println!("init transport...");
@@ -21,7 +22,9 @@ pub async fn async_main(with_sample_data: bool) -> Result<()> {
             TransportConfig::default(),
         )
         .await?
-    } else {
+    } else if use_devnet{
+        Transport::try_new("https://api.devnet.solana.com", TransportConfig::default()).await?
+    }else{
         Transport::try_new("http://127.0.0.1:8899", TransportConfig::default()).await?
     };
 
@@ -76,16 +79,17 @@ async fn create_sample_data() -> Result<()> {
     ];
 
     let images = vec![
-        "https://tinyurl.com/3nnzazpv",
-        "https://images.freeimages.com/365/images/previews/f7e/abstract-rounded-rectangles-vector-graphic-3664.jpg",
-        "https://images.freeimages.com/365/images/previews/953/ham-pattern-background-17545.jpg",
-        "https://images.freeimages.com/365/images/previews/c34/abstract-colorful-yarn-background-vector-free-34204.jpg",
-        "https://images.freeimages.com/365/images/previews/f84/tulip-vector-bouquet-illustration-free-33999.jpg",
-        "https://images.freeimages.com/vhq/images/previews/7ae/exploding-gift-box-with-colorful-star-for-celebration-74578.jpg",
-        "https://images.freeimages.com/365/images/previews/def/abstract-colorful-light-waves-vector-background-3259.jpg",
-        "https://images.freeimages.com/vhq/images/previews/a6e/abstract-blue-wave-background-vector-graphic-73825.jpg",
-        "https://images.freeimages.com/vhq/images/previews/9ea/bright-stars-gorgeous-special-effects-02-vector-6216.jpg",
-        "https://images.freeimages.com/vhq/images/previews/f3d/gorgeous-diploma-certificate-template-02-vector-6248.jpg",
+        "https://tinyurl.com/2p9df348",
+        "https://cdn.pixabay.com/photo/2019/07/30/05/53/dog-4372036_1280.jpg",
+        "https://cdn.pixabay.com/photo/2019/12/03/22/22/dog-4671215_1280.jpg",
+        "https://cdn.pixabay.com/photo/2017/08/18/16/14/dog-2655472_1280.jpg",
+        "https://cdn.pixabay.com/photo/2019/05/23/19/29/dog-4224638_1280.jpg",
+
+        "https://cdn.pixabay.com/photo/2020/04/08/08/33/cat-5016374_1280.jpg",
+        "https://cdn.pixabay.com/photo/2022/02/18/14/27/cat-7020822_1280.jpg",
+        "https://cdn.pixabay.com/photo/2021/11/21/22/17/british-shorthair-6815384_1280.jpg",
+        "https://cdn.pixabay.com/photo/2022/04/19/18/14/cat-7143536_1280.jpg",
+        "https://cdn.pixabay.com/photo/2021/03/13/13/42/cat-6091733_1280.jpg",
     ];
     let mint_names = vec!["Dog Tokens", "Cat Tokens"];
     let names = vec![

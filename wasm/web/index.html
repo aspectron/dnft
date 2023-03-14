@@ -72,7 +72,7 @@
           dnft.init_console_panic_hook();
           console.log("init kaizen");
           dnft.init_kaizen(dnft, solanaWeb3, {PhantomWalletAdapter, WalletReadyState});
-          console.log("program_id: ", dnft.dnft_program_id());
+          console.log("program_id: ", dnft.dnft_program_id()+"");
           console.dir(dnft);
           //let transport = await dnft.Transport.InProcUnitTests(program_id,authority);
           let transport = await new dnft.Transport(`http://${location.hostname}:8899`);
