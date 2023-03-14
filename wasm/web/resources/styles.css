@@ -161,6 +161,13 @@ h1, h2, h3, h4, h5 {
 .mdl-layout__tab{
   font-size:1.2rem;
 }
+.mdl-layout__tab[disabled]{
+  opacity:0.5;
+  cursor:default;
+}
+.mdl-layout__tab[disabled] .mdl-layout__tab-ripple-container{
+  display:none;
+}
 
 .mdl-button--big{
   height:50px;

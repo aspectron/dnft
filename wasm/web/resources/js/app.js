@@ -124,6 +124,7 @@ class App{
         this._marketLoadState = {page: 0, saleType:1};
         this._myNFTsLoadState = {};
         this.initMsgDialog();
+        this.initTabs();
         await this.initApp();
         this.initUpload();
     }
@@ -311,6 +312,7 @@ class App{
         console.log("wallet-connected ::: pubkey: ", key.toString());
         $("#wallet-pubkey").innerHTML = this.dnft.shortenPubkey(key.toString());
         $(".wallet-connect-container").classList.add("connected");
+        $$(`#top-tabs a[disabled]`).forEach(a=>a.removeAttribute("disabled"))
         if (this.reloadOnConnect){
             //window.location.reload();
             let authority = this.walletPubkey.toString();
@@ -321,8 +323,9 @@ class App{
             $$(".user-btn[disabled]").forEach(el=>{
                 el.disabled = false;
             })
-
-            this.loadMyNFTs();
+            setTimeout(()=>{
+                this.loadMyNFTs();
+            }, 1000)
         }
     }
 
@@ -634,7 +637,7 @@ class App{
         
         let scrollTop = this.mainEl.scrollTop;
         if (havePlaceholder){
-            scrollTop = 130;
+            scrollTop = 0;
             this.marketplaceListEl.innerHTML = "";
         }
         elements.map(el=>this._appendPanel(this.marketplaceListEl, el, ".nft-panel"));
@@ -773,7 +776,7 @@ class App{
         
         let scrollTop = 0;
         if (havePlaceholder){
-            scrollTop = 130;
+            //scrollTop = 130;
             this.nftListEl.innerHTML = "";
         }
         elements.map(el=>this._appendPanel(this.nftListEl, el, ".nft-panel"));
@@ -1453,6 +1456,27 @@ class App{
             // tr.appendChild(td_action);
             // this.fieldListEl.appendChild(tr);
         }
+    }
+
+    initTabs(){
+        $$("#top-tabs .mdl-layout__tab").forEach(tab=>{
+            tab.addEventListener("click", ()=>{
+                if (tab.hasAttribute("disabled"))
+                    return
+                tab.show();
+                $(`main`).scrollTo({
+                    top: 0,
+                    behavior: "smooth"
+                });
+                let tabName = this.getActiveTabName();
+                //console.log("tabName", tabName)
+                if (tabName == "browse"){
+                    this.selectAnotherMintForBrowse();
+                }else if (tabName == "marketplace"){
+                    this.selectAnotherMintForMarketplace();
+                }
+            })
+        })
     }
 
     activateTab(tab){

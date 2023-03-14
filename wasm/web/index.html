@@ -97,12 +97,12 @@
             </div>
           </div>
         </div>
-        <div id="top-tabs" class="mdl-layout__tab-bar mdl-js-ripple-effect mdl-color--primary-dark">
+        <div id="top-tabs" class="mdl-layout__tab-bar mdl-layout__tab-manual-switch mdl-js-ripple-effect mdl-color--primary-dark">
             <a href="#browse" class="mdl-layout__tab is-active">Browse NFTs</a>
             <a href="#marketplace" class="mdl-layout__tab">Marketplace</a>
-            <a href="#create-dnft" class="mdl-layout__tab">Create  Mint</a>
-            <a href="#browse-mints" class="mdl-layout__tab">Create Tokens</a>
-            <a href="#mynfts" class="mdl-layout__tab">My NFTs</a>
+            <a href="#create-dnft" disabled class="mdl-layout__tab">Create  Mint</a>
+            <a href="#browse-mints" disabled class="mdl-layout__tab">Create Tokens</a>
+            <a href="#mynfts" disabled class="mdl-layout__tab">My NFTs</a>
         </div>
       </header>
       <main class="mdl-layout__content">
@@ -347,10 +347,10 @@
                     <tr>
                       <td class="mdl-data-table__cell--non-numeric edit-container-holder">
                         <div class="edit-container">
-                          <label class="field-type">String</label>
+                          <label class="field-type">ImageUrl</label>
                           <div class="editable-holder">
                             <label class="mdl-textfield mdl-js-textfield">
-                              <input type="text" placeholder="Field name" class="field-name-input mdl-textfield__input">
+                              <input type="text" value="NFT Image" placeholder="Field name" class="field-name-input mdl-textfield__input">
                               <span class="mdl-textfield__label">Field name</span>
                             </label>
                           </div>
