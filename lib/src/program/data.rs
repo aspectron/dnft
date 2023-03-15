@@ -19,17 +19,23 @@ pub enum Data {
     Flags32(u32),
     Flags64(u64),
     String(String),
-    // Url(String),
     Url(Url),
-    // PageUrl(String),
-    // ImageUrl(String),
-    // ResourceUrl(String),
     Date(u32), // <-- TODO
     Time(u32), // <-- TODO
     Geo(Geo),
     Pubkey(Pubkey),
     // Array(Vec<Data>),
     // Table(Vec<(Data, Data)>),
+
+    // TODO:
+    //
+    // MetaplexNft(Pubkey),
+    // Accounts(Pubkey),
+    // Dnft(Pubkey),
+    // DnftList(Vec<Pubkey>),
+    // DnftMint(Pubkey)
+    // DnftMintList(Vec<Pubkey>),
+    //
 }
 
 impl Data {
